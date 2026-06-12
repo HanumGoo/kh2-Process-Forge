@@ -15,7 +15,7 @@ namespace ProcessForge
         //clear the RAM by emptying the working set of the current process
         private void ClearRAM_Click(object sender, EventArgs e)
         {
-            
+             
         }
 
         //browse for the executable file to run
@@ -25,14 +25,14 @@ namespace ProcessForge
             OFD.Filter = "Executable Files (*.exe)|*.exe";
             if (OFD.ShowDialog() == DialogResult.OK)
             {
-                textBox2.Text = OFD.FileName;
+                FilePathName.Text = OFD.FileName;
             }
         }
 
         //test button for validating the click event
         private void ValidatingEvent_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("haha test");
+            MessageBox.Show("Validating");
         }
 
         //run the process with the given path and time for looping

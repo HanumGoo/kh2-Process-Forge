@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ProcessForge
+namespace ProcessForge.ApplicationLogic
 {
     public static class ClearUnusedMemoryLogic
     {
@@ -44,7 +44,7 @@ namespace ProcessForge
                 MessageBox.Show("There's no Process name inc.exe. Are you really open it?");
             }
         }
-        private static void ClearUnusedMemoryWithoutMessageBox(string processName)
+        public static void ClearUnusedMemoryWithoutMessageBox(string processName)
         {
             string processname = processName;
 

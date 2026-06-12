@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProcessForge.ComboBox
+namespace ProcessForge.ComboBoxLogic
 {
-    public class ComboBox2
+    public static class RenameUsingImportLogic
     {
     }
 }
