@@ -25,7 +25,7 @@ namespace ProcessForge.ApplicationLogic
 
 
 
-        public static void StartApplicationWithRename(List<string> DataID, string Path, string ProcessName)
+        public static void StartApplicationWithRename(List<string> DataID, string Path, int ApplicationCount, int Delay, string ProcessName)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace ProcessForge.ApplicationLogic
                 MessageBox.Show("error di StartApplicationWithRename : " + ex.Message);
             }
         }
-        public static void StartApplicationWithRenameWithImport(List<string> DataID, string Path, string notepadPath, string ProcessName)
+        public static void StartApplicationWithRenameWithImport(string Path, string notepadPath, int ApplicationCount, int Delay, string ProcessName)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace ProcessForge.ApplicationLogic
                     }
                     else
                     {
-                        MessageBox.Show("Terjadi kesalahan data pada database notepad, mohon di cek kembali ya!\nData yang rusak : " + IDStatusData[0], "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("There is an error from your notepad data!\nBroke Data : " + IDStatusData[0], "Failed", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
 
@@ -180,10 +180,10 @@ namespace ProcessForge.ApplicationLogic
             }
             catch (Exception ex)
             {
-                MessageBox.Show("error di StartApplicationWithRename : " + ex.Message);
+                MessageBox.Show("error from StartApplicationWithRename : " + ex.Message);
             }
         }
-        public static void StartApplicationWithoutRename(int TotalRunINT, string Path, string ProcessName)
+        public static void StartApplicationWithoutRename(int TotalRunINT, string Path, int ApplicationCount, int Delay, string ProcessName)
         {
             try
             {
@@ -247,7 +247,7 @@ namespace ProcessForge.ApplicationLogic
 
                     if (InstanceName == "Not Found")
                     {
-                        MessageBox.Show("Tidak ketemu nama dengan ID yang sesuai");
+                        MessageBox.Show("Name not found with the corresponding ID");
                         return;
                     }
                     PerformanceCounter counter = new PerformanceCounter("Process", "% Processor Time", InstanceName);
