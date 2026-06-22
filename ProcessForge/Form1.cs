@@ -7,18 +7,26 @@ namespace ProcessForge
 {
     public partial class Form1 : Form
     {
+        //for timer
         int secondsRemaining;
+
+        //for Run 1
         bool isRun1Running = false;
+
+        //for Run 2
+        bool isRun2Running = false;
+        private CancellationTokenSource? _cts;
+
         string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public Form1()
         {
             InitializeComponent();
             FormStartup();
         }
-            private void FormStartup()
-            {
-                ComboBox.SelectedIndex = 0;
-            }
+        private void FormStartup()
+        {
+            ComboBox.SelectedIndex = 0;
+        }
 
         //clear the RAM by emptying the working set of the current process
         private void ClearRAM_Click(object sender, EventArgs e)
@@ -40,6 +48,15 @@ namespace ProcessForge
             if (OFD.ShowDialog() == DialogResult.OK)
             {
                 FilePathName.Text = OFD.FileName;
+            }
+        }
+        private void BrowseFileNotepad_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog OFD = new OpenFileDialog();
+            OFD.Filter = "Text Files (*.txt)|*.txt";
+            if (OFD.ShowDialog() == DialogResult.OK)
+            {
+                NotepadPathTextbox.Text = OFD.FileName;
             }
         }
 
@@ -107,6 +124,12 @@ namespace ProcessForge
 
             if (ComboBox.SelectedIndex == 0)
             {
+                if (RunTotal <= 0)
+                {
+                    MessageBox.Show("Please enter a valid number of times to run the application.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 MessageBox.Show($"Running an Application for {RunTotal} times", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -116,12 +139,23 @@ namespace ProcessForge
                 {
                     MessageBox.Show("Please enter a rename text.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
-                };
+                }
+                if (RunTotal <= 0)
+                {
+                    MessageBox.Show("Please enter a valid number of times to run the application.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 MessageBox.Show($"Running an Application for {RunTotal} times\nRenaming all Applications to {renameText}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (ComboBox.SelectedIndex == 2)
             {
+                if (MinRun > MaxRun || MinRun <= 0 || MaxRun <= 0)
+                {
+                    MessageBox.Show("Please ensure that the minimum and maximum run values are valid and the minimum is less than or equal to the maximum.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 MessageBox.Show($"Running an Application for {MaxRun - MinRun + 1} times\nRenaming all Applications from {MinRun} to {MaxRun}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -147,68 +181,130 @@ namespace ProcessForge
 
         //run the process with the given path and time for looping
 
-        private void Run2_Click(object sender, EventArgs e)
+        private async void Run2_Click(object sender, EventArgs e)
         {
+            if (isRun2Running)
+            {
+                _cts?.Cancel();
+                return;
+            }
+
             int RunTotal = (int)numericUpDown5.Value;
             string FilePath = FilePathName.Text;
             int Application = (int)numericUpDown3.Value;
             int Delay = (int)numericUpDown4.Value;
             string ProcessNameString = ProcessName.Text;
 
-            if (ComboBox.SelectedIndex == 0)
+            isRun2Running = true;
+            panel3.BackColor = Color.Green;
+            Run2.Text = "Stop";
+            _cts = new CancellationTokenSource();
+
+            try
             {
-                //none selection
-                
-                StartApplicationWithRenameLogic.StartApplicationWithoutRename(RunTotal, FilePath, Application, Delay, ProcessNameString);
-                return;
-            }
-            if (ComboBox.SelectedIndex == 1)
-            {
-                if (string.IsNullOrEmpty(RenameTextbox.Text))
+                if (ComboBox.SelectedIndex == 0)
                 {
-                    MessageBox.Show("Please enter a rename text.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    //none selection
+                    if (RunTotal <= 0)
+                    {
+                        MessageBox.Show("Please enter a valid number of times to run the application.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    await StartApplicationWithRenameLogic.StartApplicationWithoutRename(RunTotal, FilePath, Application, Delay, ProcessNameString, _cts.Token);
                     return;
-                };
-                //manually rename selection
-                List<string> DataID = new List<string>();
-
-                for (int i = 0; i < RunTotal; i++)
-                {
-                    DataID.Add($"{RenameTextbox.Text}");
                 }
-
-                StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString);
-                return;
-            }
-            if (ComboBox.SelectedIndex == 2)
-            {
-                //rename using increment selection
-
-                List<string> DataID = new List<string>();
-                int FirstRange = (int)numericUpDown1.Value;
-                int SecondRange = (int)numericUpDown2.Value;
-
-                for (int i = FirstRange; i <= SecondRange; i++)
+                if (ComboBox.SelectedIndex == 1)
                 {
-                    DataID.Add($"{i}");
+                    //manually rename selection
+                    if (string.IsNullOrEmpty(RenameTextbox.Text))
+                    {
+                        MessageBox.Show("Please enter a rename text.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    if (RunTotal <= 0)
+                    {
+                        MessageBox.Show("Please enter a valid number of times to run the application.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    List<string> DataID = new List<string>();
+
+                    for (int i = 0; i < RunTotal; i++)
+                    {
+                        DataID.Add($"{RenameTextbox.Text}");
+                    }
+
+                    await StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString, _cts.Token);
+                    return;
                 }
+                if (ComboBox.SelectedIndex == 2)
+                {
+                    //rename using increment selection
+                    int FirstRange = (int)numericUpDown1.Value;
+                    int SecondRange = (int)numericUpDown2.Value;
 
-                StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString);
-                return;
+                    if (FirstRange > SecondRange || FirstRange <= 0 || SecondRange <= 0)
+                    {
+                        MessageBox.Show("Please ensure that the minimum and maximum run values are valid and the minimum is less than or equal to the maximum.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    List<string> DataID = new List<string>();
+
+                    for (int i = FirstRange; i <= SecondRange; i++)
+                    {
+                        DataID.Add($"{i}");
+                    }
+
+                    await StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString, _cts.Token);
+                    return;
+                }
+                if (ComboBox.SelectedIndex == 3)
+                {
+                    //rename using import selection
+                    try
+                    {
+                        await StartApplicationWithRenameLogic.StartApplicationWithRenameWithImport(FilePath, NotepadPathTextbox.Text, Application, Delay, ProcessNameString, _cts.Token);
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
             }
-            if (ComboBox.SelectedIndex == 3)
+            catch (OperationCanceledException)
             {
-                //rename using import selection
-
-                StartApplicationWithRenameLogic.StartApplicationWithRenameWithImport(FilePath, NotepadPathTextbox.Text, Application, Delay, ProcessNameString);
-                return;
+                MessageBox.Show("The operation was successfully canceled.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                panel3.BackColor = Color.Red;
+                isRun2Running = false;
+                Run2.Text = "Run";
+                _cts.Dispose();
+                _cts = null;
+            }
+
         }
 
         //terminate the process with the given path
         private void Terminate_Click(object sender, EventArgs e)
         {
-            
+            string ProcessNameString = ProcessName.Text;
+            if (string.IsNullOrEmpty(ProcessNameString))
+            {
+                MessageBox.Show("Please enter a valid process name.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            TerminateApplicationLogic.TerminateApplication(ProcessNameString);
+            return;
         }
 
 
@@ -235,80 +331,80 @@ namespace ProcessForge
                 ComboBoxSelectedIndex3();
             }
         }
-            private void ComboBoxSelectedIndex0()
-            {
+        private void ComboBoxSelectedIndex0()
+        {
             //none selection
-                RunTotalLabel.Location = new Point(455, RunTotalLabel.Location.Y);
-                numericUpDown5.Location = new Point(455, numericUpDown5.Location.Y);
-                MaxLabel.Location = new Point(455, MaxLabel.Location.Y);
-                RunTotalLabel.Visible = true;
-                numericUpDown5.Visible = true;
-                MaxLabel.Visible = true;
-                
+            RunTotalLabel.Location = new Point(455, RunTotalLabel.Location.Y);
+            numericUpDown5.Location = new Point(455, numericUpDown5.Location.Y);
+            MaxLabel.Location = new Point(455, MaxLabel.Location.Y);
+            RunTotalLabel.Visible = true;
+            numericUpDown5.Visible = true;
+            MaxLabel.Visible = true;
 
-                RenameLabel.Visible = false;
-                RenameTextbox.Visible = false;
-                numericUpDown1.Visible = false;
-                numericUpDown2.Visible = false;
-                DelimiterToLabel.Visible = false;
-                NotepadPathTextbox.Visible = false;
-                BrowseFileNotepad.Visible = false;
-            }
-            private void ComboBoxSelectedIndex1()
-            {
+
+            RenameLabel.Visible = false;
+            RenameTextbox.Visible = false;
+            numericUpDown1.Visible = false;
+            numericUpDown2.Visible = false;
+            DelimiterToLabel.Visible = false;
+            NotepadPathTextbox.Visible = false;
+            BrowseFileNotepad.Visible = false;
+        }
+        private void ComboBoxSelectedIndex1()
+        {
             //Manually rename selection
-                RunTotalLabel.Location = new Point(783, RunTotalLabel.Location.Y);
+            RunTotalLabel.Location = new Point(783, RunTotalLabel.Location.Y);
             numericUpDown5.Location = new Point(783, numericUpDown5.Location.Y);
-                MaxLabel.Location = new Point(783, MaxLabel.Location.Y);
-                RenameLabel.Text = "Rename Application Name";
-                RenameLabel.Visible = true;
-                RenameTextbox.Visible = true;
-                RunTotalLabel.Visible = true;
-                numericUpDown5.Visible = true;
-                MaxLabel.Visible = true;
+            MaxLabel.Location = new Point(783, MaxLabel.Location.Y);
+            RenameLabel.Text = "Rename Application Name";
+            RenameLabel.Visible = true;
+            RenameTextbox.Visible = true;
+            RunTotalLabel.Visible = true;
+            numericUpDown5.Visible = true;
+            MaxLabel.Visible = true;
 
 
-                numericUpDown1.Visible = false;
-                numericUpDown2.Visible = false;
-                DelimiterToLabel.Visible = false;
-                NotepadPathTextbox.Visible = false;
-                BrowseFileNotepad.Visible = false;
-            }
-            private void ComboBoxSelectedIndex2()
-            {
+            numericUpDown1.Visible = false;
+            numericUpDown2.Visible = false;
+            DelimiterToLabel.Visible = false;
+            NotepadPathTextbox.Visible = false;
+            BrowseFileNotepad.Visible = false;
+        }
+        private void ComboBoxSelectedIndex2()
+        {
             //Rename using increment selection
-                RenameLabel.Text = "Rename Application by Increment";
-                RenameLabel.Visible = true;
-                numericUpDown1.Visible = true;
-                numericUpDown2.Visible = true;
-                DelimiterToLabel.Visible = true;
+            RenameLabel.Text = "Rename Application by Increment";
+            RenameLabel.Visible = true;
+            numericUpDown1.Visible = true;
+            numericUpDown2.Visible = true;
+            DelimiterToLabel.Visible = true;
 
 
-                RenameTextbox.Visible = false;
-                RunTotalLabel.Visible = false;
-                numericUpDown5.Visible = false;
-                MaxLabel.Visible = false;
-                NotepadPathTextbox.Visible = false;
-                BrowseFileNotepad.Visible = false;
-            }
-            private void ComboBoxSelectedIndex3()
-            {
-                //Rename using import selection
-                RenameLabel.Text = "Rename Application by Import";
-                RenameLabel.Visible = true;
-                NotepadPathTextbox.Visible = true;
-                BrowseFileNotepad.Visible = true;
+            RenameTextbox.Visible = false;
+            RunTotalLabel.Visible = false;
+            numericUpDown5.Visible = false;
+            MaxLabel.Visible = false;
+            NotepadPathTextbox.Visible = false;
+            BrowseFileNotepad.Visible = false;
+        }
+        private void ComboBoxSelectedIndex3()
+        {
+            //Rename using import selection
+            RenameLabel.Text = "Rename Application by Import";
+            RenameLabel.Visible = true;
+            NotepadPathTextbox.Visible = true;
+            BrowseFileNotepad.Visible = true;
 
-                numericUpDown1.Visible = false;
-                numericUpDown2.Visible = false;
-                RenameTextbox.Visible = false;
-                RunTotalLabel.Visible = false;
-                numericUpDown5.Visible = false;
-                MaxLabel.Visible = false;
-                DelimiterToLabel.Visible = false;
-                
-            }
+            numericUpDown1.Visible = false;
+            numericUpDown2.Visible = false;
+            RenameTextbox.Visible = false;
+            RunTotalLabel.Visible = false;
+            numericUpDown5.Visible = false;
+            MaxLabel.Visible = false;
+            DelimiterToLabel.Visible = false;
 
+        }
 
+        
     }
 }

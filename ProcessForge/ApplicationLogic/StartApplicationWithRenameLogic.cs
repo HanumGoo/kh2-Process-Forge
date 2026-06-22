@@ -25,39 +25,27 @@ namespace ProcessForge.ApplicationLogic
 
 
 
-        public static void StartApplicationWithRename(List<string> DataID, string Path, int ApplicationCount, int Delay, string ProcessName)
+        public async static Task StartApplicationWithRename(List<string> DataID, string Path, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token)
         {
             try
             {
-                List<Process> AllProcessRun = new List<Process>();
-
+                //List<Process> AllProcessRun = new List<Process>();
+                Token.ThrowIfCancellationRequested();
                 for (int i = 0; i < DataID.Count; i++)
                 {
-
-                    if (i != 0 && i % 4 == 0)
+                    Token.ThrowIfCancellationRequested();
+                    if (i % ApplicationCount == 0)
                     {
-                        //Thread.Sleep(30000);
+                        await Task.Delay(Delay, Token);
                         ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
                         //CheckerUltimate(AllProcessRun);
-
-
-                    }
-                    if (i != 0 && i % 20 == 0)
-                    {
-                        //Thread.Sleep(150000);
-                        ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
-                        //CheckerUltimate(AllProcessRun);
-
-
                     }
 
                     Process Application = Process.Start(Path);
-
+                    await Task.Delay(500, Token);
                     Application.WaitForInputIdle();
-
-                    AllProcessRun.Add(Application);
-                    IntPtr ApplicationHandle = Application.MainWindowHandle;
-
+                    Application.Refresh();
+                    IntPtr ApplicationHandle = GetMainWindowHandleByPid(Application.Id);
 
                     if (ApplicationHandle == IntPtr.Zero)
                     {
@@ -79,21 +67,22 @@ namespace ProcessForge.ApplicationLogic
                 MessageBox.Show("error di StartApplicationWithRename : " + ex.Message);
             }
         }
-        public static void StartApplicationWithRenameWithImport(string Path, string notepadPath, int ApplicationCount, int Delay, string ProcessName)
+        public async static Task StartApplicationWithRenameWithImport(string Path, string notepadPath, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token)
         {
             try
             {
+                Token.ThrowIfCancellationRequested();
                 string NotepadPath = notepadPath;
 
                 string NotepadContent = File.ReadAllText(NotepadPath);
 
-                string[] NotepadExtract = NotepadContent.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
+                string[] NotepadExtract = NotepadContent.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
                 List<string> IDData = new List<string>();
                 List<string> StatusData = new List<string>();
 
                 foreach (string IDPassword in NotepadExtract)
                 {
+                    Token.ThrowIfCancellationRequested();
                     string[] IDStatusData = IDPassword.Split(new string[] { "," }, StringSplitOptions.None);
 
                     if (IDStatusData.Length == 2)
@@ -109,24 +98,25 @@ namespace ProcessForge.ApplicationLogic
 
                 }
 
+                //for (int i = 0; i < IDData.Count; i++)
+                //{
+                //    MessageBox.Show("ID : " + IDData[i] + "notepad: " + NotepadExtract[i] + "Hello");
+                //}
+
                 //List<Process> AllProcessRun = new List<Process>();
                 StringBuilder MySB = new StringBuilder();
 
                 for (int i = 0; i < NotepadExtract.Length; i++)
                 {
+                    
+
+                    Token.ThrowIfCancellationRequested();
                     if (StatusData[i] == "NotExist")
                     {
-                        if (i != 0 && i % 4 == 0)
+                        if (i % ApplicationCount == 0)
                         {
-                            //Thread.Sleep(30000);
-                            ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
-                            //CheckerUltimate(AllProcessRun);
-
-
-                        }
-                        if (i != 0 && i % 20 == 0)
-                        {
-                            //Thread.Sleep(150000);
+                            Token.ThrowIfCancellationRequested();
+                            await Task.Delay(Delay, Token);
                             ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
                             //CheckerUltimate(AllProcessRun);
 
@@ -134,11 +124,10 @@ namespace ProcessForge.ApplicationLogic
                         }
 
                         Process Application = Process.Start(Path);
-
+                        await Task.Delay(500, Token);
                         Application.WaitForInputIdle();
-
-                        //AllProcessRun.Add(Application);
-                        IntPtr ApplicationHandle = Application.MainWindowHandle;
+                        Application.Refresh();
+                        IntPtr ApplicationHandle = GetMainWindowHandleByPid(Application.Id);
 
 
                         if (ApplicationHandle == IntPtr.Zero)
@@ -155,12 +144,12 @@ namespace ProcessForge.ApplicationLogic
 
                             if (i < NotepadExtract.Length - 1)
                             {
-                                MySB.Append("\n");
+                                MySB.Append(Environment.NewLine);
                             }
                             
 
 
-                            
+
 
 
 
@@ -180,41 +169,31 @@ namespace ProcessForge.ApplicationLogic
             }
             catch (Exception ex)
             {
-                MessageBox.Show("error from StartApplicationWithRename : " + ex.Message);
+                MessageBox.Show("error from StartApplicationWithRename : " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        public static void StartApplicationWithoutRename(int TotalRunINT, string Path, int ApplicationCount, int Delay, string ProcessName)
+        public async static Task StartApplicationWithoutRename(int TotalRunINT, string Path, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token)
         {
             try
             {
                 //List<Process> AllProcessRun = new List<Process>();
-
+                Token.ThrowIfCancellationRequested();
                 for (int i = 0; i < TotalRunINT; i++)
                 {
-                    if (i != 0 && i % 4 == 0)
+                    Token.ThrowIfCancellationRequested();
+                    if (i % ApplicationCount == 0)
                     {
-                        //Thread.Sleep(30000);
+                        Token.ThrowIfCancellationRequested();
+                        await Task.Delay(Delay, Token);
                         ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
                         //CheckerUltimate(AllProcessRun);
-
-
-
-                    }
-                    if (i != 0 && i % 20 == 0)
-                    {
-                        //Thread.Sleep(150000);
-                        ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
-                        //CheckerUltimate(AllProcessRun);
-
-
                     }
 
                     Process Application = Process.Start(Path);
-
+                    await Task.Delay(500, Token);
                     Application.WaitForInputIdle();
-                    //AllProcessRun.Add(Application);
-                    IntPtr ApplicationHandle = Application.MainWindowHandle;
-
+                    Application.Refresh();
+                    IntPtr ApplicationHandle = GetMainWindowHandleByPid(Application.Id);
 
                     if (ApplicationHandle == IntPtr.Zero)
                     {
@@ -224,6 +203,8 @@ namespace ProcessForge.ApplicationLogic
                     else
                     {
                         ShowWindow(ApplicationHandle, SW_MINIMIZE);
+                        //MessageBox.Show("Handle Found! : " + ApplicationHandle.ToString());
+                        
                     }
                 }
             }
@@ -280,6 +261,23 @@ namespace ProcessForge.ApplicationLogic
                 }
 
             }
+        }
+        private static IntPtr GetMainWindowHandleByPid(int pid)
+        {
+            IntPtr foundHandle = IntPtr.Zero;
+
+            EnumWindows((hWnd, lParam) =>
+            {
+                GetWindowThreadProcessId(hWnd, out uint windowPid);
+                if (windowPid == pid)
+                {
+                    foundHandle = hWnd;
+                    return false; // Stop enumeration
+                }
+                return true; // Continue
+            }, IntPtr.Zero);
+
+            return foundHandle;
         }
 
         private static string GetProcessInstanceName(int ProcessID)

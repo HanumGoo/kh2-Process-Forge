@@ -422,6 +422,7 @@
             BrowseFileNotepad.TabIndex = 32;
             BrowseFileNotepad.Text = "Browse File Location...";
             BrowseFileNotepad.UseVisualStyleBackColor = false;
+            BrowseFileNotepad.Click += BrowseFileNotepad_Click;
             // 
             // NotepadPathTextbox
             // 
