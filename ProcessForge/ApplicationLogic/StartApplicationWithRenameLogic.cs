@@ -25,7 +25,7 @@ namespace ProcessForge.ApplicationLogic
 
 
 
-        public async static Task StartApplicationWithRename(List<string> DataID, string Path, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token)
+        public async static Task StartApplicationWithRename(List<string> DataID, string Path, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token, bool isUsingCPUCheck)
         {
             try
             {
@@ -39,6 +39,24 @@ namespace ProcessForge.ApplicationLogic
                         await Task.Delay(Delay, Token);
                         ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
                         //CheckerUltimate(AllProcessRun);
+                    }
+
+                    if (isUsingCPUCheck)
+                    {
+                        Token.ThrowIfCancellationRequested();
+
+                        CpuMonitor cpu = new CpuMonitor();
+                        await Task.Delay(1000, Token);
+                        float cpuUsage = await cpu.GetCpuUsage();
+                        //MessageBox.Show($"Current CPU Usage: {cpuUsage:F2}%");
+
+                        while (cpuUsage > 80)
+                        {
+                            Token.ThrowIfCancellationRequested();
+
+                            await Task.Delay(2000, Token);// Wait for 1 second before checking again
+                            cpuUsage = await cpu.GetCpuUsage();
+                        }
                     }
 
                     Process Application = Process.Start(Path);
@@ -67,7 +85,7 @@ namespace ProcessForge.ApplicationLogic
                 MessageBox.Show("error di StartApplicationWithRename : " + ex.Message);
             }
         }
-        public async static Task StartApplicationWithRenameWithImport(string Path, string notepadPath, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token)
+        public async static Task StartApplicationWithRenameWithImport(string Path, string notepadPath, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token, bool isUsingCPUCheck)
         {
             try
             {
@@ -123,6 +141,24 @@ namespace ProcessForge.ApplicationLogic
 
                         }
 
+                        if (isUsingCPUCheck)
+                        {
+                            Token.ThrowIfCancellationRequested();
+
+                            CpuMonitor cpu = new CpuMonitor();
+                            await Task.Delay(1000, Token);
+                            float cpuUsage = await cpu.GetCpuUsage();
+                            //MessageBox.Show($"Current CPU Usage: {cpuUsage:F2}%");
+
+                            while (cpuUsage > 80)
+                            {
+                                Token.ThrowIfCancellationRequested();
+
+                                await Task.Delay(2000, Token);// Wait for 1 second before checking again
+                                cpuUsage = await cpu.GetCpuUsage();
+                            }
+                        }
+
                         Process Application = Process.Start(Path);
                         await Task.Delay(500, Token);
                         Application.WaitForInputIdle();
@@ -172,7 +208,7 @@ namespace ProcessForge.ApplicationLogic
                 MessageBox.Show("error from StartApplicationWithRename : " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        public async static Task StartApplicationWithoutRename(int TotalRunINT, string Path, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token)
+        public async static Task StartApplicationWithoutRename(int TotalRunINT, string Path, int ApplicationCount, int Delay, string ProcessName, CancellationToken Token, bool isUsingCPUCheck)
         {
             try
             {
@@ -187,6 +223,24 @@ namespace ProcessForge.ApplicationLogic
                         await Task.Delay(Delay, Token);
                         ClearUnusedMemoryLogic.ClearUnusedMemoryWithoutMessageBox(ProcessName);
                         //CheckerUltimate(AllProcessRun);
+                    }
+
+                    if (isUsingCPUCheck)
+                    {
+                        Token.ThrowIfCancellationRequested();
+
+                        CpuMonitor cpu = new CpuMonitor();
+                        await Task.Delay(1000, Token);
+                        float cpuUsage = await cpu.GetCpuUsage();
+                        //MessageBox.Show($"Current CPU Usage: {cpuUsage:F2}%");
+
+                        while (cpuUsage > 80)
+                        {
+                            Token.ThrowIfCancellationRequested();
+
+                            await Task.Delay(2000, Token);// Wait for 1 second before checking again
+                            cpuUsage = await cpu.GetCpuUsage();
+                        }
                     }
 
                     Process Application = Process.Start(Path);

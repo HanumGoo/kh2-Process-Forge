@@ -20,15 +20,9 @@ namespace ProcessForge.ApplicationLogic
             _cpuCounter.NextValue();
         }
 
-        public float GetCpuUsage()
+        public async Task<float> GetCpuUsage()
         {
-            Thread.Sleep(1000); // Wait 1 second for a valid reading
             return _cpuCounter.NextValue();
-        }
-
-        public bool IsCpuAbove80()
-        {
-            return GetCpuUsage() > 80f;
         }
     }
 }

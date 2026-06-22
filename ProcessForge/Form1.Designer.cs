@@ -71,6 +71,8 @@
             panel2 = new Panel();
             panel3 = new Panel();
             numericUpDown5 = new NumericUpDown();
+            label4 = new Label();
+            CPUChecker = new Button();
             ((System.ComponentModel.ISupportInitialize)TimeSetForClearRAM).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
@@ -544,6 +546,30 @@
             numericUpDown5.TabIndex = 42;
             numericUpDown5.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI Symbol", 9F);
+            label4.ForeColor = Color.White;
+            label4.Location = new Point(657, 469);
+            label4.Name = "label4";
+            label4.Size = new Size(168, 25);
+            label4.TabIndex = 44;
+            label4.Text = "Pause if CPU% > 80";
+            // 
+            // CPUChecker
+            // 
+            CPUChecker.BackColor = Color.Red;
+            CPUChecker.Font = new Font("Segoe UI Symbol", 6F);
+            CPUChecker.ForeColor = Color.Black;
+            CPUChecker.Location = new Point(830, 469);
+            CPUChecker.Name = "CPUChecker";
+            CPUChecker.Size = new Size(38, 26);
+            CPUChecker.TabIndex = 45;
+            CPUChecker.Text = "Off";
+            CPUChecker.UseVisualStyleBackColor = false;
+            CPUChecker.Click += CPUChecker_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -551,6 +577,8 @@
             BackColor = SystemColors.Desktop;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(886, 667);
+            Controls.Add(CPUChecker);
+            Controls.Add(label4);
             Controls.Add(numericUpDown5);
             Controls.Add(panel3);
             Controls.Add(panel2);
@@ -649,5 +677,7 @@
         private Panel panel2;
         private Panel panel3;
         private NumericUpDown numericUpDown5;
+        private Label label4;
+        private Button CPUChecker;
     }
 }

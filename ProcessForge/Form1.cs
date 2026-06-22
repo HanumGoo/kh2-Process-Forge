@@ -15,6 +15,7 @@ namespace ProcessForge
 
         //for Run 2
         bool isRun2Running = false;
+        bool isUsingCPUCheck = false;
         private CancellationTokenSource? _cts;
 
         string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -211,7 +212,7 @@ namespace ProcessForge
                         return;
                     }
 
-                    await StartApplicationWithRenameLogic.StartApplicationWithoutRename(RunTotal, FilePath, Application, Delay, ProcessNameString, _cts.Token);
+                    await StartApplicationWithRenameLogic.StartApplicationWithoutRename(RunTotal, FilePath, Application, Delay, ProcessNameString, _cts.Token, isUsingCPUCheck);
                     return;
                 }
                 if (ComboBox.SelectedIndex == 1)
@@ -235,7 +236,7 @@ namespace ProcessForge
                         DataID.Add($"{RenameTextbox.Text}");
                     }
 
-                    await StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString, _cts.Token);
+                    await StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString, _cts.Token, isUsingCPUCheck);
                     return;
                 }
                 if (ComboBox.SelectedIndex == 2)
@@ -257,7 +258,7 @@ namespace ProcessForge
                         DataID.Add($"{i}");
                     }
 
-                    await StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString, _cts.Token);
+                    await StartApplicationWithRenameLogic.StartApplicationWithRename(DataID, FilePath, Application, Delay, ProcessNameString, _cts.Token, isUsingCPUCheck);
                     return;
                 }
                 if (ComboBox.SelectedIndex == 3)
@@ -265,7 +266,7 @@ namespace ProcessForge
                     //rename using import selection
                     try
                     {
-                        await StartApplicationWithRenameLogic.StartApplicationWithRenameWithImport(FilePath, NotepadPathTextbox.Text, Application, Delay, ProcessNameString, _cts.Token);
+                        await StartApplicationWithRenameLogic.StartApplicationWithRenameWithImport(FilePath, NotepadPathTextbox.Text, Application, Delay, ProcessNameString, _cts.Token, isUsingCPUCheck);
                         return;
                     }
                     catch (Exception ex)
@@ -405,6 +406,20 @@ namespace ProcessForge
 
         }
 
-        
+        private void CPUChecker_Click(object sender, EventArgs e)
+        {
+            if (isUsingCPUCheck)
+            {
+                isUsingCPUCheck = false;
+                CPUChecker.BackColor = Color.Red;
+                CPUChecker.Text = "Off";
+            }
+            else
+            {
+                isUsingCPUCheck = true;
+                CPUChecker.BackColor = Color.Green;
+                CPUChecker.Text = "On";
+            }
+        }
     }
 }
