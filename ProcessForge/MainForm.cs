@@ -315,7 +315,7 @@ namespace ProcessForge
         {
             if (bulkWindowForm == null || bulkWindowForm.IsDisposed)
             {
-                bulkWindowForm = new BulkWindowForm();
+                bulkWindowForm = new BulkWindowForm(ProcessName.Text);
                 bulkWindowForm.Show();
             }
         }
