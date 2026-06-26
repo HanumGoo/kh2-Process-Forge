@@ -1,34 +1,31 @@
-﻿using System;
+﻿using ProcessForge.RefreshLogic;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
-using ProcessForge.RefreshLogic;
 using System.Windows.Forms;
-using System.Diagnostics;
 
 namespace ProcessForge
 {
-    public partial class BulkWindowForm : Form
+    public partial class ImportWindowForm : Form
     {
         //check import status
-        bool isUsingImport = false;
-        string ProcessName = string.Empty;
+        bool isUsingImport = true;
 
         //page
         int PageCount = 1;
 
-        public BulkWindowForm(string processName)
+        public ImportWindowForm()
         {
             InitializeComponent();
-            ProcessName = processName;
             FormStartup();
-            RefreshFunction();
         }
         public void FormStartup()
         {
-            ProcessListLabel.Text = !string.IsNullOrEmpty(ProcessName) ? $"Process List ({ProcessName})" : "Process List (None)";
+            ProcessListLabel.Text = $"Import List";
         }
 
         private void RefreshButton_Click(object sender, EventArgs e)
@@ -48,7 +45,17 @@ namespace ProcessForge
 
         private void NextButton_Click(object sender, EventArgs e)
         {
-            if (Process.GetProcessesByName(ProcessName).Length < PageCount * 100)
+            string path = ImportTextbox.Text;
+
+            if (!File.Exists(path) || string.IsNullOrEmpty(path))
+            {
+                MessageBox.Show("Error! : the path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string[] AllData = File.ReadAllText(path).Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (AllData.Length < PageCount * 100)
             {
                 return;
             }
@@ -57,29 +64,9 @@ namespace ProcessForge
         }
         private void RefreshFunction()
         {
-            if (string.IsNullOrEmpty(ProcessName))
-            {
-                MessageBox.Show("please add process name first at the main form", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            Process[] AllProcess = Process.GetProcessesByName(ProcessName);
-            List<string> ProcessTitle = new List<string>();
-
-            foreach (Process item in AllProcess)
-            {
-                if (string.IsNullOrEmpty(item.MainWindowTitle))
-                {
-
-                }
-                else
-                {
-                    ProcessTitle.Add(item.MainWindowTitle);
-                }
-            }
-
             if (!isUsingImport)
             {
-                RefreshLogic.RefreshLogic.Refresh(flowLayoutPanel, LabelPage, PageCount, ProcessTitle);
+                //RefreshLogic.RefreshLogic.Refresh(flowLayoutPanel, LabelPage, PageCount, ProcessTitle);
             }
             else
             {
@@ -113,7 +100,7 @@ namespace ProcessForge
                     AllDataImport[1].Add(TitleAndStatus[1]);
                 }
 
-                RefreshLogic.RefreshLogic.RefreshWIthNotepadCheck(flowLayoutPanel, LabelPage, PageCount, ImportTextbox.Text, ProcessTitle, AllDataImport);
+                RefreshLogic.RefreshLogic.RefreshWIthNotepadImport(flowLayoutPanel, LabelPage, PageCount, ImportTextbox.Text, AllDataImport);
             }
         }
 
@@ -124,7 +111,7 @@ namespace ProcessForge
             bool isTrue = false;
             foreach (Control control in flowLayoutPanel.Controls)
             {
-
+                
                 if (control is Button button)
                 {
                     if (button.Tag is ButtonData data)
@@ -158,18 +145,18 @@ namespace ProcessForge
 
         private void OnOffImport_Click(object sender, EventArgs e)
         {
-            isUsingImport = !isUsingImport;
+            //isUsingImport = !isUsingImport;
 
-            if (isUsingImport)
-            {
-                panel3.BackColor = Color.Green;
-                OnOffImport.Text = "Off";
-            }
-            else
-            {
-                panel3.BackColor = Color.Red;
-                OnOffImport.Text = "On";
-            }
+            //if (isUsingImport)
+            //{
+            //    panel3.BackColor = Color.Green;
+            //    OnOffImport.Text = "Off";
+            //}
+            //else
+            //{
+            //    panel3.BackColor = Color.Red;
+            //    OnOffImport.Text = "On";
+            //}
         }
 
         private void CheckImport_Click(object sender, EventArgs e)
@@ -192,6 +179,15 @@ namespace ProcessForge
                 if (TitleAndStatus.Length != 2)
                 {
                     MessageBox.Show("Import Data error! please check this one: \n" + $"\"{item}\"", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (TitleAndStatus[1] == "NotExist" || TitleAndStatus[1] == "Exist")
+                {
+                    continue;
+                }
+                else
+                {
+                    MessageBox.Show("Import Data error! please check this one(status error): \n" + $"\"{item}\"", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }

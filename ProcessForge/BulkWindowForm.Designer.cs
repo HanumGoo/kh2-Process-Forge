@@ -35,17 +35,17 @@
             flowLayoutPanel = new FlowLayoutPanel();
             panel1 = new Panel();
             panel2 = new Panel();
-            FilePathName = new TextBox();
+            txtSearch = new TextBox();
             button1 = new Button();
             PreviousButton = new Button();
             NextButton = new Button();
             LabelPage = new Label();
             ImportTextbox = new TextBox();
-            button4 = new Button();
-            button5 = new Button();
+            ImportBrowse = new Button();
             panel3 = new Panel();
-            button6 = new Button();
+            OnOffImport = new Button();
             panel4 = new Panel();
+            CheckImport = new Button();
             SuspendLayout();
             // 
             // ProcessListLabel
@@ -111,24 +111,25 @@
             panel2.Size = new Size(776, 10);
             panel2.TabIndex = 51;
             // 
-            // FilePathName
+            // txtSearch
             // 
-            FilePathName.BackColor = SystemColors.Desktop;
-            FilePathName.Font = new Font("Segoe UI Symbol", 9F);
-            FilePathName.ForeColor = Color.White;
-            FilePathName.Location = new Point(359, 12);
-            FilePathName.Name = "FilePathName";
-            FilePathName.Size = new Size(230, 31);
-            FilePathName.TabIndex = 52;
+            txtSearch.BackColor = SystemColors.Desktop;
+            txtSearch.Font = new Font("Segoe UI Symbol", 9F);
+            txtSearch.ForeColor = Color.White;
+            txtSearch.Location = new Point(443, 12);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(233, 31);
+            txtSearch.TabIndex = 52;
+            txtSearch.TextChanged += txtSearch_TextChanged;
             // 
             // button1
             // 
             button1.BackColor = SystemColors.Desktop;
             button1.Font = new Font("Segoe UI Symbol", 9F);
             button1.ForeColor = Color.White;
-            button1.Location = new Point(595, 11);
+            button1.Location = new Point(351, 11);
             button1.Name = "button1";
-            button1.Size = new Size(83, 32);
+            button1.Size = new Size(86, 32);
             button1.TabIndex = 53;
             button1.Text = "Find";
             button1.UseVisualStyleBackColor = false;
@@ -180,29 +181,18 @@
             ImportTextbox.Size = new Size(233, 31);
             ImportTextbox.TabIndex = 57;
             // 
-            // button4
+            // ImportBrowse
             // 
-            button4.BackColor = SystemColors.Desktop;
-            button4.Font = new Font("Segoe UI Symbol", 9F);
-            button4.ForeColor = Color.White;
-            button4.Location = new Point(682, 67);
-            button4.Name = "button4";
-            button4.Size = new Size(105, 32);
-            button4.TabIndex = 58;
-            button4.Text = "Browse";
-            button4.UseVisualStyleBackColor = false;
-            // 
-            // button5
-            // 
-            button5.BackColor = SystemColors.Desktop;
-            button5.Font = new Font("Segoe UI Symbol", 9F);
-            button5.ForeColor = Color.White;
-            button5.Location = new Point(351, 67);
-            button5.Name = "button5";
-            button5.Size = new Size(86, 32);
-            button5.TabIndex = 59;
-            button5.Text = "Check";
-            button5.UseVisualStyleBackColor = false;
+            ImportBrowse.BackColor = SystemColors.Desktop;
+            ImportBrowse.Font = new Font("Segoe UI Symbol", 9F);
+            ImportBrowse.ForeColor = Color.White;
+            ImportBrowse.Location = new Point(682, 67);
+            ImportBrowse.Name = "ImportBrowse";
+            ImportBrowse.Size = new Size(105, 32);
+            ImportBrowse.TabIndex = 58;
+            ImportBrowse.Text = "Browse";
+            ImportBrowse.UseVisualStyleBackColor = false;
+            ImportBrowse.Click += ImportBrowse_Click;
             // 
             // panel3
             // 
@@ -213,17 +203,18 @@
             panel3.Size = new Size(29, 26);
             panel3.TabIndex = 42;
             // 
-            // button6
+            // OnOffImport
             // 
-            button6.BackColor = SystemColors.Desktop;
-            button6.Font = new Font("Segoe UI Symbol", 9F);
-            button6.ForeColor = Color.White;
-            button6.Location = new Point(259, 67);
-            button6.Name = "button6";
-            button6.Size = new Size(86, 32);
-            button6.TabIndex = 62;
-            button6.Text = "On";
-            button6.UseVisualStyleBackColor = false;
+            OnOffImport.BackColor = SystemColors.Desktop;
+            OnOffImport.Font = new Font("Segoe UI Symbol", 9F);
+            OnOffImport.ForeColor = Color.White;
+            OnOffImport.Location = new Point(259, 67);
+            OnOffImport.Name = "OnOffImport";
+            OnOffImport.Size = new Size(86, 32);
+            OnOffImport.TabIndex = 62;
+            OnOffImport.Text = "On";
+            OnOffImport.UseVisualStyleBackColor = false;
+            OnOffImport.Click += OnOffImport_Click;
             // 
             // panel4
             // 
@@ -235,23 +226,36 @@
             panel4.Size = new Size(775, 10);
             panel4.TabIndex = 51;
             // 
+            // CheckImport
+            // 
+            CheckImport.BackColor = SystemColors.Desktop;
+            CheckImport.Font = new Font("Segoe UI Symbol", 9F);
+            CheckImport.ForeColor = Color.White;
+            CheckImport.Location = new Point(351, 67);
+            CheckImport.Name = "CheckImport";
+            CheckImport.Size = new Size(86, 32);
+            CheckImport.TabIndex = 63;
+            CheckImport.Text = "Check";
+            CheckImport.UseVisualStyleBackColor = false;
+            CheckImport.Click += CheckImport_Click;
+            // 
             // BulkWindowForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Desktop;
             ClientSize = new Size(800, 691);
+            Controls.Add(CheckImport);
             Controls.Add(panel4);
-            Controls.Add(button6);
+            Controls.Add(OnOffImport);
             Controls.Add(panel3);
-            Controls.Add(button5);
-            Controls.Add(button4);
+            Controls.Add(ImportBrowse);
             Controls.Add(ImportTextbox);
             Controls.Add(LabelPage);
             Controls.Add(PreviousButton);
             Controls.Add(NextButton);
             Controls.Add(button1);
-            Controls.Add(FilePathName);
+            Controls.Add(txtSearch);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Controls.Add(flowLayoutPanel);
@@ -273,16 +277,16 @@
         private FlowLayoutPanel flowLayoutPanel;
         private Panel panel1;
         private Panel panel2;
-        private TextBox FilePathName;
+        private TextBox txtSearch;
         private Button button1;
         private Button PreviousButton;
         private Button NextButton;
         private Label LabelPage;
         private TextBox ImportTextbox;
-        private Button button4;
-        private Button button5;
+        private Button ImportBrowse;
         private Panel panel3;
-        private Button button6;
+        private Button OnOffImport;
         private Panel panel4;
+        private Button CheckImport;
     }
 }

@@ -76,6 +76,8 @@
             panel4 = new Panel();
             label7 = new Label();
             OpenBulkWindow = new Button();
+            TextWinHandler = new Label();
+            OpenWindowImportThing = new Button();
             ((System.ComponentModel.ISupportInitialize)TimeSetForClearRAM).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
@@ -586,11 +588,11 @@
             // label7
             // 
             label7.AutoSize = true;
-            label7.Font = new Font("Segoe UI Symbol", 12F);
+            label7.Font = new Font("Segoe UI Symbol", 10F);
             label7.ForeColor = Color.White;
             label7.Location = new Point(12, 490);
             label7.Name = "label7";
-            label7.Size = new Size(201, 32);
+            label7.Size = new Size(165, 28);
             label7.TabIndex = 46;
             label7.Text = "Bulk App Handler";
             // 
@@ -599,13 +601,37 @@
             OpenBulkWindow.BackColor = SystemColors.Desktop;
             OpenBulkWindow.Font = new Font("Segoe UI Symbol", 9F);
             OpenBulkWindow.ForeColor = Color.White;
-            OpenBulkWindow.Location = new Point(12, 535);
+            OpenBulkWindow.Location = new Point(12, 530);
             OpenBulkWindow.Name = "OpenBulkWindow";
-            OpenBulkWindow.Size = new Size(338, 47);
+            OpenBulkWindow.Size = new Size(338, 34);
             OpenBulkWindow.TabIndex = 47;
             OpenBulkWindow.Text = "Open";
             OpenBulkWindow.UseVisualStyleBackColor = false;
             OpenBulkWindow.Click += OpenBulkWindow_Click;
+            // 
+            // TextWinHandler
+            // 
+            TextWinHandler.AutoSize = true;
+            TextWinHandler.Font = new Font("Segoe UI Symbol", 10F);
+            TextWinHandler.ForeColor = Color.White;
+            TextWinHandler.Location = new Point(13, 572);
+            TextWinHandler.Name = "TextWinHandler";
+            TextWinHandler.Size = new Size(187, 28);
+            TextWinHandler.TabIndex = 48;
+            TextWinHandler.Text = "Text Import Handler";
+            // 
+            // OpenWindowImportThing
+            // 
+            OpenWindowImportThing.BackColor = SystemColors.Desktop;
+            OpenWindowImportThing.Font = new Font("Segoe UI Symbol", 9F);
+            OpenWindowImportThing.ForeColor = Color.White;
+            OpenWindowImportThing.Location = new Point(12, 614);
+            OpenWindowImportThing.Name = "OpenWindowImportThing";
+            OpenWindowImportThing.Size = new Size(338, 34);
+            OpenWindowImportThing.TabIndex = 49;
+            OpenWindowImportThing.Text = "Open";
+            OpenWindowImportThing.UseVisualStyleBackColor = false;
+            OpenWindowImportThing.Click += OpenWindowImportThing_Click;
             // 
             // MainForm
             // 
@@ -614,6 +640,8 @@
             BackColor = SystemColors.Desktop;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(886, 667);
+            Controls.Add(OpenWindowImportThing);
+            Controls.Add(TextWinHandler);
             Controls.Add(OpenBulkWindow);
             Controls.Add(label7);
             Controls.Add(panel4);
@@ -722,5 +750,8 @@
         private Panel panel4;
         private Label label7;
         private Button OpenBulkWindow;
+        private Button button1;
+        private Label TextWinHandler;
+        private Button OpenWindowImportThing;
     }
 }

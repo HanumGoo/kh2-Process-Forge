@@ -20,6 +20,8 @@ namespace ProcessForge
 
         //for BulkWindowForm
         BulkWindowForm? bulkWindowForm;
+        //for ImportWindowForm
+        ImportWindowForm? importWindowForm;
 
         string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public MainForm()
@@ -324,7 +326,14 @@ namespace ProcessForge
                 bulkWindowForm.Show();
             }
         }
-
+        private void OpenWindowImportThing_Click(object sender, EventArgs e)
+        {
+            if (importWindowForm == null || importWindowForm.IsDisposed)
+            {
+                importWindowForm = new ImportWindowForm();
+                importWindowForm.Show();
+            }
+        }
 
 
         //event handler for the combo box selection change, currently empty

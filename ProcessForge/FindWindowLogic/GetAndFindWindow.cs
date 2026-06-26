@@ -92,33 +92,11 @@ namespace ProcessForge.FindWindowLogic
                 listBox.Items.Add(s);
             }
         }
-        public static void selectListBox(ListBox listBox)
+        public static void WindowRestore(string TitleName)
         {
-            if (listBox.Items.Count > 0)
-            {
-                if (listBox.SelectedIndex < 0)
-                {
-                    return;
-                }
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                string[] Mystring = listBox.SelectedItem.ToString().Split(new string[] { " | Status: " }, StringSplitOptions.None);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-                if (Mystring.Length != 2)
-                {
-                    MessageBox.Show("idk how you get here but you did");
-                    return;
-                }
-
-                if (Mystring[0] == null)
-                {
-                    MessageBox.Show("selected but no data");
-                    return;
-                }
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                IntPtr hWnd = FindWindow(null, Mystring[0]);
+                IntPtr hWnd = FindWindow(null, TitleName);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
                 if (hWnd != IntPtr.Zero)
@@ -132,7 +110,7 @@ namespace ProcessForge.FindWindowLogic
                 }
 
 
-            }
+            
         }
     }
 }

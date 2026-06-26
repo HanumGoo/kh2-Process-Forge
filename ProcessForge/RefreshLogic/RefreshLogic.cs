@@ -25,12 +25,17 @@ namespace ProcessForge.RefreshLogic
                 Button btn = new Button();
 
                 btn.Text = AllProcessTitle[i];
+                btn.Tag = new ButtonData
+                {
+                    LineIndex = i,
+                    Text = AllProcessTitle[i]
+                };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
                 btn.Width = flowLayoutPanel.Width - 300;
                 btn.Font = new Font("Segoe UI Symbol", 9F);
                 btn.ForeColor = Color.White;
-                //btn.Click += Button_Click;
+                btn.Click += ButtonRestoreWindow_Click;
 
                 flowLayoutPanel.Controls.Add(btn);
                 PageShow++;
@@ -40,7 +45,7 @@ namespace ProcessForge.RefreshLogic
             labelPage.Text = AllProcessTitle.Count <= 100 ? $"{AllProcessTitle.Count}/{AllProcessTitle.Count}" : $"{PageStart} - {PageStart + PageShow}/{AllProcessTitle.Count}";
         
         }
-        public static void RefreshWIthNotepadCheck(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, List<string> AllProcessTitle, List<List<string>> AllDataImport)
+        public static void RefreshWIthNotepadCheck(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, string path, List<string> AllProcessTitle, List<List<string>> AllDataImport)
         {
             flowLayoutPanel.Controls.Clear();
 
@@ -54,12 +59,15 @@ namespace ProcessForge.RefreshLogic
 
             foreach (var TitleName in AllProcessTitle)
             {
+                bool isFound = false;
+
                 for (int i = 0; i < AllDataImport[0].Count; i++)
                 {
                     if (TitleName == AllDataImport[0][i])
                     {
                         DetectedProcess[0].Add(AllDataImport[0][i]);
                         DetectedProcess[1].Add(AllDataImport[1][i]);
+                        isFound = true;
                         break;
                     }
                     else
@@ -67,13 +75,20 @@ namespace ProcessForge.RefreshLogic
 
                     }
                 }
+
+                if (!isFound)
+                {
+                    DetectedProcess[0].Add(TitleName);
+                    DetectedProcess[1].Add("None");
+                }
+
             }
 
             //rename label page
             int PageStart = (pageCount - 1) * 100;
             int PageShow = 0;
 
-            for (int i = PageStart; i < AllProcessTitle.Count; i++)
+            for (int i = PageStart; i < DetectedProcess[0].Count; i++)
             {
                 if (PageShow > 99)
                 {
@@ -83,23 +98,43 @@ namespace ProcessForge.RefreshLogic
                 Button btn = new Button();
 
                 btn.Text = DetectedProcess[0][i];
+                btn.Tag = new ButtonData
+                {
+                    LineIndex = i,
+                    Text = DetectedProcess[0][i]
+                };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
                 btn.Width = flowLayoutPanel.Width - 300;
                 btn.Font = new Font("Segoe UI Symbol", 9F);
                 btn.ForeColor = Color.White;
-                //btn.Click += Button_Click;
+                btn.Click += ButtonRestoreWindow_Click;
 
                 Button btn2 = new Button();
 
                 btn2.Text = DetectedProcess[1][i];
+                btn2.Tag = i;
                 btn2.Margin = new Padding(5, 5, 5, 5);
                 btn2.Size = new Size(135, 40);
                 btn2.Width = flowLayoutPanel.Width - 550;
                 btn2.Font = new Font("Segoe UI Symbol", 9F);
                 btn2.ForeColor = Color.White;
-                btn2.BackColor = Color.Green;
-                //btn2.Click += Button_Click;
+                
+
+                if (DetectedProcess[1][i] == "NotExist")
+                {
+                    btn2.BackColor = Color.Red;
+                    btn2.Click += (sender, e) => ButtonRestoreImport_Click(sender, e, path);
+                }
+                else if (DetectedProcess[1][i] == "Exist")
+                {
+                    btn2.BackColor = Color.Green;
+                    btn2.Click += (sender, e) => ButtonRestoreImport_Click(sender, e, path);
+                }
+                else
+                {
+                    btn2.BackColor = Color.Gray;
+                }
 
                 flowLayoutPanel.Controls.Add(btn);
                 flowLayoutPanel.Controls.Add(btn2);
@@ -109,5 +144,145 @@ namespace ProcessForge.RefreshLogic
             //rename label page
             labelPage.Text = AllProcessTitle.Count <= 100 ? $"{AllProcessTitle.Count}/{AllProcessTitle.Count}" : $"{PageStart} - {PageStart + PageShow}/{AllProcessTitle.Count}";
         }
+
+        public static void RefreshWIthNotepadImport(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, string path, List<List<string>> AllDataImport)
+        {
+            flowLayoutPanel.Controls.Clear();
+
+            List<List<string>> DetectedProcess = AllDataImport;
+
+            //rename label page
+            int PageStart = (pageCount - 1) * 100;
+            int PageShow = 0;
+
+            for (int i = PageStart; i < DetectedProcess[0].Count; i++)
+            {
+                if (PageShow > 99)
+                {
+                    break;
+                }
+
+                Button btn = new Button();
+
+                btn.Text = DetectedProcess[0][i];
+                btn.Tag = new ButtonData
+                { 
+                LineIndex = i,
+                Text = DetectedProcess[0][i]
+                };
+                btn.Margin = new Padding(5, 5, 5, 5);
+                btn.Size = new Size(135, 40);
+                btn.Width = flowLayoutPanel.Width - 300;
+                btn.Font = new Font("Segoe UI Symbol", 9F);
+                btn.ForeColor = Color.White;
+                btn.Click += (sender, e) => Inputbox_Click(sender, e, path);
+
+                Button btn2 = new Button();
+
+                btn2.Text = DetectedProcess[1][i];
+                btn2.Tag = i;
+                btn2.Margin = new Padding(5, 5, 5, 5);
+                btn2.Size = new Size(135, 40);
+                btn2.Width = flowLayoutPanel.Width - 550;
+                btn2.Font = new Font("Segoe UI Symbol", 9F);
+                btn2.ForeColor = Color.White;
+
+
+                if (DetectedProcess[1][i] == "NotExist")
+                {
+                    btn2.BackColor = Color.Red;
+                    btn2.Click += (sender, e) => ButtonRestoreImport_Click(sender, e, path);
+                }
+                else if (DetectedProcess[1][i] == "Exist")
+                {
+                    btn2.BackColor = Color.Green;
+                    btn2.Click += (sender, e) => ButtonRestoreImport_Click(sender, e, path);
+                }
+                else
+                {
+                    btn2.BackColor = Color.Gray;
+                }
+
+                flowLayoutPanel.Controls.Add(btn);
+                flowLayoutPanel.Controls.Add(btn2);
+                PageShow++;
+            }
+
+            //rename label page
+            labelPage.Text = AllDataImport[0].Count <= 100 ? $"{AllDataImport[0].Count}/{AllDataImport[0].Count}" : $"{PageStart} - {PageStart + PageShow}/{AllDataImport[0].Count}";
+        }
+        private static void ButtonRestoreWindow_Click(object? sender, EventArgs e)
+        {
+            if (sender is Button btn && !string.IsNullOrEmpty(btn.Text))
+            {
+                ProcessForge.FindWindowLogic.GetAndFindWindow.WindowRestore(btn.Text);
+            }
+            else
+            {
+                MessageBox.Show("Error, the windows form didn't have a title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        private static void ButtonRestoreImport_Click(object? sender, EventArgs e, string path)
+        {
+            if (sender is Button btn && !string.IsNullOrEmpty(btn.Text) && !string.IsNullOrEmpty(btn.Tag?.ToString()))
+            {
+                string[] lines = File.ReadAllLines(path);
+                if (btn.Text == "NotExist")
+                {
+                    int StartsLine = (int)btn.Tag;
+                    string[] DataSplit = lines[StartsLine].Split(new string[] {","}, StringSplitOptions.None);
+                    lines[StartsLine] = DataSplit[0] + "," + "Exist";
+                    btn.Text = "Exist";
+                    btn.BackColor = Color.Green;
+
+                }
+                else if (btn.Text == "Exist")
+                {
+                    int StartsLine = (int)btn.Tag;
+                    string[] DataSplit = lines[StartsLine].Split(new string[] { "," }, StringSplitOptions.None);
+                    lines[StartsLine] = DataSplit[0] + "," + "NotExist";
+                    btn.Text = "NotExist";
+                    btn.BackColor = Color.Red;
+                }
+                else
+                {
+
+                }
+
+                File.WriteAllLines(path, lines);
+            }
+            else
+            {
+                MessageBox.Show("Error, the windows form didn't have a title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            
+        }
+        private static void Inputbox_Click(object? sender, EventArgs e, string path)
+        {
+            string? text = ProcessForge.RefreshLogic.InputBox.Show("Please enter a new value:", "Input");
+            if (text == null)
+            {
+                return;
+            }
+            if (sender is Button btn && btn.Tag is ButtonData data)
+            {
+                string[] lines = File.ReadAllLines(path);
+
+                int StartsLine = data.LineIndex;
+                string[] DataSplit = lines[StartsLine].Split(new string[] { "," }, StringSplitOptions.None);
+                lines[StartsLine] = text + "," + DataSplit[1];
+                btn.Text = text;
+                File.WriteAllLines(path, lines);
+            }
+            else
+            {
+                MessageBox.Show("Error, this one Import didn't provide any title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+    }
+    public class ButtonData
+    {
+        public int LineIndex { get; set; }
+        public string Text { get; set; } = "";
     }
 }
