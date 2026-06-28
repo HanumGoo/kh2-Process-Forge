@@ -137,7 +137,7 @@
             LabelPage.AutoSize = true;
             LabelPage.Font = new Font("Segoe UI", 12F);
             LabelPage.ForeColor = Color.White;
-            LabelPage.Location = new Point(8, 701);
+            LabelPage.Location = new Point(8, 648);
             LabelPage.Margin = new Padding(2, 0, 2, 0);
             LabelPage.Name = "LabelPage";
             LabelPage.Size = new Size(44, 21);
@@ -151,7 +151,7 @@
             PreviousButton.BackColor = SystemColors.Desktop;
             PreviousButton.Font = new Font("Segoe UI Symbol", 12F);
             PreviousButton.ForeColor = Color.White;
-            PreviousButton.Location = new Point(116, 701);
+            PreviousButton.Location = new Point(116, 648);
             PreviousButton.Margin = new Padding(2);
             PreviousButton.Name = "PreviousButton";
             PreviousButton.Size = new Size(131, 36);
@@ -166,7 +166,7 @@
             NextButton.BackColor = SystemColors.Desktop;
             NextButton.Font = new Font("Segoe UI Symbol", 12F);
             NextButton.ForeColor = Color.White;
-            NextButton.Location = new Point(251, 701);
+            NextButton.Location = new Point(251, 648);
             NextButton.Margin = new Padding(2);
             NextButton.Name = "NextButton";
             NextButton.Size = new Size(128, 36);
@@ -209,7 +209,7 @@
             panel2.BackColor = Color.Transparent;
             panel2.BorderStyle = BorderStyle.Fixed3D;
             panel2.ForeColor = SystemColors.ActiveCaptionText;
-            panel2.Location = new Point(8, 689);
+            panel2.Location = new Point(8, 636);
             panel2.Margin = new Padding(2);
             panel2.Name = "panel2";
             panel2.Size = new Size(762, 8);
@@ -234,7 +234,7 @@
             flowLayoutPanel.Location = new Point(8, 105);
             flowLayoutPanel.Margin = new Padding(2);
             flowLayoutPanel.Name = "flowLayoutPanel";
-            flowLayoutPanel.Size = new Size(761, 580);
+            flowLayoutPanel.Size = new Size(761, 527);
             flowLayoutPanel.TabIndex = 68;
             // 
             // RefreshButton
@@ -297,7 +297,7 @@
             NewImportFile.BackColor = SystemColors.Desktop;
             NewImportFile.Font = new Font("Segoe UI Symbol", 12F);
             NewImportFile.ForeColor = Color.White;
-            NewImportFile.Location = new Point(454, 701);
+            NewImportFile.Location = new Point(454, 648);
             NewImportFile.Margin = new Padding(2);
             NewImportFile.Name = "NewImportFile";
             NewImportFile.Size = new Size(316, 36);
@@ -311,7 +311,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Desktop;
-            ClientSize = new Size(778, 748);
+            ClientSize = new Size(778, 695);
             Controls.Add(NewImportFile);
             Controls.Add(label1);
             Controls.Add(CheckImport);
