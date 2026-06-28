@@ -233,7 +233,7 @@ namespace ProcessForge
                 ImportTextbox.Text = OFD.FileName;
                 RefreshFunction();
             }
-            
+
         }
 
         private void AddDatabutton_Click(object sender, EventArgs e)
@@ -275,7 +275,7 @@ namespace ProcessForge
             FBD.ShowNewFolderButton = true;   // Mengizinkan buat folder baru
 
             string selectedPath;
-            
+
 
             if (FBD.ShowDialog() == DialogResult.OK)
             {
@@ -312,18 +312,18 @@ namespace ProcessForge
 
             foreach (string item in bulkData)
             {
-                bulkImportData.Add(item+",NotExist");
+                bulkImportData.Add(item + ",NotExist");
             }
 
-            string pathFileCombine = Path.Combine(selectedPath, fileName[0]+".txt");
+            string pathFileCombine = Path.Combine(selectedPath, fileName[0] + ".txt");
             if (File.Exists(pathFileCombine))
             {
                 DialogResult fileExist = MessageBox.Show("file already exist with that file name. replace it?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.None);
-                
+
                 if (fileExist == DialogResult.Yes)
                 {
-                        File.WriteAllLines(pathFileCombine, bulkImportData);
-                        MessageBox.Show("Create import file success!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    File.WriteAllLines(pathFileCombine, bulkImportData);
+                    MessageBox.Show("Create import file success!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
@@ -335,8 +335,10 @@ namespace ProcessForge
                 File.WriteAllLines(pathFileCombine, bulkImportData);
                 MessageBox.Show("Create import file success!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            
-                    
+
+
         }
+
+       
     }
 }

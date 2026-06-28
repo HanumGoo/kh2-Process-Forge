@@ -34,8 +34,8 @@ namespace ProcessForge.RefreshLogic
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
-                btn.Width = flowLayoutPanel.Width - 300;
-                btn.Font = new Font("Segoe UI Symbol", 9F);
+                btn.Width = (int)(flowLayoutPanel.Width * 0.70);
+                btn.Font = new Font("Segoe UI Symbol", 10F);
                 btn.ForeColor = Color.White;
                 btn.Click += (sender, e) => ButtonRestoreWindow_Click(sender, e, ProcessId);
 
@@ -45,8 +45,8 @@ namespace ProcessForge.RefreshLogic
                 btn3.Tag = i;
                 btn3.Margin = new Padding(5, 5, 5, 5);
                 btn3.Size = new Size(135, 40);
-                btn3.Width = flowLayoutPanel.Width - 550;
-                btn3.Font = new Font("Segoe UI Symbol", 9F);
+                btn3.Width = (int)(flowLayoutPanel.Width * 0.20);
+                btn3.Font = new Font("Segoe UI Symbol", 10F);
                 btn3.ForeColor = Color.White;
                 btn3.BackColor = Color.Maroon;
                 btn3.Click += (sender, e) => ButtonTerminate_Click(sender, e, flowLayoutPanel, ProcessId);
@@ -62,6 +62,8 @@ namespace ProcessForge.RefreshLogic
         }
         public static void RefreshWIthNotepadCheck(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, string path, List<ProcessData> AllProcessTitle, List<List<string>> AllDataImport)
         {
+            
+
             flowLayoutPanel.Controls.Clear();
 
             
@@ -114,6 +116,8 @@ namespace ProcessForge.RefreshLogic
 
                 int ProcessId = AllProcessTitle[i].ProcessId;
 
+                
+
                 Button btn = new Button();
 
                 btn.Text = DetectedProcess[0][i];
@@ -124,8 +128,8 @@ namespace ProcessForge.RefreshLogic
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
-                btn.Width = flowLayoutPanel.Width - 550;
-                btn.Font = new Font("Segoe UI Symbol", 9F);
+                btn.Width = (int)(flowLayoutPanel.Width * 0.50);
+                btn.Font = new Font("Segoe UI Symbol", 10F);
                 btn.ForeColor = Color.White;
                 btn.Click += (sender, e) => ButtonRestoreWindow_Click(sender, e, ProcessId);
 
@@ -135,8 +139,8 @@ namespace ProcessForge.RefreshLogic
                 btn2.Tag = i;
                 btn2.Margin = new Padding(5, 5, 5, 5);
                 btn2.Size = new Size(135, 40);
-                btn2.Width = flowLayoutPanel.Width - 550;
-                btn2.Font = new Font("Segoe UI Symbol", 9F);
+                btn2.Width = (int)(flowLayoutPanel.Width * 0.20);
+                btn2.Font = new Font("Segoe UI Symbol", 10F);
                 btn2.ForeColor = Color.White;
 
                 Button btn3 = new Button();
@@ -145,8 +149,8 @@ namespace ProcessForge.RefreshLogic
                 btn3.Tag = i;
                 btn3.Margin = new Padding(5, 5, 5, 5);
                 btn3.Size = new Size(135, 40);
-                btn3.Width = flowLayoutPanel.Width - 550;
-                btn3.Font = new Font("Segoe UI Symbol", 9F);
+                btn3.Width = (int)(flowLayoutPanel.Width * 0.20);
+                btn3.Font = new Font("Segoe UI Symbol", 10F);
                 btn3.ForeColor = Color.White;
                 btn3.BackColor = Color.Maroon;
                 btn3.Click += (sender, e) => ButtonTerminate_Click(sender, e, flowLayoutPanel, ProcessId);
@@ -193,7 +197,6 @@ namespace ProcessForge.RefreshLogic
                 {
                     break;
                 }
-
                 Button btn = new Button();
 
                 btn.Text = DetectedProcess[0][i];
@@ -204,8 +207,8 @@ namespace ProcessForge.RefreshLogic
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
-                btn.Width = flowLayoutPanel.Width - 550;
-                btn.Font = new Font("Segoe UI Symbol", 9F);
+                btn.Width = (int)(flowLayoutPanel.Width * 0.50);
+                btn.Font = new Font("Segoe UI Symbol", 10F);
                 btn.ForeColor = Color.White;
                 btn.Click += (sender, e) => Inputbox_Click(sender, e, path);
 
@@ -215,8 +218,8 @@ namespace ProcessForge.RefreshLogic
                 btn2.Tag = i;
                 btn2.Margin = new Padding(5, 5, 5, 5);
                 btn2.Size = new Size(135, 40);
-                btn2.Width = flowLayoutPanel.Width - 550;
-                btn2.Font = new Font("Segoe UI Symbol", 9F);
+                btn2.Width = (int)(flowLayoutPanel.Width * 0.20);
+                btn2.Font = new Font("Segoe UI Symbol", 10F);
                 btn2.ForeColor = Color.White;
 
                 Button btn3 = new Button();
@@ -225,8 +228,8 @@ namespace ProcessForge.RefreshLogic
                 btn3.Tag = i;
                 btn3.Margin = new Padding(5, 5, 5, 5);
                 btn3.Size = new Size(135, 40);
-                btn3.Width = flowLayoutPanel.Width - 550;
-                btn3.Font = new Font("Segoe UI Symbol", 9F);
+                btn3.Width = (int)(flowLayoutPanel.Width * 0.20);
+                btn3.Font = new Font("Segoe UI Symbol", 10F);
                 btn3.ForeColor = Color.White;
                 btn3.BackColor = Color.Maroon;
                 btn3.Click += (sender, e) => ButtonDelete_Click(sender, e, path, flowLayoutPanel);

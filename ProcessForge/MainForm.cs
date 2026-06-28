@@ -374,9 +374,9 @@ namespace ProcessForge
         private void ComboBoxSelectedIndex0()
         {
             //none selection
-            RunTotalLabel.Location = new Point(455, RunTotalLabel.Location.Y);
-            numericUpDown5.Location = new Point(455, numericUpDown5.Location.Y);
-            MaxLabel.Location = new Point(455, MaxLabel.Location.Y);
+            //RunTotalLabel.Location = new Point(515, RunTotalLabel.Location.Y);
+            //numericUpDown5.Location = new Point(515, numericUpDown5.Location.Y);
+            //MaxLabel.Location = new Point(515, MaxLabel.Location.Y);
             RunTotalLabel.Visible = true;
             numericUpDown5.Visible = true;
             MaxLabel.Visible = true;
@@ -393,9 +393,9 @@ namespace ProcessForge
         private void ComboBoxSelectedIndex1()
         {
             //Manually rename selection
-            RunTotalLabel.Location = new Point(783, RunTotalLabel.Location.Y);
-            numericUpDown5.Location = new Point(783, numericUpDown5.Location.Y);
-            MaxLabel.Location = new Point(783, MaxLabel.Location.Y);
+            //RunTotalLabel.Location = new Point(860, RunTotalLabel.Location.Y);
+            //numericUpDown5.Location = new Point(860, numericUpDown5.Location.Y);
+            //MaxLabel.Location = new Point(860, MaxLabel.Location.Y);
             RenameLabel.Text = "Rename Application Name";
             RenameLabel.Visible = true;
             RenameTextbox.Visible = true;
