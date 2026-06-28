@@ -6,7 +6,7 @@ namespace ProcessForge.RefreshLogic
 {
     public class RefreshLogic
     {
-        public static void Refresh(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, List<string> AllProcessTitle)
+        public static void Refresh(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, List<ProcessData> AllProcessTitle)
         {
             //clear panel
             flowLayoutPanel.Controls.Clear();
@@ -22,22 +22,37 @@ namespace ProcessForge.RefreshLogic
                     break;
                 }
 
+                int ProcessId = AllProcessTitle[i].ProcessId;
+
                 Button btn = new Button();
 
-                btn.Text = AllProcessTitle[i];
+                btn.Text = AllProcessTitle[i].TitleName;
                 btn.Tag = new ButtonData
                 {
                     LineIndex = i,
-                    Text = AllProcessTitle[i]
+                    Text = AllProcessTitle[i].TitleName
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
                 btn.Width = flowLayoutPanel.Width - 300;
                 btn.Font = new Font("Segoe UI Symbol", 9F);
                 btn.ForeColor = Color.White;
-                btn.Click += ButtonRestoreWindow_Click;
+                btn.Click += (sender, e) => ButtonRestoreWindow_Click(sender, e, ProcessId);
+
+                Button btn3 = new Button();
+                
+                btn3.Text = "Terminate";
+                btn3.Tag = i;
+                btn3.Margin = new Padding(5, 5, 5, 5);
+                btn3.Size = new Size(135, 40);
+                btn3.Width = flowLayoutPanel.Width - 550;
+                btn3.Font = new Font("Segoe UI Symbol", 9F);
+                btn3.ForeColor = Color.White;
+                btn3.BackColor = Color.Maroon;
+                btn3.Click += (sender, e) => ButtonTerminate_Click(sender, e, flowLayoutPanel, ProcessId);
 
                 flowLayoutPanel.Controls.Add(btn);
+                flowLayoutPanel.Controls.Add(btn3);
                 PageShow++;
             }
 
@@ -45,7 +60,7 @@ namespace ProcessForge.RefreshLogic
             labelPage.Text = AllProcessTitle.Count <= 100 ? $"{AllProcessTitle.Count}/{AllProcessTitle.Count}" : $"{PageStart} - {PageStart + PageShow}/{AllProcessTitle.Count}";
         
         }
-        public static void RefreshWIthNotepadCheck(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, string path, List<string> AllProcessTitle, List<List<string>> AllDataImport)
+        public static void RefreshWIthNotepadCheck(FlowLayoutPanel flowLayoutPanel, Label labelPage, int pageCount, string path, List<ProcessData> AllProcessTitle, List<List<string>> AllDataImport)
         {
             flowLayoutPanel.Controls.Clear();
 
@@ -54,19 +69,21 @@ namespace ProcessForge.RefreshLogic
             List<List<string>> DetectedProcess = new List<List<string>>
             {
                 new List<string>(),
+                new List<string>(),
                 new List<string>()
             };
 
-            foreach (var TitleName in AllProcessTitle)
+            foreach (var processData in AllProcessTitle)
             {
                 bool isFound = false;
 
                 for (int i = 0; i < AllDataImport[0].Count; i++)
                 {
-                    if (TitleName == AllDataImport[0][i])
+                    if (processData.TitleName == AllDataImport[0][i])
                     {
                         DetectedProcess[0].Add(AllDataImport[0][i]);
                         DetectedProcess[1].Add(AllDataImport[1][i]);
+                        DetectedProcess[2].Add(processData.ProcessId.ToString());
                         isFound = true;
                         break;
                     }
@@ -78,7 +95,7 @@ namespace ProcessForge.RefreshLogic
 
                 if (!isFound)
                 {
-                    DetectedProcess[0].Add(TitleName);
+                    DetectedProcess[0].Add(processData.TitleName);
                     DetectedProcess[1].Add("None");
                 }
 
@@ -95,6 +112,8 @@ namespace ProcessForge.RefreshLogic
                     break;
                 }
 
+                int ProcessId = AllProcessTitle[i].ProcessId;
+
                 Button btn = new Button();
 
                 btn.Text = DetectedProcess[0][i];
@@ -105,10 +124,10 @@ namespace ProcessForge.RefreshLogic
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
                 btn.Size = new Size(135, 40);
-                btn.Width = flowLayoutPanel.Width - 300;
+                btn.Width = flowLayoutPanel.Width - 550;
                 btn.Font = new Font("Segoe UI Symbol", 9F);
                 btn.ForeColor = Color.White;
-                btn.Click += ButtonRestoreWindow_Click;
+                btn.Click += (sender, e) => ButtonRestoreWindow_Click(sender, e, ProcessId);
 
                 Button btn2 = new Button();
 
@@ -119,7 +138,19 @@ namespace ProcessForge.RefreshLogic
                 btn2.Width = flowLayoutPanel.Width - 550;
                 btn2.Font = new Font("Segoe UI Symbol", 9F);
                 btn2.ForeColor = Color.White;
+
+                Button btn3 = new Button();
                 
+                btn3.Text = "Terminate";
+                btn3.Tag = i;
+                btn3.Margin = new Padding(5, 5, 5, 5);
+                btn3.Size = new Size(135, 40);
+                btn3.Width = flowLayoutPanel.Width - 550;
+                btn3.Font = new Font("Segoe UI Symbol", 9F);
+                btn3.ForeColor = Color.White;
+                btn3.BackColor = Color.Maroon;
+                btn3.Click += (sender, e) => ButtonTerminate_Click(sender, e, flowLayoutPanel, ProcessId);
+
 
                 if (DetectedProcess[1][i] == "NotExist")
                 {
@@ -138,6 +169,7 @@ namespace ProcessForge.RefreshLogic
 
                 flowLayoutPanel.Controls.Add(btn);
                 flowLayoutPanel.Controls.Add(btn2);
+                flowLayoutPanel.Controls.Add(btn3);
                 PageShow++;
             }
 
@@ -223,11 +255,11 @@ namespace ProcessForge.RefreshLogic
             //rename label page
             labelPage.Text = AllDataImport[0].Count <= 100 ? $"{AllDataImport[0].Count}/{AllDataImport[0].Count}" : $"{PageStart} - {PageStart + PageShow}/{AllDataImport[0].Count}";
         }
-        private static void ButtonRestoreWindow_Click(object? sender, EventArgs e)
+        private static void ButtonRestoreWindow_Click(object? sender, EventArgs e, int id)
         {
             if (sender is Button btn && !string.IsNullOrEmpty(btn.Text))
             {
-                ProcessForge.FindWindowLogic.GetAndFindWindow.WindowRestore(btn.Text);
+                ProcessForge.FindWindowLogic.GetAndFindWindow.WindowRestore(id);
             }
             else
             {
@@ -324,6 +356,52 @@ namespace ProcessForge.RefreshLogic
 
             }
         }
+        private static void ButtonTerminate_Click(object? sender, EventArgs e, FlowLayoutPanel flowLayoutPanel, int ProcessID)
+        {
+            bool terminateStatus = ProcessForge.ApplicationLogic.TerminateApplicationLogic.TerminateApplicationUsingId(ProcessID);
+            if (terminateStatus)
+            {
+                if (sender is Button btn && !string.IsNullOrEmpty(btn.Tag?.ToString()))
+                {
+                    int StartsLine = (int)btn.Tag;
+                    bool isFound = false;
+                    foreach (Control control in flowLayoutPanel.Controls)
+                    {
+
+                        if (control is Button button)
+                        {
+                            if (button.Tag is ButtonData data && data.LineIndex == StartsLine)
+                            {
+                                button.Visible = false;
+                                isFound = true;
+                            }
+                            else if (button.Tag is not ButtonData && button.Tag is not null && (int)button.Tag == StartsLine)
+                            {
+                                button.Visible = false;
+                            }
+                            else if (isFound && button.Tag is not null)
+                            {
+                                if (button.Tag is ButtonData currentData)
+                                {
+                                    button.Tag = new ButtonData
+                                    {
+                                        LineIndex = currentData.LineIndex - 1,
+                                        Text = currentData.Text
+                                    };
+                                }
+                                else
+                                {
+                                    int newTag = (int)button.Tag - 1;
+                                    button.Tag = newTag;
+                                }
+
+                            }
+                        }
+                    }
+                }
+                    
+            }
+        }
         private static void Inputbox_Click(object? sender, EventArgs e, string path)
         {
             string[]? text = ProcessForge.RefreshLogic.InputBox.Show("Please enter a new value:", "Input", false, "");
@@ -347,10 +425,16 @@ namespace ProcessForge.RefreshLogic
             }
         }
         
+        
     }
     public class ButtonData
     {
         public int LineIndex { get; set; }
         public string Text { get; set; } = "";
+    }
+    public class ProcessData
+    {
+        public int ProcessId { get; set; }
+        public string TitleName { get; set; } = "";
     }
 }

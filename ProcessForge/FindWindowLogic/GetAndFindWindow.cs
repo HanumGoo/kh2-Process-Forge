@@ -112,5 +112,20 @@ namespace ProcessForge.FindWindowLogic
 
             
         }
+        public static void WindowRestore(int processId)
+        {
+            Process? process = Process.GetProcessById(processId);
+
+            IntPtr hWnd = process.MainWindowHandle;
+
+            if (hWnd != IntPtr.Zero)
+            {
+                ShowWindow(hWnd, SW_RESTORE);
+            }
+            else
+            {
+                MessageBox.Show("Window not found.");
+            }
+        }
     }
 }

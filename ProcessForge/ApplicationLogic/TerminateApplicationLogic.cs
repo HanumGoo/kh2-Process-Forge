@@ -30,5 +30,28 @@ namespace ProcessForge.ApplicationLogic
 
             }
         }
+        public static bool TerminateApplicationUsingId(int id)
+        {
+            DialogResult MB = MessageBox.Show("Are you sure terminate this app id : " + id + " process?", "You Sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (MB == DialogResult.Yes)
+            {
+                Process AllINCProcess = Process.GetProcessById(id);
+
+                if (AllINCProcess == null)
+                {
+                    MessageBox.Show("there is no " + id + " ID process running, are you sure you have it open?", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return false;
+                }
+                
+                    AllINCProcess.Kill();
+                    return true;
+
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

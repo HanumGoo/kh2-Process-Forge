@@ -50,6 +50,7 @@
             // 
             // ProcessListLabel
             // 
+            ProcessListLabel.Anchor = AnchorStyles.Top;
             ProcessListLabel.AutoSize = true;
             ProcessListLabel.Font = new Font("Segoe UI Symbol", 12F);
             ProcessListLabel.ForeColor = Color.White;
@@ -61,6 +62,7 @@
             // 
             // label2
             // 
+            label2.Anchor = AnchorStyles.Top;
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Symbol", 10F);
             label2.ForeColor = Color.White;
@@ -72,6 +74,7 @@
             // 
             // RefreshButton
             // 
+            RefreshButton.Anchor = AnchorStyles.Top;
             RefreshButton.BackColor = SystemColors.Desktop;
             RefreshButton.Font = new Font("Segoe UI Symbol", 9F);
             RefreshButton.ForeColor = Color.White;
@@ -85,6 +88,7 @@
             // 
             // flowLayoutPanel
             // 
+            flowLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             flowLayoutPanel.AutoScroll = true;
             flowLayoutPanel.Location = new Point(11, 118);
             flowLayoutPanel.Name = "flowLayoutPanel";
@@ -93,6 +97,7 @@
             // 
             // panel1
             // 
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             panel1.BackColor = Color.Transparent;
             panel1.BorderStyle = BorderStyle.Fixed3D;
             panel1.ForeColor = SystemColors.ActiveCaptionText;
@@ -103,6 +108,7 @@
             // 
             // panel2
             // 
+            panel2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel2.BackColor = Color.Transparent;
             panel2.BorderStyle = BorderStyle.Fixed3D;
             panel2.ForeColor = SystemColors.ActiveCaptionText;
@@ -113,6 +119,7 @@
             // 
             // txtSearch
             // 
+            txtSearch.Anchor = AnchorStyles.Top;
             txtSearch.BackColor = SystemColors.Desktop;
             txtSearch.Font = new Font("Segoe UI Symbol", 9F);
             txtSearch.ForeColor = Color.White;
@@ -124,6 +131,7 @@
             // 
             // button1
             // 
+            button1.Anchor = AnchorStyles.Top;
             button1.BackColor = SystemColors.Desktop;
             button1.Font = new Font("Segoe UI Symbol", 9F);
             button1.ForeColor = Color.White;
@@ -136,10 +144,11 @@
             // 
             // PreviousButton
             // 
+            PreviousButton.Anchor = AnchorStyles.Bottom;
             PreviousButton.BackColor = SystemColors.Desktop;
             PreviousButton.Font = new Font("Segoe UI Symbol", 9F);
             PreviousButton.ForeColor = Color.White;
-            PreviousButton.Location = new Point(244, 647);
+            PreviousButton.Location = new Point(198, 650);
             PreviousButton.Name = "PreviousButton";
             PreviousButton.Size = new Size(103, 32);
             PreviousButton.TabIndex = 54;
@@ -149,10 +158,11 @@
             // 
             // NextButton
             // 
+            NextButton.Anchor = AnchorStyles.Bottom;
             NextButton.BackColor = SystemColors.Desktop;
             NextButton.Font = new Font("Segoe UI Symbol", 9F);
             NextButton.ForeColor = Color.White;
-            NextButton.Location = new Point(455, 647);
+            NextButton.Location = new Point(307, 650);
             NextButton.Name = "NextButton";
             NextButton.Size = new Size(103, 32);
             NextButton.TabIndex = 55;
@@ -162,10 +172,11 @@
             // 
             // LabelPage
             // 
+            LabelPage.Anchor = AnchorStyles.Bottom;
             LabelPage.AutoSize = true;
             LabelPage.Font = new Font("Segoe UI", 10F);
             LabelPage.ForeColor = Color.White;
-            LabelPage.Location = new Point(371, 648);
+            LabelPage.Location = new Point(12, 651);
             LabelPage.Name = "LabelPage";
             LabelPage.Size = new Size(56, 28);
             LabelPage.TabIndex = 56;
@@ -173,6 +184,7 @@
             // 
             // ImportTextbox
             // 
+            ImportTextbox.Anchor = AnchorStyles.Top;
             ImportTextbox.BackColor = SystemColors.Desktop;
             ImportTextbox.Font = new Font("Segoe UI Symbol", 9F);
             ImportTextbox.ForeColor = Color.White;
@@ -183,6 +195,7 @@
             // 
             // ImportBrowse
             // 
+            ImportBrowse.Anchor = AnchorStyles.Top;
             ImportBrowse.BackColor = SystemColors.Desktop;
             ImportBrowse.Font = new Font("Segoe UI Symbol", 9F);
             ImportBrowse.ForeColor = Color.White;
@@ -196,6 +209,7 @@
             // 
             // panel3
             // 
+            panel3.Anchor = AnchorStyles.Top;
             panel3.BackColor = Color.Red;
             panel3.BorderStyle = BorderStyle.Fixed3D;
             panel3.Location = new Point(224, 70);
@@ -205,6 +219,7 @@
             // 
             // OnOffImport
             // 
+            OnOffImport.Anchor = AnchorStyles.Top;
             OnOffImport.BackColor = SystemColors.Desktop;
             OnOffImport.Font = new Font("Segoe UI Symbol", 9F);
             OnOffImport.ForeColor = Color.White;
@@ -218,6 +233,7 @@
             // 
             // panel4
             // 
+            panel4.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             panel4.BackColor = Color.Transparent;
             panel4.BorderStyle = BorderStyle.Fixed3D;
             panel4.ForeColor = SystemColors.ActiveCaptionText;
@@ -228,6 +244,7 @@
             // 
             // CheckImport
             // 
+            CheckImport.Anchor = AnchorStyles.Top;
             CheckImport.BackColor = SystemColors.Desktop;
             CheckImport.Font = new Font("Segoe UI Symbol", 9F);
             CheckImport.ForeColor = Color.White;

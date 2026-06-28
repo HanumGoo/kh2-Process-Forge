@@ -63,7 +63,7 @@ namespace ProcessForge
                 return;
             }
             Process[] AllProcess = Process.GetProcessesByName(ProcessName);
-            List<string> ProcessTitle = new List<string>();
+            List<ProcessData> ProcessTitle = new List<ProcessData>();
 
             foreach (Process item in AllProcess)
             {
@@ -73,7 +73,11 @@ namespace ProcessForge
                 }
                 else
                 {
-                    ProcessTitle.Add(item.MainWindowTitle);
+                    ProcessTitle.Add(new ProcessData
+                    {
+                        TitleName = item.MainWindowTitle,
+                        ProcessId = item.Id
+                    });
                 }
             }
 
