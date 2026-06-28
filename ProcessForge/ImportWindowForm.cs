@@ -231,8 +231,9 @@ namespace ProcessForge
             if (OFD.ShowDialog() == DialogResult.OK)
             {
                 ImportTextbox.Text = OFD.FileName;
+                RefreshFunction();
             }
-            RefreshFunction();
+            
         }
 
         private void AddDatabutton_Click(object sender, EventArgs e)
@@ -259,10 +260,83 @@ namespace ProcessForge
             {
                 linesList.Add(item + ",NotExist");
             }
-               
+
 
             File.WriteAllLines(path, linesList);
             RefreshFunction();
+        }
+
+        private void NewImportFile_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog FBD = new FolderBrowserDialog();
+
+            FBD.Description = "Choose folder";
+            FBD.UseDescriptionForTitle = true; // Menampilkan deskripsi sebagai judul
+            FBD.ShowNewFolderButton = true;   // Mengizinkan buat folder baru
+
+            string selectedPath;
+            
+
+            if (FBD.ShowDialog() == DialogResult.OK)
+            {
+                // Ambil path folder yang dipilih
+                selectedPath = FBD.SelectedPath;
+                //MessageBox.Show("Folder yang dipilih: " + selectedPath, "Informasi");
+            }
+            else
+            {
+                return;
+            }
+
+            string[]? fileName = ProcessForge.RefreshLogic.InputBox.Show("File Name : ", "Input", false, "");
+
+            if (fileName == null)
+            {
+                //MessageBox.Show("No title no create then", "Cancel", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                return;
+            }
+            if (fileName[0] == "")
+            {
+                MessageBox.Show("No title no create then", "Cancel", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                return;
+            }
+
+            string[]? bulkData = ProcessForge.RefreshLogic.InputBox.Show("new/first data (optional) : ", "Input", true, "");
+
+            if (bulkData == null)
+            {
+                return;
+            }
+
+            List<string> bulkImportData = new List<string>();
+
+            foreach (string item in bulkData)
+            {
+                bulkImportData.Add(item+",NotExist");
+            }
+
+            string pathFileCombine = Path.Combine(selectedPath, fileName[0]+".txt");
+            if (File.Exists(pathFileCombine))
+            {
+                DialogResult fileExist = MessageBox.Show("file already exist with that file name. replace it?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.None);
+                
+                if (fileExist == DialogResult.Yes)
+                {
+                        File.WriteAllLines(pathFileCombine, bulkImportData);
+                        MessageBox.Show("Create import file success!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                File.WriteAllLines(pathFileCombine, bulkImportData);
+                MessageBox.Show("Create import file success!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            
+                    
         }
     }
 }

@@ -47,14 +47,16 @@
             label2 = new Label();
             ProcessListLabel = new Label();
             label1 = new Label();
+            NewImportFile = new Button();
             SuspendLayout();
             // 
             // CheckImport
             // 
+            CheckImport.Anchor = AnchorStyles.Top;
             CheckImport.BackColor = SystemColors.Desktop;
             CheckImport.Font = new Font("Segoe UI Symbol", 9F);
             CheckImport.ForeColor = Color.White;
-            CheckImport.Location = new Point(350, 72);
+            CheckImport.Location = new Point(348, 72);
             CheckImport.Name = "CheckImport";
             CheckImport.Size = new Size(86, 32);
             CheckImport.TabIndex = 80;
@@ -64,20 +66,22 @@
             // 
             // panel4
             // 
+            panel4.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             panel4.BackColor = Color.Transparent;
             panel4.BorderStyle = BorderStyle.Fixed3D;
             panel4.ForeColor = SystemColors.ActiveCaptionText;
             panel4.Location = new Point(10, 56);
             panel4.Name = "panel4";
-            panel4.Size = new Size(775, 10);
+            panel4.Size = new Size(772, 10);
             panel4.TabIndex = 70;
             // 
             // OnOffImport
             // 
+            OnOffImport.Anchor = AnchorStyles.Top;
             OnOffImport.BackColor = SystemColors.Desktop;
             OnOffImport.Font = new Font("Segoe UI Symbol", 9F);
             OnOffImport.ForeColor = Color.White;
-            OnOffImport.Location = new Point(258, 72);
+            OnOffImport.Location = new Point(256, 72);
             OnOffImport.Name = "OnOffImport";
             OnOffImport.Size = new Size(86, 32);
             OnOffImport.TabIndex = 79;
@@ -87,19 +91,21 @@
             // 
             // panel3
             // 
+            panel3.Anchor = AnchorStyles.Top;
             panel3.BackColor = Color.Green;
             panel3.BorderStyle = BorderStyle.Fixed3D;
-            panel3.Location = new Point(223, 75);
+            panel3.Location = new Point(221, 75);
             panel3.Name = "panel3";
             panel3.Size = new Size(29, 26);
             panel3.TabIndex = 66;
             // 
             // ImportBrowse
             // 
+            ImportBrowse.Anchor = AnchorStyles.Top;
             ImportBrowse.BackColor = SystemColors.Desktop;
             ImportBrowse.Font = new Font("Segoe UI Symbol", 9F);
             ImportBrowse.ForeColor = Color.White;
-            ImportBrowse.Location = new Point(681, 72);
+            ImportBrowse.Location = new Point(679, 72);
             ImportBrowse.Name = "ImportBrowse";
             ImportBrowse.Size = new Size(105, 32);
             ImportBrowse.TabIndex = 78;
@@ -109,20 +115,22 @@
             // 
             // ImportTextbox
             // 
+            ImportTextbox.Anchor = AnchorStyles.Top;
             ImportTextbox.BackColor = SystemColors.Desktop;
             ImportTextbox.Font = new Font("Segoe UI Symbol", 9F);
             ImportTextbox.ForeColor = Color.White;
-            ImportTextbox.Location = new Point(442, 73);
+            ImportTextbox.Location = new Point(440, 73);
             ImportTextbox.Name = "ImportTextbox";
             ImportTextbox.Size = new Size(233, 31);
             ImportTextbox.TabIndex = 77;
             // 
             // LabelPage
             // 
+            LabelPage.Anchor = AnchorStyles.Bottom;
             LabelPage.AutoSize = true;
             LabelPage.Font = new Font("Segoe UI", 8F);
             LabelPage.ForeColor = Color.White;
-            LabelPage.Location = new Point(12, 662);
+            LabelPage.Location = new Point(8, 659);
             LabelPage.Name = "LabelPage";
             LabelPage.Size = new Size(44, 21);
             LabelPage.TabIndex = 76;
@@ -131,10 +139,11 @@
             // 
             // PreviousButton
             // 
+            PreviousButton.Anchor = AnchorStyles.Bottom;
             PreviousButton.BackColor = SystemColors.Desktop;
             PreviousButton.Font = new Font("Segoe UI Symbol", 9F);
             PreviousButton.ForeColor = Color.White;
-            PreviousButton.Location = new Point(149, 655);
+            PreviousButton.Location = new Point(145, 652);
             PreviousButton.Name = "PreviousButton";
             PreviousButton.Size = new Size(103, 32);
             PreviousButton.TabIndex = 74;
@@ -144,10 +153,11 @@
             // 
             // NextButton
             // 
+            NextButton.Anchor = AnchorStyles.Bottom;
             NextButton.BackColor = SystemColors.Desktop;
             NextButton.Font = new Font("Segoe UI Symbol", 9F);
             NextButton.ForeColor = Color.White;
-            NextButton.Location = new Point(258, 655);
+            NextButton.Location = new Point(254, 652);
             NextButton.Name = "NextButton";
             NextButton.Size = new Size(103, 32);
             NextButton.TabIndex = 75;
@@ -157,10 +167,11 @@
             // 
             // AddDatabutton
             // 
+            AddDatabutton.Anchor = AnchorStyles.Top;
             AddDatabutton.BackColor = SystemColors.Desktop;
             AddDatabutton.Font = new Font("Segoe UI Symbol", 9F);
             AddDatabutton.ForeColor = Color.White;
-            AddDatabutton.Location = new Point(223, 16);
+            AddDatabutton.Location = new Point(221, 12);
             AddDatabutton.Name = "AddDatabutton";
             AddDatabutton.Size = new Size(121, 32);
             AddDatabutton.TabIndex = 73;
@@ -170,10 +181,11 @@
             // 
             // txtSearch
             // 
+            txtSearch.Anchor = AnchorStyles.Top;
             txtSearch.BackColor = SystemColors.Desktop;
             txtSearch.Font = new Font("Segoe UI Symbol", 9F);
             txtSearch.ForeColor = Color.White;
-            txtSearch.Location = new Point(442, 17);
+            txtSearch.Location = new Point(440, 13);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new Size(233, 31);
             txtSearch.TabIndex = 72;
@@ -181,38 +193,42 @@
             // 
             // panel2
             // 
+            panel2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel2.BackColor = Color.Transparent;
             panel2.BorderStyle = BorderStyle.Fixed3D;
             panel2.ForeColor = SystemColors.ActiveCaptionText;
             panel2.Location = new Point(10, 636);
             panel2.Name = "panel2";
-            panel2.Size = new Size(776, 10);
+            panel2.Size = new Size(773, 10);
             panel2.TabIndex = 71;
             // 
             // panel1
             // 
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             panel1.BackColor = Color.Transparent;
             panel1.BorderStyle = BorderStyle.Fixed3D;
             panel1.ForeColor = SystemColors.ActiveCaptionText;
             panel1.Location = new Point(10, 110);
             panel1.Name = "panel1";
-            panel1.Size = new Size(776, 10);
+            panel1.Size = new Size(773, 10);
             panel1.TabIndex = 69;
             // 
             // flowLayoutPanel
             // 
+            flowLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             flowLayoutPanel.AutoScroll = true;
-            flowLayoutPanel.Location = new Point(10, 123);
+            flowLayoutPanel.Location = new Point(7, 126);
             flowLayoutPanel.Name = "flowLayoutPanel";
-            flowLayoutPanel.Size = new Size(776, 507);
+            flowLayoutPanel.Size = new Size(778, 504);
             flowLayoutPanel.TabIndex = 68;
             // 
             // RefreshButton
             // 
+            RefreshButton.Anchor = AnchorStyles.Top;
             RefreshButton.BackColor = SystemColors.Desktop;
             RefreshButton.Font = new Font("Segoe UI Symbol", 9F);
             RefreshButton.ForeColor = Color.White;
-            RefreshButton.Location = new Point(681, 16);
+            RefreshButton.Location = new Point(679, 12);
             RefreshButton.Name = "RefreshButton";
             RefreshButton.Size = new Size(105, 32);
             RefreshButton.TabIndex = 67;
@@ -222,10 +238,11 @@
             // 
             // label2
             // 
+            label2.Anchor = AnchorStyles.Top;
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Symbol", 10F);
             label2.ForeColor = Color.White;
-            label2.Location = new Point(10, 73);
+            label2.Location = new Point(8, 73);
             label2.Name = "label2";
             label2.Size = new Size(159, 28);
             label2.TabIndex = 65;
@@ -233,10 +250,11 @@
             // 
             // ProcessListLabel
             // 
+            ProcessListLabel.Anchor = AnchorStyles.Top;
             ProcessListLabel.AutoSize = true;
             ProcessListLabel.Font = new Font("Segoe UI Symbol", 12F);
             ProcessListLabel.ForeColor = Color.White;
-            ProcessListLabel.Location = new Point(11, 14);
+            ProcessListLabel.Location = new Point(9, 10);
             ProcessListLabel.Name = "ProcessListLabel";
             ProcessListLabel.Size = new Size(127, 32);
             ProcessListLabel.TabIndex = 64;
@@ -244,21 +262,37 @@
             // 
             // label1
             // 
+            label1.Anchor = AnchorStyles.Top;
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI Symbol", 10F);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(356, 18);
+            label1.Location = new Point(354, 14);
             label1.Name = "label1";
             label1.Size = new Size(84, 28);
             label1.TabIndex = 81;
             label1.Text = "Search : ";
+            // 
+            // NewImportFile
+            // 
+            NewImportFile.Anchor = AnchorStyles.Bottom;
+            NewImportFile.BackColor = SystemColors.Desktop;
+            NewImportFile.Font = new Font("Segoe UI Symbol", 9F);
+            NewImportFile.ForeColor = Color.White;
+            NewImportFile.Location = new Point(564, 652);
+            NewImportFile.Name = "NewImportFile";
+            NewImportFile.Size = new Size(220, 32);
+            NewImportFile.TabIndex = 82;
+            NewImportFile.Text = "Create new import file";
+            NewImportFile.UseVisualStyleBackColor = false;
+            NewImportFile.Click += NewImportFile_Click;
             // 
             // ImportWindowForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Desktop;
-            ClientSize = new Size(800, 702);
+            ClientSize = new Size(797, 702);
+            Controls.Add(NewImportFile);
             Controls.Add(label1);
             Controls.Add(CheckImport);
             Controls.Add(panel4);
@@ -304,5 +338,6 @@
         private Label label2;
         private Label ProcessListLabel;
         private Label label1;
+        private Button NewImportFile;
     }
 }
