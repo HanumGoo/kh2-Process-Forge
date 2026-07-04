@@ -86,10 +86,11 @@ namespace ProcessForge
             {
                 CountDownTimer.Stop();
                 TimerForSeconds.Stop();
-
                 Run1.Text = "Run";
                 isRun1Running = false;
                 CountDownSeconds.Text = "Count down event : Stopped";
+                panel2.BackColor = Color.Red;
+
             }
             else
             {
@@ -100,6 +101,7 @@ namespace ProcessForge
 
                 Run1.Text = "Stop";
                 isRun1Running = true;
+                panel2.BackColor = Color.Green;
             }
 
         }

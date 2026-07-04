@@ -126,6 +126,7 @@ namespace ProcessForge
             string search = txtSearch.Text.ToLower();
 
             bool isTrue = false;
+            bool isTrueSecond = false;
             foreach (Control control in flowLayoutPanel.Controls)
             {
 
@@ -144,12 +145,18 @@ namespace ProcessForge
                             isTrue = false;
                         }
                     }
+                    else if (isTrue)
+                    {
+                        button.Visible = true;
+                        isTrue = false;
+                        isTrueSecond = true;
+                    }
                     else
                     {
-                        if (isTrue)
+                        if (isTrueSecond)
                         {
                             button.Visible = true;
-                            isTrue = false;
+                            isTrueSecond = false;
                         }
                         else
                         {
