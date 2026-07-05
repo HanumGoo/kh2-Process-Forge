@@ -1,4 +1,5 @@
-﻿using ProcessForge.RefreshLogic;
+﻿using ProcessForge.ApplicationLogic;
+using ProcessForge.RefreshLogic;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,16 +13,21 @@ namespace ProcessForge
 {
     public partial class AutoLoginWindowForm : Form
     {
+        //process name
+        string processName;
+
         //check import status
         bool isUsingImport = true;
 
         //page
         int PageCount = 1;
 
-        public AutoLoginWindowForm()
+        public AutoLoginWindowForm(string ProcessName)
         {
+
             InitializeComponent();
             FormStartup();
+            processName = ProcessName;
         }
         public void FormStartup()
         {
@@ -30,19 +36,20 @@ namespace ProcessForge
 
         private void RefreshButton_Click(object sender, EventArgs e)
         {
-
+            RefreshFunction();
         }
-
-        private void PreviousButton_Click(object sender, EventArgs e)
+        private void RefreshFunction()
         {
-
+            string path = ImportTextbox.Text;
+            if (!File.Exists(path) || string.IsNullOrEmpty(path))
+            {
+                MessageBox.Show("Error! : the path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            string[] AllLines = File.ReadAllLines(path);
+            LabelPage.Text = $"{AllLines.Length}/{AllLines.Length}";
+            AutoLoginLogic.RefreshLoginImport(flowLayoutPanel, ImportTextbox.Text);
         }
-
-        private void NextButton_Click(object sender, EventArgs e)
-        {
-
-        }
-        
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
@@ -92,7 +99,42 @@ namespace ProcessForge
 
         private void OnOffImport_Click(object sender, EventArgs e)
         {
-            
+            string path = ImportTextbox.Text;
+            if (!File.Exists(path) || string.IsNullOrEmpty(path))
+            {
+                MessageBox.Show("Error! : the path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            DialogResult result = MessageBox.Show("do you want to reset all the status?.", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result != DialogResult.Yes)
+            {
+                return;
+            }
+            string[] AllLines = File.ReadAllLines(path);
+            StringBuilder sb = new StringBuilder();
+            foreach (string line in AllLines)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    MessageBox.Show("Error! : the file contain empty line(s).", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                List<string> lineSplit = line.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (lineSplit.Count != 5)
+                {
+                    MessageBox.Show("Error! : the file contain wrong format line(s).\n" + lineSplit, "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (lineSplit[4].ToLower() != "true" && lineSplit[4].ToLower() != "false")
+                {
+                    MessageBox.Show("Error! : the file contain wrong format line(s).\n" + lineSplit, "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                lineSplit[4] = "false";
+                sb.AppendLine(string.Join(",", lineSplit));
+            }
+            File.WriteAllText(path, sb.ToString());
+            RefreshFunction();
         }
 
         private void CheckImport_Click(object sender, EventArgs e)
@@ -103,7 +145,28 @@ namespace ProcessForge
                 MessageBox.Show("Error! : the path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
+            string[] AllLines = File.ReadAllLines(path);
+            foreach (string line in AllLines)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    MessageBox.Show("Error! : the file contain empty line(s).", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                string[] lineSplit = line.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                if (lineSplit.Length != 5)
+                {
+                    MessageBox.Show("Error! : the file contain wrong format line(s).\n" + lineSplit, "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (lineSplit[4].ToLower() != "true" && lineSplit[4].ToLower() != "false")
+                {
+                    MessageBox.Show("Error! : the file contain wrong format line(s).\n" + lineSplit, "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                
+            }
+            MessageBox.Show("Import file is valid!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void ImportBrowse_Click(object sender, EventArgs e)
@@ -113,6 +176,7 @@ namespace ProcessForge
             if (OFD.ShowDialog() == DialogResult.OK)
             {
                 ImportTextbox.Text = OFD.FileName;
+                RefreshFunction();
             }
 
         }
@@ -139,11 +203,12 @@ namespace ProcessForge
 
             foreach (string item in text)
             {
-                linesList.Add(item + ",NotExist");
+                linesList.Add(item);
             }
 
 
             File.WriteAllLines(path, linesList);
+            RefreshFunction();
         }
 
         private void NewImportFile_Click(object sender, EventArgs e)
@@ -192,7 +257,7 @@ namespace ProcessForge
 
             foreach (string item in bulkData)
             {
-                bulkImportData.Add(item + ",NotExist");
+                bulkImportData.Add(item);
             }
 
             string pathFileCombine = Path.Combine(selectedPath, fileName[0] + ".txt");

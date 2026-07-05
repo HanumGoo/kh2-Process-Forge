@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImportWindowForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AutoLoginWindowForm));
             CheckImport = new Button();
             panel4 = new Panel();
             OnOffImport = new Button();
@@ -36,8 +36,6 @@
             ImportBrowse = new Button();
             ImportTextbox = new TextBox();
             LabelPage = new Label();
-            PreviousButton = new Button();
-            NextButton = new Button();
             AddDatabutton = new Button();
             txtSearch = new TextBox();
             panel2 = new Panel();
@@ -137,34 +135,6 @@
             LabelPage.TabIndex = 76;
             LabelPage.Text = "??/??";
             LabelPage.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // PreviousButton
-            // 
-            PreviousButton.Anchor = AnchorStyles.Bottom;
-            PreviousButton.BackColor = SystemColors.Desktop;
-            PreviousButton.Font = new Font("Segoe UI Symbol", 12F);
-            PreviousButton.ForeColor = Color.White;
-            PreviousButton.Location = new Point(214, 1080);
-            PreviousButton.Name = "PreviousButton";
-            PreviousButton.Size = new Size(187, 60);
-            PreviousButton.TabIndex = 74;
-            PreviousButton.Text = "Previous";
-            PreviousButton.UseVisualStyleBackColor = false;
-            PreviousButton.Click += PreviousButton_Click;
-            // 
-            // NextButton
-            // 
-            NextButton.Anchor = AnchorStyles.Bottom;
-            NextButton.BackColor = SystemColors.Desktop;
-            NextButton.Font = new Font("Segoe UI Symbol", 12F);
-            NextButton.ForeColor = Color.White;
-            NextButton.Location = new Point(407, 1080);
-            NextButton.Name = "NextButton";
-            NextButton.Size = new Size(183, 60);
-            NextButton.TabIndex = 75;
-            NextButton.Text = "Next";
-            NextButton.UseVisualStyleBackColor = false;
-            NextButton.Click += NextButton_Click;
             // 
             // AddDatabutton
             // 
@@ -287,7 +257,7 @@
             NewImportFile.UseVisualStyleBackColor = false;
             NewImportFile.Click += NewImportFile_Click;
             // 
-            // ImportWindowForm
+            // AutoLoginWindowForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -302,8 +272,6 @@
             Controls.Add(ImportBrowse);
             Controls.Add(ImportTextbox);
             Controls.Add(LabelPage);
-            Controls.Add(PreviousButton);
-            Controls.Add(NextButton);
             Controls.Add(AddDatabutton);
             Controls.Add(txtSearch);
             Controls.Add(panel2);
@@ -313,7 +281,7 @@
             Controls.Add(label2);
             Controls.Add(ProcessListLabel);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Name = "ImportWindowForm";
+            Name = "AutoLoginWindowForm";
             Text = "Import Handler";
             ResumeLayout(false);
             PerformLayout();
@@ -328,8 +296,6 @@
         private Button ImportBrowse;
         private TextBox ImportTextbox;
         private Label LabelPage;
-        private Button PreviousButton;
-        private Button NextButton;
         private Button AddDatabutton;
         private TextBox txtSearch;
         private Panel panel2;

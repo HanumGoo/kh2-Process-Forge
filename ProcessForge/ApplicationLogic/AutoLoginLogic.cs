@@ -151,6 +151,140 @@ namespace ProcessForge.ApplicationLogic
                 flowLayoutPanel.Controls.Add(btn3);
             }
         }
+        public static void RefreshLoginImport(FlowLayoutPanel flowLayoutPanel, string accountDataFilePath)
+        {
+            //getting all data process with the same name and get their title and process id
+            if (string.IsNullOrEmpty(accountDataFilePath))
+            {
+                MessageBox.Show("please add account data file path first at the main form", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+
+            //extract file data from account data file path
+            string[] FileExtract = File.ReadAllLines(accountDataFilePath);
+            List<DataLoginFormat> DetectedData = new List<DataLoginFormat>();
+
+            int counter = 0;
+            foreach (string line in FileExtract)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    MessageBox.Show("Found empty line in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                string[] lineSplit = line.Split(new string[] { "," }, StringSplitOptions.None);
+                if (lineSplit.Length != 5)
+                {
+                    MessageBox.Show("Invalid line format in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (bool.TryParse(lineSplit[4], out bool valid))
+                {
+                    DetectedData.Add(new DataLoginFormat
+                    {
+                        nickname = lineSplit[0],
+                        username = lineSplit[1],
+                        password = lineSplit[2],
+                        secondPassword = lineSplit[3],
+                        isLogin = valid,
+                        LineIndex = counter
+                    });
+                    counter++;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid boolean value in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+
+            }
+
+            //clear panel
+            flowLayoutPanel.Controls.Clear();
+
+
+            foreach (DataLoginFormat item in DetectedData)
+            {
+                int ProcessId = item.ProcessId;
+
+                Button btn = new Button();
+
+                btn.Text = item.nickname;
+                btn.Tag = new ButtonData
+                {
+                    LineIndex = item.LineIndex,
+                    Text = item.nickname
+                };
+                btn.Margin = new Padding(5, 5, 5, 5);
+                btn.Size = new Size(135, 40);
+                btn.Width = (int)(flowLayoutPanel.Width * 0.18);
+                btn.Font = new Font("Segoe UI Symbol", 10F);
+                btn.ForeColor = Color.White;
+                btn.Click += (sender, e) => ButtonRestoreImportNickname_Click(sender, e, accountDataFilePath);
+
+                Button btn2 = new Button();
+                btn2.Text = item.username;
+                btn2.Tag = item.LineIndex;
+                btn2.Margin = new Padding(5, 5, 5, 5);
+                btn2.Size = new Size(135, 40);
+                btn2.Width = (int)(flowLayoutPanel.Width * 0.18);
+                btn2.Font = new Font("Segoe UI Symbol", 10F);
+                btn2.ForeColor = Color.White;
+                btn2.Click += (sender, e) => ButtonRestoreImportUsername_Click(sender, e, accountDataFilePath);
+
+                Button btn3 = new Button();
+                btn3.Text = item.password;
+                btn3.Tag = item.LineIndex;
+                btn3.Margin = new Padding(5, 5, 5, 5);
+                btn3.Size = new Size(135, 40);
+                btn3.Width = (int)(flowLayoutPanel.Width * 0.18);
+                btn3.Font = new Font("Segoe UI Symbol", 10F);
+                btn3.ForeColor = Color.White;
+                btn3.Click += (sender, e) => ButtonRestoreImportPassword_Click(sender, e, accountDataFilePath);
+
+                Button btn4 = new Button();
+                btn4.Text = item.secondPassword;
+                btn4.Tag = item.LineIndex;
+                btn4.Margin = new Padding(5, 5, 5, 5);
+                btn4.Size = new Size(135, 40);
+                btn4.Width = (int)(flowLayoutPanel.Width * 0.18);
+                btn4.Font = new Font("Segoe UI Symbol", 10F);
+                btn4.ForeColor = Color.White;
+                btn4.Click += (sender, e) => ButtonRestoreImportSecondPassword_Click(sender, e, accountDataFilePath);
+
+                Button btn5 = new Button();
+                btn5.Text = item.isLogin ? "Logined" : "Not Logined";
+                btn5.Tag = item.LineIndex;
+                btn5.Margin = new Padding(5, 5, 5, 5);
+                btn5.Size = new Size(135, 40);
+                btn5.Width = (int)(flowLayoutPanel.Width * 0.10);
+                btn5.Font = new Font("Segoe UI Symbol", 10F);
+                btn5.ForeColor = Color.White;
+                btn5.BackColor = item.isLogin ? Color.Green : Color.Red;
+                btn5.Click += (sender, e) => ButtonRestoreImport_Click(sender, e, accountDataFilePath);
+
+                Button btn6 = new Button();
+
+                btn6.Text = "Delete";
+                btn6.Tag = item.LineIndex;
+                btn6.Margin = new Padding(5, 5, 5, 5);
+                btn6.Size = new Size(135, 40);
+                btn6.Width = (int)(flowLayoutPanel.Width * 0.10);
+                btn6.Font = new Font("Segoe UI Symbol", 10F);
+                btn6.ForeColor = Color.White;
+                btn6.BackColor = Color.Maroon;
+                btn6.Click += (sender, e) => ButtonDelete_Click(sender, e, accountDataFilePath, flowLayoutPanel);
+
+                flowLayoutPanel.Controls.Add(btn);
+                flowLayoutPanel.Controls.Add(btn2);
+                flowLayoutPanel.Controls.Add(btn3);
+                flowLayoutPanel.Controls.Add(btn4);
+                flowLayoutPanel.Controls.Add(btn5);
+                flowLayoutPanel.Controls.Add(btn6);
+            }
+        }
         public static void ResetLogin(string accountDataFilePath)
         {
             DialogResult result = MessageBox.Show("Are you sure you want to reset all login statuses to Not Logined?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -255,7 +389,97 @@ namespace ProcessForge.ApplicationLogic
             }
 
         }
+        private static void ButtonRestoreImportUsername_Click(object? sender, EventArgs e, string path)
+        {
+            string[]? text = ProcessForge.RefreshLogic.InputBox.Show("Please enter a new value:", "Input", false, "");
+            if (text == null)
+            {
+                return;
+            }
+            if (sender is Button btn && btn.Tag is int data)
+            {
+                string[] lines = File.ReadAllLines(path);
 
+                int StartsLine = data;
+                string[] DataSplit = lines[StartsLine].Split(new string[] { "," }, StringSplitOptions.None);
+                lines[StartsLine] = DataSplit[0] + "," + text[0] + "," + DataSplit[2] + "," + DataSplit[3] + "," + DataSplit[4];
+                btn.Text = text[0];
+                File.WriteAllLines(path, lines);
+            }
+            else
+            {
+                MessageBox.Show("Error, this one Import didn't provide any title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+        }
+        private static void ButtonRestoreImportPassword_Click(object? sender, EventArgs e, string path)
+        {
+            string[]? text = ProcessForge.RefreshLogic.InputBox.Show("Please enter a new value:", "Input", false, "");
+            if (text == null)
+            {
+                return;
+            }
+            if (sender is Button btn && btn.Tag is int data)
+            {
+                string[] lines = File.ReadAllLines(path);
+
+                int StartsLine = data;
+                string[] DataSplit = lines[StartsLine].Split(new string[] { "," }, StringSplitOptions.None);
+                lines[StartsLine] = DataSplit[0] + "," + DataSplit[1] + "," + text[0] + "," + DataSplit[3] + "," + DataSplit[4];
+                btn.Text = text[0];
+                File.WriteAllLines(path, lines);
+            }
+            else
+            {
+                MessageBox.Show("Error, this one Import didn't provide any title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+        }
+        private static void ButtonRestoreImportSecondPassword_Click(object? sender, EventArgs e, string path)
+        {
+            string[]? text = ProcessForge.RefreshLogic.InputBox.Show("Please enter a new value:", "Input", false, "");
+            if (text == null)
+            {
+                return;
+            }
+            if (sender is Button btn && btn.Tag is int data)
+            {
+                string[] lines = File.ReadAllLines(path);
+
+                int StartsLine = data;
+                string[] DataSplit = lines[StartsLine].Split(new string[] { "," }, StringSplitOptions.None);
+                lines[StartsLine] = DataSplit[0] + "," + DataSplit[1] + "," + DataSplit[2] + "," + text[0] + "," + DataSplit[4];
+                btn.Text = text[0];
+                File.WriteAllLines(path, lines);
+            }
+            else
+            {
+                MessageBox.Show("Error, this one Import didn't provide any title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+        }
+        private static void ButtonRestoreImportNickname_Click(object? sender, EventArgs e, string path)
+        {
+            string[]? text = ProcessForge.RefreshLogic.InputBox.Show("Please enter a new value:", "Input", false, "");
+            if (text == null)
+            {
+                return;
+            }
+            if (sender is Button btn && btn.Tag is ButtonData data)
+            {
+                string[] lines = File.ReadAllLines(path);
+
+                int StartsLine = data.LineIndex;
+                string[] DataSplit = lines[StartsLine].Split(new string[] { "," }, StringSplitOptions.None);
+                lines[StartsLine] = text[0] + "," + DataSplit[1] + "," + DataSplit[2] + "," + DataSplit[3] + "," + DataSplit[4];
+                btn.Text = text[0];
+                File.WriteAllLines(path, lines);
+            }
+            else
+            {
+                MessageBox.Show("Error, this one Import didn't provide any title", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
         private static void ButtonTerminate_Click(object? sender, EventArgs e, FlowLayoutPanel flowLayoutPanel, int ProcessID)
         {
             bool terminateStatus = ProcessForge.ApplicationLogic.TerminateApplicationLogic.TerminateApplicationUsingId(ProcessID);
@@ -302,7 +526,61 @@ namespace ProcessForge.ApplicationLogic
 
             }
         }
-      
+        private static void ButtonDelete_Click(object? sender, EventArgs e, string path, FlowLayoutPanel flowLayoutPanel)
+        {
+            DialogResult messageBoxResult = MessageBox.Show("Are you sure want to delete this?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (messageBoxResult != DialogResult.Yes)
+            {
+                return;
+            }
+
+            if (sender is Button btn && !string.IsNullOrEmpty(btn.Tag?.ToString()))
+            {
+                List<string> lines = File.ReadAllLines(path).ToList();
+
+                int StartsLine = (int)btn.Tag;
+                lines.RemoveAt(StartsLine);
+
+                File.WriteAllLines(path, lines);
+
+                bool isFound = false;
+                foreach (Control control in flowLayoutPanel.Controls)
+                {
+
+                    if (control is Button button)
+                    {
+                        if (button.Tag is ButtonData data && data.LineIndex == StartsLine)
+                        {
+                            button.Visible = false;
+                            isFound = true;
+                        }
+                        else if (button.Tag is not ButtonData && button.Tag is not null && (int)button.Tag == StartsLine)
+                        {
+                            button.Visible = false;
+                        }
+                        else if (isFound && button.Tag is not null)
+                        {
+                            if (button.Tag is ButtonData currentData)
+                            {
+                                button.Tag = new ButtonData
+                                {
+                                    LineIndex = currentData.LineIndex - 1,
+                                    Text = currentData.Text
+                                };
+                            }
+                            else
+                            {
+                                int newTag = (int)button.Tag - 1;
+                                button.Tag = newTag;
+                            }
+
+                        }
+                    }
+                }
+
+            }
+        }
 
     }
     public class DataLoginFormat

@@ -486,7 +486,7 @@ namespace ProcessForge
                     MessageBox.Show("please add process name first at the main form", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                autoLoginWindowForm = new AutoLoginWindowForm();
+                autoLoginWindowForm = new AutoLoginWindowForm(ProcessName.Text);
                 autoLoginWindowForm.Show();
             }
         }
