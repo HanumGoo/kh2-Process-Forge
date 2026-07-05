@@ -1,5 +1,7 @@
 using ProcessForge.ApplicationLogic;
 using ProcessForge.FindWindowLogic;
+using ProcessForge.RefreshLogic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -22,6 +24,8 @@ namespace ProcessForge
         BulkWindowForm? bulkWindowForm;
         //for ImportWindowForm
         ImportWindowForm? importWindowForm;
+        //for AutoLoginWindowForm
+        AutoLoginWindowForm? autoLoginWindowForm;
 
         string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public MainForm()
@@ -189,7 +193,7 @@ namespace ProcessForge
                             runCounter++;
                         }
                     }
-                    
+
                     MessageBox.Show($"Running an Application for {runCounter} times\nRenaming all Applications based on the content of the txt file", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
@@ -463,6 +467,104 @@ namespace ProcessForge
             }
         }
 
-        
+        private void browseAccount_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog OFD = new OpenFileDialog();
+            OFD.Filter = "Text Files (*.txt)|*.txt";
+            if (OFD.ShowDialog() == DialogResult.OK)
+            {
+                FilePathNameLogin.Text = OFD.FileName;
+            }
+        }
+
+        private void accountFileHandler_Click(object sender, EventArgs e)
+        {
+            if (autoLoginWindowForm == null || autoLoginWindowForm.IsDisposed)
+            {
+                if (string.IsNullOrEmpty(ProcessName.Text))
+                {
+                    MessageBox.Show("please add process name first at the main form", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                autoLoginWindowForm = new AutoLoginWindowForm();
+                autoLoginWindowForm.Show();
+            }
+        }
+
+        private void refreshButton_Click(object sender, EventArgs e)
+        {
+            if (!File.Exists(FilePathNameLogin.Text) || string.IsNullOrEmpty(FilePathNameLogin.Text))
+            {
+                MessageBox.Show("Error! : the account data file path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            AutoLoginLogic.RefreshLogin(flowLayoutPanel, ProcessName.Text, FilePathNameLogin.Text);
+        }
+
+        private void resetButton_Click(object sender, EventArgs e)
+        {
+            if (!File.Exists(FilePathNameLogin.Text) || string.IsNullOrEmpty(FilePathNameLogin.Text))
+            {
+                MessageBox.Show("Error! : the account data file path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            AutoLoginLogic.ResetLogin(FilePathNameLogin.Text);
+        }
+
+        private void testLogin_Click(object sender, EventArgs e)
+        {
+            AutoLoginLogic.TestLogin();
+        }
+
+        private async void runLogin_Click(object sender, EventArgs e)
+        {
+            await AutoLoginLogic.RunAutoLogin();
+        }
+
+        private void txtSearchLogin_TextChanged(object sender, EventArgs e)
+        {
+            string search = txtSearchLogin.Text.ToLower();
+
+            bool isTrue = false;
+            bool isTrueSecond = false;
+            foreach (Control control in flowLayoutPanel.Controls)
+            {
+
+                if (control is System.Windows.Forms.Button button)
+                {
+                    if (button.Tag is ButtonData data)
+                    {
+                        if (data.Text.ToLower().Contains(search))
+                        {
+                            button.Visible = true;
+                            isTrue = true;
+                        }
+                        else
+                        {
+                            button.Visible = false;
+                            isTrue = false;
+                        }
+                    }
+                    else if (isTrue)
+                    {
+                        button.Visible = true;
+                        isTrue = false;
+                        isTrueSecond = true;
+                    }
+                    else
+                    {
+                        if (isTrueSecond)
+                        {
+                            button.Visible = true;
+                            isTrueSecond = false;
+                        }
+                        else
+                        {
+                            button.Visible = false;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
