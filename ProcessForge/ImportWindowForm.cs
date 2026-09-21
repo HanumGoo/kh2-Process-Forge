@@ -245,6 +245,7 @@ namespace ProcessForge
                 MessageBox.Show("Error! : the path isnt right or you didn't add one.", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            
 
             string[]? text = ProcessForge.RefreshLogic.InputBox.Show("new data (can be bulk using new line) : ", "Input", true, "");
             if (text == null || text[0] == "")
@@ -255,6 +256,12 @@ namespace ProcessForge
             string[] lines = File.ReadAllLines(path);
 
             List<string> linesList = lines.ToList();
+
+            if (text.Any(t => t.Contains(",")))
+            {
+                MessageBox.Show("Error! : you can't add commas in the items", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             foreach (string item in text)
             {

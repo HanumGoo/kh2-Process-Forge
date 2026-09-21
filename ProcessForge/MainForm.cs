@@ -509,6 +509,7 @@ namespace ProcessForge
                 return;
             }
             AutoLoginLogic.ResetLogin(FilePathNameLogin.Text);
+            AutoLoginLogic.RefreshLogin(flowLayoutPanel, ProcessName.Text, FilePathNameLogin.Text);
         }
 
         private void testLogin_Click(object sender, EventArgs e)
