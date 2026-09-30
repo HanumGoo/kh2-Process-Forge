@@ -97,6 +97,7 @@
             accountFileHandler = new Button();
             panel9 = new Panel();
             label15 = new Label();
+            settingForm = new Button();
             ((System.ComponentModel.ISupportInitialize)TimeSetForClearRAM).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
@@ -870,6 +871,19 @@
             label15.TabIndex = 74;
             label15.Text = "Exist Apps List - Auto Login";
             // 
+            // settingForm
+            // 
+            settingForm.BackColor = SystemColors.Desktop;
+            settingForm.Font = new Font("Segoe UI Symbol", 12F);
+            settingForm.ForeColor = Color.White;
+            settingForm.Location = new Point(1677, 26);
+            settingForm.Name = "settingForm";
+            settingForm.Size = new Size(173, 53);
+            settingForm.TabIndex = 75;
+            settingForm.Text = "Settings";
+            settingForm.UseVisualStyleBackColor = false;
+            settingForm.Click += settingForm_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -877,6 +891,7 @@
             BackColor = SystemColors.Desktop;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(1884, 998);
+            Controls.Add(settingForm);
             Controls.Add(label15);
             Controls.Add(panel9);
             Controls.Add(accountFileHandler);
@@ -1028,5 +1043,6 @@
         private Label label15;
         private Button refreshButton;
         private Button resetButton;
+        private Button settingForm;
     }
 }

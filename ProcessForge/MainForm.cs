@@ -27,6 +27,8 @@ namespace ProcessForge
         //for AutoLoginWindowForm
         AutoLoginWindowForm? autoLoginWindowForm;
 
+        AutoLoginSettingsForm? autoLoginSettingsForm;
+
         string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public MainForm()
         {
@@ -565,6 +567,15 @@ namespace ProcessForge
                         }
                     }
                 }
+            }
+        }
+
+        private void settingForm_Click(object sender, EventArgs e)
+        {
+            if (autoLoginSettingsForm == null || autoLoginSettingsForm.IsDisposed)
+            {
+                autoLoginSettingsForm = new AutoLoginSettingsForm();
+                autoLoginSettingsForm.Show();
             }
         }
     }
