@@ -201,11 +201,11 @@ namespace ProcessForge
 
             List<string> linesList = lines.ToList();
 
-            if (text.Any(t => t.Contains(",")))
-            {
-                MessageBox.Show("Error! : you can't add commas in the items", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            //if (text.Any(t => t.Contains(",")))
+            //{
+            //    MessageBox.Show("Error! : you can't add commas in the items", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
 
             foreach (string item in text)
             {
