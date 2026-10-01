@@ -1,16 +1,9 @@
-﻿namespace ProcessForge
+namespace ProcessForge
 {
     partial class BulkWindowForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,306 +15,405 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BulkWindowForm));
+            pnlHeader = new Panel();
+            lblHeaderSubtitle = new Label();
             ProcessListLabel = new Label();
-            label2 = new Label();
-            RefreshButton = new Button();
-            flowLayoutPanel = new FlowLayoutPanel();
-            panel1 = new Panel();
-            panel2 = new Panel();
+            pnlToolbar = new Panel();
+            lblSearch = new Label();
             txtSearch = new TextBox();
-            PreviousButton = new Button();
-            NextButton = new Button();
-            LabelPage = new Label();
-            ImportTextbox = new TextBox();
-            ImportBrowse = new Button();
+            btnSearch = new Button();
+            btnClearSearch = new Button();
+            RefreshButton = new Button();
+            label2 = new Label();
             panel3 = new Panel();
             OnOffImport = new Button();
-            panel4 = new Panel();
             CheckImport = new Button();
+            lblFilePath = new Label();
+            ImportTextbox = new TextBox();
+            ImportBrowse = new Button();
+            pnlContent = new Panel();
+            flowLayoutPanel = new FlowLayoutPanel();
+            pnlFooter = new Panel();
+            LabelPage = new Label();
+            PreviousButton = new Button();
+            NextButton = new Button();
             label1 = new Label();
+            panel1 = new Panel();
+            panel2 = new Panel();
+            panel4 = new Panel();
+            pnlHeader.SuspendLayout();
+            pnlToolbar.SuspendLayout();
+            pnlContent.SuspendLayout();
+            pnlFooter.SuspendLayout();
             SuspendLayout();
+            // 
+            // pnlHeader
+            // 
+            pnlHeader.BackColor = Color.Black;
+            pnlHeader.Controls.Add(lblHeaderSubtitle);
+            pnlHeader.Controls.Add(ProcessListLabel);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 0);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(820, 65);
+            pnlHeader.TabIndex = 0;
+            // 
+            // lblHeaderSubtitle
+            // 
+            lblHeaderSubtitle.AutoSize = true;
+            lblHeaderSubtitle.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblHeaderSubtitle.ForeColor = Color.LightGray;
+            lblHeaderSubtitle.Location = new Point(17, 34);
+            lblHeaderSubtitle.Name = "lblHeaderSubtitle";
+            lblHeaderSubtitle.Size = new Size(390, 13);
+            lblHeaderSubtitle.TabIndex = 1;
+            lblHeaderSubtitle.Text = "Bulk Process Manager — Monitor, restore, and terminate running processes.";
             // 
             // ProcessListLabel
             // 
-            ProcessListLabel.Anchor = AnchorStyles.Top;
             ProcessListLabel.AutoSize = true;
-            ProcessListLabel.Font = new Font("Segoe UI Symbol", 16F);
+            ProcessListLabel.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
             ProcessListLabel.ForeColor = Color.White;
-            ProcessListLabel.Location = new Point(7, 8);
-            ProcessListLabel.Margin = new Padding(2, 0, 2, 0);
+            ProcessListLabel.Location = new Point(16, 9);
             ProcessListLabel.Name = "ProcessListLabel";
-            ProcessListLabel.Size = new Size(123, 30);
-            ProcessListLabel.TabIndex = 1;
-            ProcessListLabel.Text = "Process List";
+            ProcessListLabel.Size = new Size(185, 20);
+            ProcessListLabel.TabIndex = 0;
+            ProcessListLabel.Text = "BULK PROCESS MANAGER";
             // 
-            // label2
+            // pnlToolbar
             // 
-            label2.Anchor = AnchorStyles.Top;
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI Symbol", 12F);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(6, 73);
-            label2.Margin = new Padding(2, 0, 2, 0);
-            label2.Name = "label2";
-            label2.Size = new Size(165, 21);
-            label2.TabIndex = 2;
-            label2.Text = "Using Notepad Import";
+            pnlToolbar.BackColor = Color.WhiteSmoke;
+            pnlToolbar.Controls.Add(lblSearch);
+            pnlToolbar.Controls.Add(txtSearch);
+            pnlToolbar.Controls.Add(btnSearch);
+            pnlToolbar.Controls.Add(btnClearSearch);
+            pnlToolbar.Controls.Add(RefreshButton);
+            pnlToolbar.Controls.Add(label2);
+            pnlToolbar.Controls.Add(panel3);
+            pnlToolbar.Controls.Add(OnOffImport);
+            pnlToolbar.Controls.Add(CheckImport);
+            pnlToolbar.Controls.Add(lblFilePath);
+            pnlToolbar.Controls.Add(ImportTextbox);
+            pnlToolbar.Controls.Add(ImportBrowse);
+            pnlToolbar.Dock = DockStyle.Top;
+            pnlToolbar.Location = new Point(0, 65);
+            pnlToolbar.Name = "pnlToolbar";
+            pnlToolbar.Size = new Size(820, 85);
+            pnlToolbar.TabIndex = 1;
             // 
-            // RefreshButton
+            // lblSearch
             // 
-            RefreshButton.Anchor = AnchorStyles.Top;
-            RefreshButton.BackColor = SystemColors.Desktop;
-            RefreshButton.Font = new Font("Segoe UI Symbol", 12F);
-            RefreshButton.ForeColor = Color.White;
-            RefreshButton.Location = new Point(669, 8);
-            RefreshButton.Margin = new Padding(2, 2, 2, 2);
-            RefreshButton.Name = "RefreshButton";
-            RefreshButton.Size = new Size(110, 39);
-            RefreshButton.TabIndex = 48;
-            RefreshButton.Text = "Refresh";
-            RefreshButton.UseVisualStyleBackColor = false;
-            RefreshButton.Click += RefreshButton_Click;
-            // 
-            // flowLayoutPanel
-            // 
-            flowLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-            flowLayoutPanel.AutoScroll = true;
-            flowLayoutPanel.Location = new Point(7, 114);
-            flowLayoutPanel.Margin = new Padding(2, 2, 2, 2);
-            flowLayoutPanel.Name = "flowLayoutPanel";
-            flowLayoutPanel.Size = new Size(770, 526);
-            flowLayoutPanel.TabIndex = 49;
-            // 
-            // panel1
-            // 
-            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            panel1.BackColor = Color.Transparent;
-            panel1.BorderStyle = BorderStyle.Fixed3D;
-            panel1.ForeColor = SystemColors.ActiveCaptionText;
-            panel1.Location = new Point(7, 102);
-            panel1.Margin = new Padding(2, 2, 2, 2);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(772, 8);
-            panel1.TabIndex = 50;
-            // 
-            // panel2
-            // 
-            panel2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panel2.BackColor = Color.Transparent;
-            panel2.BorderStyle = BorderStyle.Fixed3D;
-            panel2.ForeColor = SystemColors.ActiveCaptionText;
-            panel2.Location = new Point(7, 644);
-            panel2.Margin = new Padding(2, 2, 2, 2);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(772, 8);
-            panel2.TabIndex = 51;
+            lblSearch.AutoSize = true;
+            lblSearch.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            lblSearch.ForeColor = Color.Black;
+            lblSearch.Location = new Point(14, 14);
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new Size(45, 13);
+            lblSearch.TabIndex = 0;
+            lblSearch.Text = "Search:";
             // 
             // txtSearch
             // 
-            txtSearch.Anchor = AnchorStyles.Top;
-            txtSearch.BackColor = SystemColors.Desktop;
-            txtSearch.Font = new Font("Segoe UI Symbol", 12F);
-            txtSearch.ForeColor = Color.White;
-            txtSearch.Location = new Point(399, 8);
-            txtSearch.Margin = new Padding(2, 2, 2, 2);
+            txtSearch.BorderStyle = BorderStyle.FixedSingle;
+            txtSearch.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            txtSearch.Location = new Point(65, 9);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(266, 29);
-            txtSearch.TabIndex = 52;
-            txtSearch.TextChanged += txtSearch_TextChanged;
+            txtSearch.Size = new Size(240, 23);
+            txtSearch.TabIndex = 1;
+            // 
+            // btnSearch
+            // 
+            btnSearch.BackColor = Color.Black;
+            btnSearch.Cursor = Cursors.Hand;
+            btnSearch.FlatStyle = FlatStyle.Flat;
+            btnSearch.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            btnSearch.ForeColor = Color.White;
+            btnSearch.Location = new Point(312, 8);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(72, 26);
+            btnSearch.TabIndex = 2;
+            btnSearch.Text = "SEARCH";
+            btnSearch.UseVisualStyleBackColor = false;
+            // 
+            // btnClearSearch
+            // 
+            btnClearSearch.BackColor = Color.White;
+            btnClearSearch.Cursor = Cursors.Hand;
+            btnClearSearch.FlatStyle = FlatStyle.Flat;
+            btnClearSearch.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            btnClearSearch.ForeColor = Color.Black;
+            btnClearSearch.Location = new Point(390, 8);
+            btnClearSearch.Name = "btnClearSearch";
+            btnClearSearch.Size = new Size(62, 26);
+            btnClearSearch.TabIndex = 3;
+            btnClearSearch.Text = "CLEAR";
+            btnClearSearch.UseVisualStyleBackColor = false;
+            // 
+            // RefreshButton
+            // 
+            RefreshButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            RefreshButton.BackColor = Color.Black;
+            RefreshButton.Cursor = Cursors.Hand;
+            RefreshButton.FlatStyle = FlatStyle.Flat;
+            RefreshButton.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            RefreshButton.ForeColor = Color.White;
+            RefreshButton.Location = new Point(710, 8);
+            RefreshButton.Name = "RefreshButton";
+            RefreshButton.Size = new Size(96, 26);
+            RefreshButton.TabIndex = 4;
+            RefreshButton.Text = "REFRESH";
+            RefreshButton.UseVisualStyleBackColor = false;
+            RefreshButton.Click += RefreshButton_Click;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            label2.ForeColor = Color.Black;
+            label2.Location = new Point(14, 49);
+            label2.Name = "label2";
+            label2.Size = new Size(93, 13);
+            label2.TabIndex = 5;
+            label2.Text = "Notepad Import:";
+            // 
+            // panel3
+            // 
+            panel3.BackColor = Color.Red;
+            panel3.BorderStyle = BorderStyle.FixedSingle;
+            panel3.Location = new Point(112, 50);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(13, 13);
+            panel3.TabIndex = 6;
+            // 
+            // OnOffImport
+            // 
+            OnOffImport.BackColor = Color.White;
+            OnOffImport.Cursor = Cursors.Hand;
+            OnOffImport.FlatStyle = FlatStyle.Flat;
+            OnOffImport.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            OnOffImport.ForeColor = Color.Black;
+            OnOffImport.Location = new Point(133, 44);
+            OnOffImport.Name = "OnOffImport";
+            OnOffImport.Size = new Size(58, 26);
+            OnOffImport.TabIndex = 7;
+            OnOffImport.Text = "On";
+            OnOffImport.UseVisualStyleBackColor = false;
+            OnOffImport.Click += OnOffImport_Click;
+            // 
+            // CheckImport
+            // 
+            CheckImport.BackColor = Color.White;
+            CheckImport.Cursor = Cursors.Hand;
+            CheckImport.FlatStyle = FlatStyle.Flat;
+            CheckImport.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            CheckImport.ForeColor = Color.Black;
+            CheckImport.Location = new Point(197, 44);
+            CheckImport.Name = "CheckImport";
+            CheckImport.Size = new Size(76, 26);
+            CheckImport.TabIndex = 8;
+            CheckImport.Text = "Check File";
+            CheckImport.UseVisualStyleBackColor = false;
+            CheckImport.Click += CheckImport_Click;
+            // 
+            // lblFilePath
+            // 
+            lblFilePath.AutoSize = true;
+            lblFilePath.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblFilePath.ForeColor = Color.DimGray;
+            lblFilePath.Location = new Point(285, 50);
+            lblFilePath.Name = "lblFilePath";
+            lblFilePath.Size = new Size(33, 13);
+            lblFilePath.TabIndex = 9;
+            lblFilePath.Text = "Path:";
+            // 
+            // ImportTextbox
+            // 
+            ImportTextbox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            ImportTextbox.BorderStyle = BorderStyle.FixedSingle;
+            ImportTextbox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            ImportTextbox.Location = new Point(322, 46);
+            ImportTextbox.Name = "ImportTextbox";
+            ImportTextbox.Size = new Size(378, 22);
+            ImportTextbox.TabIndex = 10;
+            // 
+            // ImportBrowse
+            // 
+            ImportBrowse.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            ImportBrowse.BackColor = Color.White;
+            ImportBrowse.Cursor = Cursors.Hand;
+            ImportBrowse.FlatStyle = FlatStyle.Flat;
+            ImportBrowse.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            ImportBrowse.ForeColor = Color.Black;
+            ImportBrowse.Location = new Point(710, 44);
+            ImportBrowse.Name = "ImportBrowse";
+            ImportBrowse.Size = new Size(96, 26);
+            ImportBrowse.TabIndex = 11;
+            ImportBrowse.Text = "Browse...";
+            ImportBrowse.UseVisualStyleBackColor = false;
+            ImportBrowse.Click += ImportBrowse_Click;
+            // 
+            // pnlContent
+            // 
+            pnlContent.BackColor = Color.White;
+            pnlContent.Controls.Add(flowLayoutPanel);
+            pnlContent.Dock = DockStyle.Fill;
+            pnlContent.Location = new Point(0, 150);
+            pnlContent.Name = "pnlContent";
+            pnlContent.Padding = new Padding(12);
+            pnlContent.Size = new Size(820, 485);
+            pnlContent.TabIndex = 2;
+            // 
+            // flowLayoutPanel
+            // 
+            flowLayoutPanel.AutoScroll = true;
+            flowLayoutPanel.BackColor = Color.White;
+            flowLayoutPanel.BorderStyle = BorderStyle.FixedSingle;
+            flowLayoutPanel.Dock = DockStyle.Fill;
+            flowLayoutPanel.Location = new Point(12, 12);
+            flowLayoutPanel.Name = "flowLayoutPanel";
+            flowLayoutPanel.Size = new Size(796, 461);
+            flowLayoutPanel.TabIndex = 0;
+            // 
+            // pnlFooter
+            // 
+            pnlFooter.BackColor = Color.WhiteSmoke;
+            pnlFooter.Controls.Add(LabelPage);
+            pnlFooter.Controls.Add(PreviousButton);
+            pnlFooter.Controls.Add(NextButton);
+            pnlFooter.Dock = DockStyle.Bottom;
+            pnlFooter.Location = new Point(0, 635);
+            pnlFooter.Name = "pnlFooter";
+            pnlFooter.Size = new Size(820, 45);
+            pnlFooter.TabIndex = 3;
+            // 
+            // LabelPage
+            // 
+            LabelPage.AutoSize = true;
+            LabelPage.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            LabelPage.ForeColor = Color.Black;
+            LabelPage.Location = new Point(16, 14);
+            LabelPage.Name = "LabelPage";
+            LabelPage.Size = new Size(39, 15);
+            LabelPage.TabIndex = 0;
+            LabelPage.Text = "??/??";
             // 
             // PreviousButton
             // 
-            PreviousButton.Anchor = AnchorStyles.Bottom;
-            PreviousButton.BackColor = SystemColors.Desktop;
-            PreviousButton.Font = new Font("Segoe UI Symbol", 12F);
-            PreviousButton.ForeColor = Color.White;
-            PreviousButton.Location = new Point(151, 662);
-            PreviousButton.Margin = new Padding(2, 2, 2, 2);
+            PreviousButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            PreviousButton.BackColor = Color.White;
+            PreviousButton.Cursor = Cursors.Hand;
+            PreviousButton.FlatStyle = FlatStyle.Flat;
+            PreviousButton.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            PreviousButton.ForeColor = Color.Black;
+            PreviousButton.Location = new Point(626, 7);
             PreviousButton.Name = "PreviousButton";
-            PreviousButton.Size = new Size(144, 30);
-            PreviousButton.TabIndex = 54;
-            PreviousButton.Text = "Previous";
+            PreviousButton.Size = new Size(85, 30);
+            PreviousButton.TabIndex = 1;
+            PreviousButton.Text = "< PREV";
             PreviousButton.UseVisualStyleBackColor = false;
             PreviousButton.Click += PreviousButton_Click;
             // 
             // NextButton
             // 
-            NextButton.Anchor = AnchorStyles.Bottom;
-            NextButton.BackColor = SystemColors.Desktop;
-            NextButton.Font = new Font("Segoe UI Symbol", 12F);
+            NextButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            NextButton.BackColor = Color.Black;
+            NextButton.Cursor = Cursors.Hand;
+            NextButton.FlatStyle = FlatStyle.Flat;
+            NextButton.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
             NextButton.ForeColor = Color.White;
-            NextButton.Location = new Point(299, 662);
-            NextButton.Margin = new Padding(2, 2, 2, 2);
+            NextButton.Location = new Point(721, 7);
             NextButton.Name = "NextButton";
-            NextButton.Size = new Size(150, 30);
-            NextButton.TabIndex = 55;
-            NextButton.Text = "Next";
+            NextButton.Size = new Size(85, 30);
+            NextButton.TabIndex = 2;
+            NextButton.Text = "NEXT >";
             NextButton.UseVisualStyleBackColor = false;
             NextButton.Click += NextButton_Click;
             // 
-            // LabelPage
+            // label1
             // 
-            LabelPage.Anchor = AnchorStyles.Bottom;
-            LabelPage.AutoSize = true;
-            LabelPage.Font = new Font("Segoe UI Symbol", 12F);
-            LabelPage.ForeColor = Color.White;
-            LabelPage.Location = new Point(6, 662);
-            LabelPage.Margin = new Padding(2, 0, 2, 0);
-            LabelPage.Name = "LabelPage";
-            LabelPage.Size = new Size(44, 21);
-            LabelPage.TabIndex = 56;
-            LabelPage.Text = "??/??";
+            label1.Location = new Point(0, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(0, 0);
+            label1.TabIndex = 0;
             // 
-            // ImportTextbox
+            // panel1
             // 
-            ImportTextbox.Anchor = AnchorStyles.Top;
-            ImportTextbox.BackColor = SystemColors.Desktop;
-            ImportTextbox.Font = new Font("Segoe UI Symbol", 12F);
-            ImportTextbox.ForeColor = Color.White;
-            ImportTextbox.Location = new Point(398, 65);
-            ImportTextbox.Margin = new Padding(2, 2, 2, 2);
-            ImportTextbox.Name = "ImportTextbox";
-            ImportTextbox.Size = new Size(266, 29);
-            ImportTextbox.TabIndex = 57;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(0, 0);
+            panel1.TabIndex = 0;
             // 
-            // ImportBrowse
+            // panel2
             // 
-            ImportBrowse.Anchor = AnchorStyles.Top;
-            ImportBrowse.BackColor = SystemColors.Desktop;
-            ImportBrowse.Font = new Font("Segoe UI Symbol", 12F);
-            ImportBrowse.ForeColor = Color.White;
-            ImportBrowse.Location = new Point(668, 63);
-            ImportBrowse.Margin = new Padding(2, 2, 2, 2);
-            ImportBrowse.Name = "ImportBrowse";
-            ImportBrowse.Size = new Size(111, 35);
-            ImportBrowse.TabIndex = 58;
-            ImportBrowse.Text = "Browse";
-            ImportBrowse.UseVisualStyleBackColor = false;
-            ImportBrowse.Click += ImportBrowse_Click;
-            // 
-            // panel3
-            // 
-            panel3.Anchor = AnchorStyles.Top;
-            panel3.BackColor = Color.Red;
-            panel3.BorderStyle = BorderStyle.Fixed3D;
-            panel3.Font = new Font("Segoe UI Symbol", 12F);
-            panel3.Location = new Point(175, 77);
-            panel3.Margin = new Padding(2, 2, 2, 2);
-            panel3.Name = "panel3";
-            panel3.Size = new Size(22, 17);
-            panel3.TabIndex = 42;
-            // 
-            // OnOffImport
-            // 
-            OnOffImport.Anchor = AnchorStyles.Top;
-            OnOffImport.BackColor = SystemColors.Desktop;
-            OnOffImport.Font = new Font("Segoe UI Symbol", 12F);
-            OnOffImport.ForeColor = Color.White;
-            OnOffImport.Location = new Point(201, 63);
-            OnOffImport.Margin = new Padding(2, 2, 2, 2);
-            OnOffImport.Name = "OnOffImport";
-            OnOffImport.Size = new Size(94, 35);
-            OnOffImport.TabIndex = 62;
-            OnOffImport.Text = "On";
-            OnOffImport.UseVisualStyleBackColor = false;
-            OnOffImport.Click += OnOffImport_Click;
+            panel2.Location = new Point(0, 0);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(0, 0);
+            panel2.TabIndex = 0;
             // 
             // panel4
             // 
-            panel4.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            panel4.BackColor = Color.Transparent;
-            panel4.BorderStyle = BorderStyle.Fixed3D;
-            panel4.ForeColor = SystemColors.ActiveCaptionText;
-            panel4.Location = new Point(7, 51);
-            panel4.Margin = new Padding(2, 2, 2, 2);
+            panel4.Location = new Point(0, 0);
             panel4.Name = "panel4";
-            panel4.Size = new Size(771, 10);
-            panel4.TabIndex = 51;
-            // 
-            // CheckImport
-            // 
-            CheckImport.Anchor = AnchorStyles.Top;
-            CheckImport.BackColor = SystemColors.Desktop;
-            CheckImport.Font = new Font("Segoe UI Symbol", 12F);
-            CheckImport.ForeColor = Color.White;
-            CheckImport.Location = new Point(299, 63);
-            CheckImport.Margin = new Padding(2, 2, 2, 2);
-            CheckImport.Name = "CheckImport";
-            CheckImport.Size = new Size(95, 35);
-            CheckImport.TabIndex = 63;
-            CheckImport.Text = "Check";
-            CheckImport.UseVisualStyleBackColor = false;
-            CheckImport.Click += CheckImport_Click;
-            // 
-            // label1
-            // 
-            label1.Anchor = AnchorStyles.Top;
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI Symbol", 12F);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(327, 11);
-            label1.Margin = new Padding(2, 0, 2, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(68, 21);
-            label1.TabIndex = 64;
-            label1.Text = "Search : ";
+            panel4.Size = new Size(0, 0);
+            panel4.TabIndex = 0;
             // 
             // BulkWindowForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Desktop;
-            ClientSize = new Size(788, 703);
-            Controls.Add(label1);
-            Controls.Add(CheckImport);
-            Controls.Add(panel4);
-            Controls.Add(OnOffImport);
-            Controls.Add(panel3);
-            Controls.Add(ImportBrowse);
-            Controls.Add(ImportTextbox);
-            Controls.Add(LabelPage);
-            Controls.Add(PreviousButton);
-            Controls.Add(NextButton);
-            Controls.Add(txtSearch);
-            Controls.Add(panel2);
-            Controls.Add(panel1);
-            Controls.Add(flowLayoutPanel);
-            Controls.Add(RefreshButton);
-            Controls.Add(label2);
-            Controls.Add(ProcessListLabel);
+            BackColor = Color.White;
+            ClientSize = new Size(820, 680);
+            Controls.Add(pnlContent);
+            Controls.Add(pnlFooter);
+            Controls.Add(pnlToolbar);
+            Controls.Add(pnlHeader);
+            Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            ForeColor = Color.Black;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(2, 2, 2, 2);
+            MinimumSize = new Size(820, 500);
             Name = "BulkWindowForm";
-            Text = "App Handler";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "ProcessForge — Bulk Process Manager";
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
+            pnlToolbar.ResumeLayout(false);
+            pnlToolbar.PerformLayout();
+            pnlContent.ResumeLayout(false);
+            pnlFooter.ResumeLayout(false);
+            pnlFooter.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
+        private Panel pnlHeader;
+        private Label lblHeaderSubtitle;
         private Label ProcessListLabel;
-        private Label label2;
-        private Button RefreshButton;
-        private FlowLayoutPanel flowLayoutPanel;
-        private Panel panel1;
-        private Panel panel2;
+        private Panel pnlToolbar;
+        private Label lblSearch;
         private TextBox txtSearch;
-        private Button PreviousButton;
-        private Button NextButton;
-        private Label LabelPage;
-        private TextBox ImportTextbox;
-        private Button ImportBrowse;
+        private Button btnSearch;
+        private Button btnClearSearch;
+        private Button RefreshButton;
+        private Label label2;
         private Panel panel3;
         private Button OnOffImport;
-        private Panel panel4;
         private Button CheckImport;
+        private Label lblFilePath;
+        private TextBox ImportTextbox;
+        private Button ImportBrowse;
+        private Panel pnlContent;
+        private FlowLayoutPanel flowLayoutPanel;
+        private Panel pnlFooter;
+        private Label LabelPage;
+        private Button PreviousButton;
+        private Button NextButton;
         private Label label1;
+        private Panel panel1;
+        private Panel panel2;
+        private Panel panel4;
     }
 }

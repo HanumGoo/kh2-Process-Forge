@@ -1,4 +1,4 @@
-﻿using ProcessForge.ApplicationLogic;
+using ProcessForge.ApplicationLogic;
 using ProcessForge.RefreshLogic;
 using System;
 using System.Collections.Generic;
@@ -16,12 +16,6 @@ namespace ProcessForge
         //process name
         string processName;
 
-        //check import status
-        bool isUsingImport = true;
-
-        //page
-        int PageCount = 1;
-
         public AutoLoginWindowForm(string ProcessName)
         {
 
@@ -31,7 +25,24 @@ namespace ProcessForge
         }
         public void FormStartup()
         {
-            ProcessListLabel.Text = $"Account File Handler";
+            ProcessListLabel.Text = "AUTO LOGIN ACCOUNTS MANAGER";
+
+            // Enable double buffering on flowLayoutPanel to eliminate flicker
+            typeof(FlowLayoutPanel).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(flowLayoutPanel, true, null);
+
+            btnSearch.Click += (s, e) => ExecuteSearch();
+            btnClearSearch.Click += (s, e) => { txtSearch.Clear(); ExecuteSearch(); };
+            txtSearch.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    ExecuteSearch();
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                }
+            };
+            txtSearch.TextChanged += txtSearch_TextChanged;
         }
 
         private void RefreshButton_Click(object sender, EventArgs e)
@@ -47,53 +58,60 @@ namespace ProcessForge
                 return;
             }
             string[] AllLines = File.ReadAllLines(path);
-            LabelPage.Text = $"{AllLines.Length}/{AllLines.Length}";
+            LabelPage.Text = $"Total Accounts: {AllLines.Length}";
             AutoLoginLogic.RefreshLoginImport(flowLayoutPanel, ImportTextbox.Text);
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void txtSearch_TextChanged(object? sender, EventArgs e)
         {
-            string search = txtSearch.Text.ToLower();
-
-            bool isTrue = false;
-            bool isTrueSecond = false;
-            foreach (Control control in flowLayoutPanel.Controls)
+            if (string.IsNullOrEmpty(txtSearch.Text))
             {
+                ExecuteSearch();
+            }
+        }
 
-                if (control is Button button)
+        private void ExecuteSearch()
+        {
+            string search = txtSearch.Text.Trim().ToLower();
+
+            // In AutoLoginLogic.RefreshLoginImport, each account row adds exactly 6 buttons to flowLayoutPanel:
+            // 0: Nickname (ButtonData), 1: Username, 2: Password, 3: SecondPassword, 4: IsLogin status, 5: Delete button
+            flowLayoutPanel.SuspendLayout();
+            try
+            {
+                var controls = flowLayoutPanel.Controls.Cast<Control>().ToList();
+                int totalRows = controls.Count / 6;
+
+                for (int r = 0; r < totalRows; r++)
                 {
-                    if (button.Tag is ButtonData data)
+                    int startIndex = r * 6;
+                    var rowControls = controls.Skip(startIndex).Take(6).ToList();
+
+                    bool matches = string.IsNullOrEmpty(search);
+                    if (!matches && rowControls.Count >= 6)
                     {
-                        if (data.Text.ToLower().Contains(search))
-                        {
-                            button.Visible = true;
-                            isTrue = true;
-                        }
-                        else
-                        {
-                            button.Visible = false;
-                            isTrue = false;
-                        }
+                        string nickname = rowControls[0].Text.ToLower();
+                        string username = rowControls[1].Text.ToLower();
+                        string password = rowControls[2].Text.ToLower();
+                        string secondPassword = rowControls[3].Text.ToLower();
+                        string status = rowControls[4].Text.ToLower();
+
+                        matches = nickname.Contains(search) ||
+                                  username.Contains(search) ||
+                                  password.Contains(search) ||
+                                  secondPassword.Contains(search) ||
+                                  status.Contains(search);
                     }
-                    else if (isTrue)
+
+                    foreach (var ctrl in rowControls)
                     {
-                        button.Visible = true;
-                        isTrue = false;
-                        isTrueSecond = true;
-                    }
-                    else
-                    {
-                        if (isTrueSecond)
-                        {
-                            button.Visible = true;
-                            isTrueSecond = false;
-                        }
-                        else
-                        {
-                            button.Visible = false;
-                        }
+                        ctrl.Visible = matches;
                     }
                 }
+            }
+            finally
+            {
+                flowLayoutPanel.ResumeLayout(true);
             }
         }
 
@@ -191,30 +209,13 @@ namespace ProcessForge
                 return;
             }
 
-            string[]? text = ProcessForge.RefreshLogic.InputBox.Show("new data (can be bulk using new line) : ", "Input", true, "");
-            if (text == null || text[0] == "")
+            using (var form = new AddAccountDataForm(path))
             {
-                return;
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    RefreshFunction();
+                }
             }
-
-            string[] lines = File.ReadAllLines(path);
-
-            List<string> linesList = lines.ToList();
-
-            //if (text.Any(t => t.Contains(",")))
-            //{
-            //    MessageBox.Show("Error! : you can't add commas in the items", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //    return;
-            //}
-
-            foreach (string item in text)
-            {
-                linesList.Add(item);
-            }
-
-
-            File.WriteAllLines(path, linesList);
-            RefreshFunction();
         }
 
         private void NewImportFile_Click(object sender, EventArgs e)

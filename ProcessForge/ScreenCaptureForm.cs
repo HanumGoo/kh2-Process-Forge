@@ -24,7 +24,8 @@ namespace ProcessForge
         {
             this.Mode = mode;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.WindowState = FormWindowState.Maximized;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Bounds = SystemInformation.VirtualScreen;
             this.TopMost = true;
             this.BackColor = Color.Black;
             this.Opacity = 0.35;
@@ -53,7 +54,7 @@ namespace ProcessForge
 
             if (Mode == ScreenCaptureMode.Point)
             {
-                SelectedPoint = e.Location;
+                SelectedPoint = Cursor.Position;
                 this.DialogResult = DialogResult.OK;
                 this.Close();
                 return;
@@ -78,7 +79,8 @@ namespace ProcessForge
             if (Mode != ScreenCaptureMode.Area || !isSelecting || e.Button != MouseButtons.Left) return;
 
             isSelecting = false;
-            SelectedArea = GetRectangle(startPoint, currentPoint);
+            Rectangle clientRect = GetRectangle(startPoint, currentPoint);
+            SelectedArea = new Rectangle(this.PointToScreen(clientRect.Location), clientRect.Size);
 
             this.DialogResult = DialogResult.OK;
             Close();

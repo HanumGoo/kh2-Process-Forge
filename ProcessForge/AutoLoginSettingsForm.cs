@@ -40,7 +40,7 @@ namespace ProcessForge
         private int currentStepIndex = 0;
         private static readonly string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
         private static readonly string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
-
+        
         private Rectangle lastCapturedArea = Rectangle.Empty;
         private int lastCapturedStepIndex = -1;
 
@@ -373,6 +373,7 @@ namespace ProcessForge
         private void PicPreview_MouseClick(object? sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || picPreview.Image == null) return;
+            if (!chkUseRelativeOffset.Checked) return;
 
             Point? imgPt = TranslatePreviewToImage(e.Location);
             if (imgPt.HasValue)
@@ -464,6 +465,7 @@ namespace ProcessForge
         private async void BtnCaptureCoords_Click(object? sender, EventArgs e)
         {
             var step = Steps[currentStepIndex];
+            bool isRelative = chkUseRelativeOffset.Checked;
 
             this.Hide();
             await Task.Delay(200);
@@ -476,60 +478,69 @@ namespace ProcessForge
                     {
                         Point clickedPoint = form.SelectedPoint;
 
-                        // If we have a template image for this step, try to locate it on screen using OpenCV
-                        // to find the relative offset
-                        bool matched = false;
-                        if (!string.IsNullOrEmpty(step.ImagePath) && File.Exists(step.ImagePath))
+                        if (!isRelative)
                         {
-                            try
+                            // Relative coordinate is disabled: capture absolute screen coordinates starting from screen 0, 0
+                            numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, clickedPoint.X));
+                            numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, clickedPoint.Y));
+                            chkUseRelativeOffset.Checked = false;
+                        }
+                        else
+                        {
+                            // Relative coordinate is enabled: calculate offset relative to matched template
+                            bool matched = false;
+                            if (!string.IsNullOrEmpty(step.ImagePath) && File.Exists(step.ImagePath))
                             {
-                                Rectangle screenSize = Screen.PrimaryScreen?.Bounds ?? Screen.GetBounds(clickedPoint);
-                                using (Bitmap fullScreenBitmap = CaptureScreenRegion(screenSize))
-                                using (Mat screenMat = BitmapConverter.ToMat(fullScreenBitmap))
-                                using (Mat templateMat = Cv2.ImRead(step.ImagePath, ImreadModes.Color))
-                                using (Mat resultMat = new Mat())
+                                try
                                 {
-                                    Cv2.CvtColor(screenMat, screenMat, ColorConversionCodes.BGRA2BGR);
-                                    Cv2.MatchTemplate(screenMat, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
-                                    Cv2.MinMaxLoc(resultMat, out double minVal, out double maxVal, out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc);
-
-                                    if (maxVal >= 0.70)
+                                    Rectangle screenSize = Screen.PrimaryScreen?.Bounds ?? Screen.GetBounds(clickedPoint);
+                                    using (Bitmap fullScreenBitmap = CaptureScreenRegion(screenSize))
+                                    using (Mat screenMat = BitmapConverter.ToMat(fullScreenBitmap))
+                                    using (Mat templateMat = Cv2.ImRead(step.ImagePath, ImreadModes.Color))
+                                    using (Mat resultMat = new Mat())
                                     {
-                                        int relX = clickedPoint.X - maxLoc.X;
-                                        int relY = clickedPoint.Y - maxLoc.Y;
+                                        Cv2.CvtColor(screenMat, screenMat, ColorConversionCodes.BGRA2BGR);
+                                        Cv2.MatchTemplate(screenMat, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
+                                        Cv2.MinMaxLoc(resultMat, out double minVal, out double maxVal, out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc);
 
-                                        numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, relX));
-                                        numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, relY));
-                                        chkUseRelativeOffset.Checked = true;
-                                        matched = true;
+                                        if (maxVal >= 0.70)
+                                        {
+                                            int relX = clickedPoint.X - maxLoc.X;
+                                            int relY = clickedPoint.Y - maxLoc.Y;
+
+                                            numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, relX));
+                                            numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, relY));
+                                            chkUseRelativeOffset.Checked = true;
+                                            matched = true;
+                                        }
                                     }
                                 }
+                                catch
+                                {
+                                    // In case OpenCV matching fails, fallback
+                                }
                             }
-                            catch
-                            {
-                                // In case OpenCV matching fails, fallback to recent area or screen coordinates
-                            }
-                        }
 
-                        if (!matched)
-                        {
-                            // If user captured region in this session on the same step
-                            if (lastCapturedArea.Width > 0 && lastCapturedArea.Height > 0 &&
-                                lastCapturedStepIndex == currentStepIndex)
+                            if (!matched)
                             {
-                                int relX = clickedPoint.X - lastCapturedArea.X;
-                                int relY = clickedPoint.Y - lastCapturedArea.Y;
+                                // If user captured region in this session on the same step
+                                if (lastCapturedArea.Width > 0 && lastCapturedArea.Height > 0 &&
+                                    lastCapturedStepIndex == currentStepIndex)
+                                {
+                                    int relX = clickedPoint.X - lastCapturedArea.X;
+                                    int relY = clickedPoint.Y - lastCapturedArea.Y;
 
-                                numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, relX));
-                                numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, relY));
-                                chkUseRelativeOffset.Checked = true;
-                            }
-                            else
-                            {
-                                // Direct screen coordinate
-                                numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, clickedPoint.X));
-                                numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, clickedPoint.Y));
-                                chkUseRelativeOffset.Checked = false;
+                                    numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, relX));
+                                    numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, relY));
+                                    chkUseRelativeOffset.Checked = true;
+                                }
+                                else
+                                {
+                                    // Direct screen coordinate fallback
+                                    numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, clickedPoint.X));
+                                    numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, clickedPoint.Y));
+                                    chkUseRelativeOffset.Checked = false;
+                                }
                             }
                         }
 

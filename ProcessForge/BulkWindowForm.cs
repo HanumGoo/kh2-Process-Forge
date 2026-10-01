@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,7 +28,24 @@ namespace ProcessForge
         }
         public void FormStartup()
         {
-            ProcessListLabel.Text = !string.IsNullOrEmpty(ProcessName) ? $"Process List ({ProcessName})" : "Process List (None)";
+            ProcessListLabel.Text = !string.IsNullOrEmpty(ProcessName) ? $"PROCESS LIST — {ProcessName.ToUpper()}" : "PROCESS LIST";
+
+            // Enable double buffering on flowLayoutPanel to eliminate flicker
+            typeof(FlowLayoutPanel).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(flowLayoutPanel, true, null);
+
+            btnSearch.Click += (s, e) => ExecuteSearch();
+            btnClearSearch.Click += (s, e) => { txtSearch.Clear(); ExecuteSearch(); };
+            txtSearch.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    ExecuteSearch();
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                }
+            };
+            txtSearch.TextChanged += txtSearch_TextChanged;
         }
 
         private void RefreshButton_Click(object sender, EventArgs e)
@@ -121,49 +138,64 @@ namespace ProcessForge
             }
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void txtSearch_TextChanged(object? sender, EventArgs e)
         {
-            string search = txtSearch.Text.ToLower();
-
-            bool isTrue = false;
-            bool isTrueSecond = false;
-            foreach (Control control in flowLayoutPanel.Controls)
+            if (string.IsNullOrEmpty(txtSearch.Text))
             {
+                ExecuteSearch();
+            }
+        }
 
-                if (control is Button button)
+        private void ExecuteSearch()
+        {
+            string search = txtSearch.Text.Trim().ToLower();
+
+            flowLayoutPanel.SuspendLayout();
+            try
+            {
+                bool isTrue = false;
+                bool isTrueSecond = false;
+                foreach (Control control in flowLayoutPanel.Controls)
                 {
-                    if (button.Tag is ButtonData data)
+                    if (control is Button button)
                     {
-                        if (data.Text.ToLower().Contains(search))
+                        if (button.Tag is ButtonData data)
+                        {
+                            if (string.IsNullOrEmpty(search) || data.Text.ToLower().Contains(search))
+                            {
+                                button.Visible = true;
+                                isTrue = true;
+                            }
+                            else
+                            {
+                                button.Visible = false;
+                                isTrue = false;
+                            }
+                        }
+                        else if (isTrue)
                         {
                             button.Visible = true;
-                            isTrue = true;
-                        }
-                        else
-                        {
-                            button.Visible = false;
                             isTrue = false;
-                        }
-                    }
-                    else if (isTrue)
-                    {
-                        button.Visible = true;
-                        isTrue = false;
-                        isTrueSecond = true;
-                    }
-                    else
-                    {
-                        if (isTrueSecond)
-                        {
-                            button.Visible = true;
-                            isTrueSecond = false;
+                            isTrueSecond = true;
                         }
                         else
                         {
-                            button.Visible = false;
+                            if (isTrueSecond)
+                            {
+                                button.Visible = true;
+                                isTrueSecond = false;
+                            }
+                            else
+                            {
+                                button.Visible = false;
+                            }
                         }
                     }
                 }
+            }
+            finally
+            {
+                flowLayoutPanel.ResumeLayout(true);
             }
         }
 

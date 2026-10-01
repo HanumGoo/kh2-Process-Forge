@@ -521,7 +521,7 @@ namespace ProcessForge
 
         private async void runLogin_Click(object sender, EventArgs e)
         {
-            await AutoLoginLogic.RunAutoLogin();
+            await AutoLoginLogic.RunAutoLogin(ProcessName.Text, FilePathNameLogin.Text);
         }
 
         private void txtSearchLogin_TextChanged(object sender, EventArgs e)

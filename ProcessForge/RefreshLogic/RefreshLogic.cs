@@ -36,7 +36,7 @@ namespace ProcessForge.RefreshLogic
                 btn.Size = new Size(135, 40);
                 btn.Width = (int)(flowLayoutPanel.Width * 0.70);
                 btn.Font = new Font("Segoe UI Symbol", 10F);
-                btn.ForeColor = Color.White;
+                btn.ForeColor = Color.Black;
                 btn.Click += (sender, e) => ButtonRestoreWindow_Click(sender, e, ProcessId);
 
                 Button btn3 = new Button();
@@ -209,7 +209,7 @@ namespace ProcessForge.RefreshLogic
                 btn.Size = new Size(135, 40);
                 btn.Width = (int)(flowLayoutPanel.Width * 0.50);
                 btn.Font = new Font("Segoe UI Symbol", 10F);
-                btn.ForeColor = Color.White;
+                btn.ForeColor = Color.Black;
                 btn.Click += (sender, e) => Inputbox_Click(sender, e, path);
 
                 Button btn2 = new Button();

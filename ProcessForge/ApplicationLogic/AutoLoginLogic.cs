@@ -1,7 +1,9 @@
-﻿using ProcessForge.RefreshLogic;
+﻿using ProcessForge.FindWindowLogic;
+using ProcessForge.RefreshLogic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ProcessForge.ApplicationLogic
@@ -9,9 +11,101 @@ namespace ProcessForge.ApplicationLogic
     public class AutoLoginLogic
     {
         //this is for fully automatic login for every NotLogin status in Account Data.
-        public async static Task RunAutoLogin()
+
+        public async static Task RunAutoLogin(string processName, string accountDataFilePath)
         {
-            
+            if (string.IsNullOrEmpty(processName) || string.IsNullOrEmpty(accountDataFilePath))
+            {
+                MessageBox.Show("please add process name and account data file path first at the main form", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            Process[] AllProcess = Process.GetProcessesByName(processName);
+            List<ProcessData> ProcessTitle = new List<ProcessData>();
+
+            foreach (Process item in AllProcess)
+            {
+                if (string.IsNullOrEmpty(item.MainWindowTitle))
+                {
+
+                }
+                else
+                {
+                    ProcessTitle.Add(new ProcessData
+                    {
+                        TitleName = item.MainWindowTitle,
+                        ProcessId = item.Id
+                    });
+                }
+            }
+
+
+            //extract file data from account data file path
+            string[] FileExtract = File.ReadAllLines(accountDataFilePath);
+            List<DataLoginFormat> DetectedData = new List<DataLoginFormat>();
+
+            int counter = 0;
+            foreach (string line in FileExtract)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    MessageBox.Show("Found empty line in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                string[] lineSplit = line.Split(new string[] { "," }, StringSplitOptions.None);
+                if (lineSplit.Length != 5)
+                {
+                    MessageBox.Show("Invalid line format in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (bool.TryParse(lineSplit[4], out bool valid))
+                {
+                    DetectedData.Add(new DataLoginFormat
+                    {
+                        nickname = lineSplit[0],
+                        username = lineSplit[1],
+                        password = lineSplit[2],
+                        secondPassword = lineSplit[3],
+                        isLogin = valid,
+                        LineIndex = counter
+                    });
+                    counter++;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid boolean value in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+
+            }
+
+
+            List<DataLoginFormat> DetectedProcess = new List<DataLoginFormat>();
+
+            foreach (ProcessData item in ProcessTitle)
+            {
+                // Logic for detecting processes
+                DataLoginFormat? matchedData = DetectedData.Find(data => data.nickname == item.TitleName);
+                if (matchedData != null)
+                {
+                    matchedData.ProcessId = item.ProcessId; // Assign the ProcessId to the matched data
+                    DetectedProcess.Add(matchedData);
+                }
+                else
+                {
+                    MessageBox.Show($"No matching account data found for process title: {item.TitleName}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+
+
+
+
+
+
+            // restore window and accepts 1 parameter that is the title process name
+            // GetAndFindWindow.WindowRestore();
         }
         public static void RefreshLogin(FlowLayoutPanel flowLayoutPanel, string processName, string accountDataFilePath)
         {
@@ -221,7 +315,7 @@ namespace ProcessForge.ApplicationLogic
                 btn.Size = new Size(135, 40);
                 btn.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn.Font = new Font("Segoe UI Symbol", 10F);
-                btn.ForeColor = Color.White;
+                btn.ForeColor = Color.Black;
                 btn.Click += (sender, e) => ButtonRestoreImportNickname_Click(sender, e, accountDataFilePath);
 
                 Button btn2 = new Button();
@@ -231,7 +325,7 @@ namespace ProcessForge.ApplicationLogic
                 btn2.Size = new Size(135, 40);
                 btn2.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn2.Font = new Font("Segoe UI Symbol", 10F);
-                btn2.ForeColor = Color.White;
+                btn2.ForeColor = Color.Black;
                 btn2.Click += (sender, e) => ButtonRestoreImportUsername_Click(sender, e, accountDataFilePath);
 
                 Button btn3 = new Button();
@@ -241,7 +335,7 @@ namespace ProcessForge.ApplicationLogic
                 btn3.Size = new Size(135, 40);
                 btn3.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn3.Font = new Font("Segoe UI Symbol", 10F);
-                btn3.ForeColor = Color.White;
+                btn3.ForeColor = Color.Black;
                 btn3.Click += (sender, e) => ButtonRestoreImportPassword_Click(sender, e, accountDataFilePath);
 
                 Button btn4 = new Button();
@@ -251,7 +345,7 @@ namespace ProcessForge.ApplicationLogic
                 btn4.Size = new Size(135, 40);
                 btn4.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn4.Font = new Font("Segoe UI Symbol", 10F);
-                btn4.ForeColor = Color.White;
+                btn4.ForeColor = Color.Black;
                 btn4.Click += (sender, e) => ButtonRestoreImportSecondPassword_Click(sender, e, accountDataFilePath);
 
                 Button btn5 = new Button();
