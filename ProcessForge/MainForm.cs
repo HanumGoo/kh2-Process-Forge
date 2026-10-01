@@ -37,6 +37,24 @@ namespace ProcessForge
         }
         private void FormStartup()
         {
+            this.DoubleBuffered = true;
+            typeof(FlowLayoutPanel).InvokeMember("DoubleBuffered",
+                System.Reflection.BindingFlags.SetProperty |
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.NonPublic,
+                null, flowLayoutPanel, new object[] { true });
+
+            btnSearchLogin.Click += (s, e) => ExecuteSearchLogin();
+            btnClearSearchLogin.Click += (s, e) => { txtSearchLogin.Clear(); ExecuteSearchLogin(); };
+            txtSearchLogin.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    ExecuteSearchLogin();
+                }
+            };
+
             ComboBox.SelectedIndex = 0;
         }
 
@@ -526,47 +544,62 @@ namespace ProcessForge
 
         private void txtSearchLogin_TextChanged(object sender, EventArgs e)
         {
-            string search = txtSearchLogin.Text.ToLower();
-
-            bool isTrue = false;
-            bool isTrueSecond = false;
-            foreach (Control control in flowLayoutPanel.Controls)
+            if (string.IsNullOrEmpty(txtSearchLogin.Text))
             {
+                ExecuteSearchLogin();
+            }
+        }
 
-                if (control is System.Windows.Forms.Button button)
+        private void ExecuteSearchLogin()
+        {
+            string search = txtSearchLogin.Text.Trim().ToLower();
+
+            flowLayoutPanel.SuspendLayout();
+            try
+            {
+                bool isTrue = false;
+                bool isTrueSecond = false;
+                foreach (Control control in flowLayoutPanel.Controls)
                 {
-                    if (button.Tag is ButtonData data)
+                    if (control is System.Windows.Forms.Button button)
                     {
-                        if (data.Text.ToLower().Contains(search))
+                        if (button.Tag is ButtonData data)
+                        {
+                            if (string.IsNullOrEmpty(search) || data.Text.ToLower().Contains(search))
+                            {
+                                button.Visible = true;
+                                isTrue = true;
+                            }
+                            else
+                            {
+                                button.Visible = false;
+                                isTrue = false;
+                            }
+                        }
+                        else if (isTrue)
                         {
                             button.Visible = true;
-                            isTrue = true;
-                        }
-                        else
-                        {
-                            button.Visible = false;
                             isTrue = false;
-                        }
-                    }
-                    else if (isTrue)
-                    {
-                        button.Visible = true;
-                        isTrue = false;
-                        isTrueSecond = true;
-                    }
-                    else
-                    {
-                        if (isTrueSecond)
-                        {
-                            button.Visible = true;
-                            isTrueSecond = false;
+                            isTrueSecond = true;
                         }
                         else
                         {
-                            button.Visible = false;
+                            if (isTrueSecond)
+                            {
+                                button.Visible = true;
+                                isTrueSecond = false;
+                            }
+                            else
+                            {
+                                button.Visible = false;
+                            }
                         }
                     }
                 }
+            }
+            finally
+            {
+                flowLayoutPanel.ResumeLayout();
             }
         }
 

@@ -1,4 +1,4 @@
-﻿namespace ProcessForge
+namespace ProcessForge
 {
     partial class MainForm
     {
@@ -30,937 +30,1443 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+
+            // Top Header & Process Toolbar
+            pnlHeader = new Panel();
+            lblHeaderTitle = new Label();
+            lblHeaderSubtitle = new Label();
+            settingForm = new Button();
+            pnlProcessToolbar = new Panel();
+            label11 = new Label();
+            ProcessName = new TextBox();
+
+            // Left Column Containers
+            gbMemoryManagement = new GroupBox();
             label1 = new Label();
             ClearRAM = new Button();
-            ValidatingEvent = new Button();
+
+            gbTimedMemory = new GroupBox();
             label2 = new Label();
+            TimeSetForClearRAM = new NumericUpDown();
+            ValidatingEvent = new Button();
+            pnlTimedStatus = new Panel();
             MSTimeSetLabel = new Label();
             CountDownSeconds = new Label();
+            lblStatusText = new Label();
+            panel2 = new Panel();
             Run1 = new Button();
+
+            gbHandlers = new GroupBox();
+            label7 = new Label();
+            lblBulkSub = new Label();
+            OpenBulkWindow = new Button();
+            TextWinHandler = new Label();
+            lblImportSub = new Label();
+            OpenWindowImportThing = new Button();
+
+            // Middle Column: Bulk Application
+            gbBulkApp = new GroupBox();
             label5 = new Label();
             label6 = new Label();
             FilePathName = new TextBox();
             BrowseFile = new Button();
             label8 = new Label();
-            MaxLabel = new Label();
-            TestButton = new Button();
-            label10 = new Label();
-            Run2 = new Button();
-            Terminate = new Button();
             ComboBox = new ComboBox();
-            ProcessName = new TextBox();
-            label11 = new Label();
-            TimeSetForClearRAM = new NumericUpDown();
-            CountDownTimer = new System.Windows.Forms.Timer(components);
-            TimerForSeconds = new System.Windows.Forms.Timer(components);
-            RenameTextbox = new TextBox();
+
+            pnlRenameOptions = new Panel();
             RenameLabel = new Label();
-            numericUpDown1 = new NumericUpDown();
-            numericUpDown2 = new NumericUpDown();
             RunTotalLabel = new Label();
+            RenameTextbox = new TextBox();
+            numericUpDown1 = new NumericUpDown();
             DelimiterToLabel = new Label();
-            BrowseFileNotepad = new Button();
-            NotepadPathTextbox = new TextBox();
-            DelayLabel = new Label();
-            numericUpDown3 = new NumericUpDown();
-            numericUpDown4 = new NumericUpDown();
-            DelayInformation = new Label();
-            DelayInformation1 = new Label();
-            label3 = new Label();
-            panel1 = new Panel();
-            panel2 = new Panel();
-            panel3 = new Panel();
+            numericUpDown2 = new NumericUpDown();
             numericUpDown5 = new NumericUpDown();
+            MaxLabel = new Label();
+            NotepadPathTextbox = new TextBox();
+            BrowseFileNotepad = new Button();
+
+            DelayLabel = new Label();
+            pnlDelaySettings = new Panel();
+            DelayInformation = new Label();
+            numericUpDown3 = new NumericUpDown();
+            label3 = new Label();
+            DelayInformation1 = new Label();
+            numericUpDown4 = new NumericUpDown();
             label4 = new Label();
             CPUChecker = new Button();
-            panel4 = new Panel();
-            label7 = new Label();
-            OpenBulkWindow = new Button();
-            TextWinHandler = new Label();
-            OpenWindowImportThing = new Button();
-            panel5 = new Panel();
-            panel6 = new Panel();
+
+            pnlValidationRow = new Panel();
+            TestButton = new Button();
+            label10 = new Label();
+            panel3 = new Panel();
+
+            Run2 = new Button();
+            Terminate = new Button();
+
+            // Right Column: Auto Login
+            gbAutoLogin = new GroupBox();
             label9 = new Label();
-            browseAccount = new Button();
-            FilePathNameLogin = new TextBox();
-            label12 = new Label();
             label13 = new Label();
-            panel7 = new Panel();
-            runLogin = new Button();
-            panel8 = new Panel();
-            label14 = new Label();
-            testLogin = new Button();
-            flowLayoutPanel = new FlowLayoutPanel();
+            label12 = new Label();
+            FilePathNameLogin = new TextBox();
+            browseAccount = new Button();
+            accountFileHandler = new Button();
+
+            pnlLoginListToolbar = new Panel();
+            label15 = new Label();
             refreshButton = new Button();
             resetButton = new Button();
+            lblSearchPrompt = new Label();
             txtSearchLogin = new TextBox();
-            accountFileHandler = new Button();
+            btnSearchLogin = new Button();
+            btnClearSearchLogin = new Button();
+
+            pnlLoginColumnHeaders = new Panel();
+            lblColTitle = new Label();
+            lblColStatus = new Label();
+            lblColAction = new Label();
+
+            flowLayoutPanel = new FlowLayoutPanel();
+
+            pnlLoginBottom = new Panel();
+            testLogin = new Button();
+            label14 = new Label();
+            panel8 = new Panel();
+
+            runLogin = new Button();
+
+            // Legacy non-visible panels (preserved for compatibility)
+            panel1 = new Panel();
+            panel4 = new Panel();
+            panel5 = new Panel();
+            panel6 = new Panel();
+            panel7 = new Panel();
             panel9 = new Panel();
-            label15 = new Label();
-            settingForm = new Button();
+
+            // Timers
+            CountDownTimer = new System.Windows.Forms.Timer(components);
+            TimerForSeconds = new System.Windows.Forms.Timer(components);
+
             ((System.ComponentModel.ISupportInitialize)TimeSetForClearRAM).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown5).BeginInit();
+            pnlHeader.SuspendLayout();
+            pnlProcessToolbar.SuspendLayout();
+            gbMemoryManagement.SuspendLayout();
+            gbTimedMemory.SuspendLayout();
+            pnlTimedStatus.SuspendLayout();
+            gbHandlers.SuspendLayout();
+            gbBulkApp.SuspendLayout();
+            pnlRenameOptions.SuspendLayout();
+            pnlDelaySettings.SuspendLayout();
+            pnlValidationRow.SuspendLayout();
+            gbAutoLogin.SuspendLayout();
+            pnlLoginListToolbar.SuspendLayout();
+            pnlLoginColumnHeaders.SuspendLayout();
+            pnlLoginBottom.SuspendLayout();
             SuspendLayout();
+
             // 
-            // label1
+            // pnlHeader
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI Symbol", 14F);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(11, 128);
-            label1.Name = "label1";
-            label1.Size = new Size(294, 38);
-            label1.TabIndex = 0;
-            label1.Text = "Clear Unused Memory";
+            pnlHeader.BackColor = Color.Black;
+            pnlHeader.Controls.Add(lblHeaderTitle);
+            pnlHeader.Controls.Add(lblHeaderSubtitle);
+            pnlHeader.Controls.Add(settingForm);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 0);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(1884, 65);
+            pnlHeader.TabIndex = 100;
+
             // 
-            // ClearRAM
+            // lblHeaderTitle
             // 
-            ClearRAM.BackColor = SystemColors.Desktop;
-            ClearRAM.Font = new Font("Segoe UI Symbol", 12F);
-            ClearRAM.ForeColor = Color.White;
-            ClearRAM.Location = new Point(11, 178);
-            ClearRAM.Name = "ClearRAM";
-            ClearRAM.Size = new Size(457, 70);
-            ClearRAM.TabIndex = 1;
-            ClearRAM.Text = "Clear RAM";
-            ClearRAM.UseVisualStyleBackColor = false;
-            ClearRAM.Click += ClearRAM_Click;
+            lblHeaderTitle.AutoSize = true;
+            lblHeaderTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            lblHeaderTitle.ForeColor = Color.White;
+            lblHeaderTitle.Location = new Point(20, 10);
+            lblHeaderTitle.Name = "lblHeaderTitle";
+            lblHeaderTitle.Size = new Size(475, 28);
+            lblHeaderTitle.TabIndex = 0;
+            lblHeaderTitle.Text = "PROCESS FORGE — KINGDOM HEROES 2 EDITION";
+
             // 
-            // ValidatingEvent
+            // lblHeaderSubtitle
             // 
-            ValidatingEvent.BackColor = SystemColors.Desktop;
-            ValidatingEvent.Font = new Font("Segoe UI Symbol", 12F);
-            ValidatingEvent.ForeColor = Color.White;
-            ValidatingEvent.Location = new Point(236, 563);
-            ValidatingEvent.Name = "ValidatingEvent";
-            ValidatingEvent.Size = new Size(231, 73);
-            ValidatingEvent.TabIndex = 3;
-            ValidatingEvent.Text = "Validate";
-            ValidatingEvent.UseVisualStyleBackColor = false;
-            ValidatingEvent.Click += ValidatingEvent_Click;
+            lblHeaderSubtitle.AutoSize = true;
+            lblHeaderSubtitle.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblHeaderSubtitle.ForeColor = Color.FromArgb(200, 200, 200);
+            lblHeaderSubtitle.Location = new Point(21, 38);
+            lblHeaderSubtitle.Name = "lblHeaderSubtitle";
+            lblHeaderSubtitle.Size = new Size(468, 19);
+            lblHeaderSubtitle.TabIndex = 1;
+            lblHeaderSubtitle.Text = "Advanced Multi-Instance Automation, Memory Optimizer & Auto-Login System";
+
             // 
-            // label2
+            // settingForm
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI Symbol", 14F);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(11, 295);
-            label2.Name = "label2";
-            label2.Size = new Size(344, 76);
-            label2.TabIndex = 2;
-            label2.Text = "Clear Unused Memory\r\n(Looping every X Seconds)";
+            settingForm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            settingForm.BackColor = Color.White;
+            settingForm.Cursor = Cursors.Hand;
+            settingForm.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            settingForm.FlatStyle = FlatStyle.Flat;
+            settingForm.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            settingForm.ForeColor = Color.Black;
+            settingForm.Location = new Point(1730, 14);
+            settingForm.Name = "settingForm";
+            settingForm.Size = new Size(130, 36);
+            settingForm.TabIndex = 1;
+            settingForm.Text = "⚙ Settings";
+            settingForm.UseVisualStyleBackColor = false;
+            settingForm.Click += settingForm_Click;
+
             // 
-            // MSTimeSetLabel
+            // pnlProcessToolbar
             // 
-            MSTimeSetLabel.AutoSize = true;
-            MSTimeSetLabel.Font = new Font("Segoe UI Symbol", 12F);
-            MSTimeSetLabel.ForeColor = Color.White;
-            MSTimeSetLabel.Location = new Point(10, 463);
-            MSTimeSetLabel.Name = "MSTimeSetLabel";
-            MSTimeSetLabel.Size = new Size(203, 32);
-            MSTimeSetLabel.TabIndex = 5;
-            MSTimeSetLabel.Text = "(MS) No Time Set";
-            // 
-            // CountDownSeconds
-            // 
-            CountDownSeconds.AutoSize = true;
-            CountDownSeconds.Font = new Font("Segoe UI Symbol", 12F);
-            CountDownSeconds.ForeColor = Color.White;
-            CountDownSeconds.Location = new Point(10, 515);
-            CountDownSeconds.Name = "CountDownSeconds";
-            CountDownSeconds.Size = new Size(238, 32);
-            CountDownSeconds.TabIndex = 6;
-            CountDownSeconds.Text = "Count down event :  ";
-            // 
-            // Run1
-            // 
-            Run1.BackColor = SystemColors.Desktop;
-            Run1.Font = new Font("Segoe UI Symbol", 12F);
-            Run1.ForeColor = Color.White;
-            Run1.Location = new Point(10, 563);
-            Run1.Name = "Run1";
-            Run1.Size = new Size(220, 73);
-            Run1.TabIndex = 7;
-            Run1.Text = "Run";
-            Run1.UseVisualStyleBackColor = false;
-            Run1.Click += Run1_Click;
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.BackColor = SystemColors.Desktop;
-            label5.Font = new Font("Segoe UI Symbol", 14F);
-            label5.ForeColor = Color.White;
-            label5.Location = new Point(671, 128);
-            label5.Name = "label5";
-            label5.Size = new Size(274, 38);
-            label5.TabIndex = 8;
-            label5.Text = "Run Bulk Application";
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Segoe UI Symbol", 12F);
-            label6.ForeColor = Color.White;
-            label6.Location = new Point(671, 170);
-            label6.Name = "label6";
-            label6.Size = new Size(105, 32);
-            label6.TabIndex = 9;
-            label6.Text = "File Path";
-            // 
-            // FilePathName
-            // 
-            FilePathName.BackColor = SystemColors.Desktop;
-            FilePathName.Font = new Font("Segoe UI Symbol", 12F);
-            FilePathName.ForeColor = Color.White;
-            FilePathName.Location = new Point(671, 208);
-            FilePathName.Name = "FilePathName";
-            FilePathName.Size = new Size(527, 39);
-            FilePathName.TabIndex = 10;
-            // 
-            // BrowseFile
-            // 
-            BrowseFile.BackColor = SystemColors.Desktop;
-            BrowseFile.Font = new Font("Segoe UI Symbol", 12F);
-            BrowseFile.ForeColor = Color.White;
-            BrowseFile.Location = new Point(671, 268);
-            BrowseFile.Name = "BrowseFile";
-            BrowseFile.Size = new Size(529, 67);
-            BrowseFile.TabIndex = 11;
-            BrowseFile.Text = "Browse File Location...";
-            BrowseFile.UseVisualStyleBackColor = false;
-            BrowseFile.Click += BrowseFile_Click_1;
-            // 
-            // label8
-            // 
-            label8.AutoSize = true;
-            label8.Font = new Font("Segoe UI Symbol", 12F);
-            label8.ForeColor = Color.White;
-            label8.Location = new Point(671, 345);
-            label8.Name = "label8";
-            label8.Size = new Size(432, 32);
-            label8.TabIndex = 13;
-            label8.Text = "Rename Every App (Optional - Choose)";
-            // 
-            // MaxLabel
-            // 
-            MaxLabel.AutoSize = true;
-            MaxLabel.Font = new Font("Segoe UI Symbol", 12F);
-            MaxLabel.ForeColor = Color.White;
-            MaxLabel.Location = new Point(1086, 543);
-            MaxLabel.Name = "MaxLabel";
-            MaxLabel.Size = new Size(130, 32);
-            MaxLabel.TabIndex = 15;
-            MaxLabel.Text = "Max (999x)";
-            // 
-            // TestButton
-            // 
-            TestButton.BackColor = SystemColors.Desktop;
-            TestButton.Font = new Font("Segoe UI Symbol", 12F);
-            TestButton.ForeColor = Color.White;
-            TestButton.Location = new Point(676, 832);
-            TestButton.Name = "TestButton";
-            TestButton.Size = new Size(121, 53);
-            TestButton.TabIndex = 16;
-            TestButton.Text = "Test";
-            TestButton.UseVisualStyleBackColor = false;
-            TestButton.Click += TestButton_Click;
-            // 
-            // label10
-            // 
-            label10.AutoSize = true;
-            label10.Font = new Font("Segoe UI Symbol", 12F);
-            label10.ForeColor = Color.White;
-            label10.Location = new Point(803, 842);
-            label10.Name = "label10";
-            label10.Size = new Size(252, 32);
-            label10.TabIndex = 17;
-            label10.Text = "Click \"Test\" to validate";
-            // 
-            // Run2
-            // 
-            Run2.BackColor = SystemColors.Desktop;
-            Run2.Font = new Font("Segoe UI Symbol", 12F);
-            Run2.ForeColor = Color.White;
-            Run2.Location = new Point(676, 892);
-            Run2.Name = "Run2";
-            Run2.Size = new Size(259, 65);
-            Run2.TabIndex = 18;
-            Run2.Text = "Run";
-            Run2.UseVisualStyleBackColor = false;
-            Run2.Click += Run2_Click;
-            // 
-            // Terminate
-            // 
-            Terminate.BackColor = SystemColors.Desktop;
-            Terminate.Font = new Font("Segoe UI Symbol", 12F);
-            Terminate.ForeColor = Color.White;
-            Terminate.Location = new Point(940, 892);
-            Terminate.Name = "Terminate";
-            Terminate.Size = new Size(256, 65);
-            Terminate.TabIndex = 19;
-            Terminate.Text = "Terminate";
-            Terminate.UseVisualStyleBackColor = false;
-            Terminate.Click += Terminate_Click;
-            // 
-            // ComboBox
-            // 
-            ComboBox.BackColor = SystemColors.Desktop;
-            ComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            ComboBox.Font = new Font("Segoe UI Symbol", 9F);
-            ComboBox.ForeColor = Color.White;
-            ComboBox.FormattingEnabled = true;
-            ComboBox.Items.AddRange(new object[] { "None...", "Rename Title Manually (Advanced)", "Rename Title To Integer Increment (Advanced)", "Rename Title Using Notepad Import (Advanced)" });
-            ComboBox.Location = new Point(671, 397);
-            ComboBox.Name = "ComboBox";
-            ComboBox.Size = new Size(527, 33);
-            ComboBox.TabIndex = 20;
-            ComboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
-            // 
-            // ProcessName
-            // 
-            ProcessName.BackColor = SystemColors.Desktop;
-            ProcessName.Font = new Font("Segoe UI Symbol", 12F);
-            ProcessName.ForeColor = Color.White;
-            ProcessName.Location = new Point(11, 63);
-            ProcessName.MaxLength = 100;
-            ProcessName.Name = "ProcessName";
-            ProcessName.PlaceholderText = "(chrome, notepad, etc)";
-            ProcessName.Size = new Size(1190, 39);
-            ProcessName.TabIndex = 21;
-            ProcessName.Text = "kh2";
-            ProcessName.TextAlign = HorizontalAlignment.Center;
+            pnlProcessToolbar.BackColor = Color.WhiteSmoke;
+            pnlProcessToolbar.Controls.Add(label11);
+            pnlProcessToolbar.Controls.Add(ProcessName);
+            pnlProcessToolbar.Dock = DockStyle.Top;
+            pnlProcessToolbar.Location = new Point(0, 65);
+            pnlProcessToolbar.Name = "pnlProcessToolbar";
+            pnlProcessToolbar.Size = new Size(1884, 55);
+            pnlProcessToolbar.TabIndex = 101;
+
             // 
             // label11
             // 
             label11.AutoSize = true;
-            label11.Font = new Font("Segoe UI Symbol", 14F);
-            label11.ForeColor = Color.White;
-            label11.Location = new Point(513, 15);
+            label11.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
+            label11.ForeColor = Color.Black;
+            label11.Location = new Point(20, 16);
             label11.Name = "label11";
-            label11.Size = new Size(193, 38);
-            label11.TabIndex = 22;
-            label11.Text = "Process Name";
+            label11.Size = new Size(174, 21);
+            label11.TabIndex = 0;
+            label11.Text = "Target Process Name:";
+
+            // 
+            // ProcessName
+            // 
+            ProcessName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            ProcessName.BackColor = Color.White;
+            ProcessName.BorderStyle = BorderStyle.FixedSingle;
+            ProcessName.Font = new Font("Segoe UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point);
+            ProcessName.ForeColor = Color.Black;
+            ProcessName.Location = new Point(200, 12);
+            ProcessName.MaxLength = 100;
+            ProcessName.Name = "ProcessName";
+            ProcessName.PlaceholderText = "(e.g., kh2, chrome, notepad)";
+            ProcessName.Size = new Size(1660, 31);
+            ProcessName.TabIndex = 0;
+            ProcessName.Text = "kh2";
+
+            // 
+            // gbMemoryManagement (Left Column 1)
+            // 
+            gbMemoryManagement.BackColor = Color.White;
+            gbMemoryManagement.Controls.Add(label1);
+            gbMemoryManagement.Controls.Add(ClearRAM);
+            gbMemoryManagement.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
+            gbMemoryManagement.ForeColor = Color.Black;
+            gbMemoryManagement.Location = new Point(20, 130);
+            gbMemoryManagement.Name = "gbMemoryManagement";
+            gbMemoryManagement.Size = new Size(430, 150);
+            gbMemoryManagement.TabIndex = 2;
+            gbMemoryManagement.TabStop = false;
+            gbMemoryManagement.Text = "CLEAR UNUSED MEMORY";
+
+            // 
+            // label1
+            // 
+            label1.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            label1.ForeColor = Color.FromArgb(90, 90, 90);
+            label1.Location = new Point(18, 30);
+            label1.Name = "label1";
+            label1.Size = new Size(394, 38);
+            label1.TabIndex = 0;
+            label1.Text = "Empty the working set of the target process to free unused system RAM immediately.";
+
+            // 
+            // ClearRAM
+            // 
+            ClearRAM.BackColor = Color.Black;
+            ClearRAM.Cursor = Cursors.Hand;
+            ClearRAM.FlatAppearance.BorderColor = Color.Black;
+            ClearRAM.FlatStyle = FlatStyle.Flat;
+            ClearRAM.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            ClearRAM.ForeColor = Color.White;
+            ClearRAM.Location = new Point(18, 75);
+            ClearRAM.Name = "ClearRAM";
+            ClearRAM.Size = new Size(394, 55);
+            ClearRAM.TabIndex = 2;
+            ClearRAM.Text = "CLEAR RAM NOW";
+            ClearRAM.UseVisualStyleBackColor = false;
+            ClearRAM.Click += ClearRAM_Click;
+
+            // 
+            // gbTimedMemory (Left Column 2)
+            // 
+            gbTimedMemory.BackColor = Color.White;
+            gbTimedMemory.Controls.Add(label2);
+            gbTimedMemory.Controls.Add(TimeSetForClearRAM);
+            gbTimedMemory.Controls.Add(ValidatingEvent);
+            gbTimedMemory.Controls.Add(pnlTimedStatus);
+            gbTimedMemory.Controls.Add(Run1);
+            gbTimedMemory.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
+            gbTimedMemory.ForeColor = Color.Black;
+            gbTimedMemory.Location = new Point(20, 292);
+            gbTimedMemory.Name = "gbTimedMemory";
+            gbTimedMemory.Size = new Size(430, 345);
+            gbTimedMemory.TabIndex = 3;
+            gbTimedMemory.TabStop = false;
+            gbTimedMemory.Text = "TIMED MEMORY CLEANER (LOOP)";
+
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            label2.ForeColor = Color.FromArgb(70, 70, 70);
+            label2.Location = new Point(18, 28);
+            label2.Name = "label2";
+            label2.Size = new Size(207, 20);
+            label2.TabIndex = 0;
+            label2.Text = "Loop Interval (in milliseconds):";
+
             // 
             // TimeSetForClearRAM
             // 
-            TimeSetForClearRAM.BackColor = SystemColors.Desktop;
-            TimeSetForClearRAM.Font = new Font("Segoe UI Symbol", 12F);
-            TimeSetForClearRAM.ForeColor = Color.White;
+            TimeSetForClearRAM.BackColor = Color.White;
+            TimeSetForClearRAM.BorderStyle = BorderStyle.FixedSingle;
+            TimeSetForClearRAM.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            TimeSetForClearRAM.ForeColor = Color.Black;
             TimeSetForClearRAM.Increment = new decimal(new int[] { 1000, 0, 0, 0 });
-            TimeSetForClearRAM.Location = new Point(13, 397);
+            TimeSetForClearRAM.Location = new Point(18, 52);
             TimeSetForClearRAM.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
             TimeSetForClearRAM.Minimum = new decimal(new int[] { 1000, 0, 0, 0 });
             TimeSetForClearRAM.Name = "TimeSetForClearRAM";
-            TimeSetForClearRAM.Size = new Size(161, 39);
-            TimeSetForClearRAM.TabIndex = 23;
+            TimeSetForClearRAM.Size = new Size(225, 30);
+            TimeSetForClearRAM.TabIndex = 3;
             TimeSetForClearRAM.Value = new decimal(new int[] { 1000, 0, 0, 0 });
+
+            // 
+            // ValidatingEvent
+            // 
+            ValidatingEvent.BackColor = Color.White;
+            ValidatingEvent.Cursor = Cursors.Hand;
+            ValidatingEvent.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            ValidatingEvent.FlatStyle = FlatStyle.Flat;
+            ValidatingEvent.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            ValidatingEvent.ForeColor = Color.Black;
+            ValidatingEvent.Location = new Point(255, 51);
+            ValidatingEvent.Name = "ValidatingEvent";
+            ValidatingEvent.Size = new Size(157, 32);
+            ValidatingEvent.TabIndex = 4;
+            ValidatingEvent.Text = "Validate";
+            ValidatingEvent.UseVisualStyleBackColor = false;
+            ValidatingEvent.Click += ValidatingEvent_Click;
+
+            // 
+            // pnlTimedStatus
+            // 
+            pnlTimedStatus.BackColor = Color.WhiteSmoke;
+            pnlTimedStatus.BorderStyle = BorderStyle.FixedSingle;
+            pnlTimedStatus.Controls.Add(MSTimeSetLabel);
+            pnlTimedStatus.Controls.Add(CountDownSeconds);
+            pnlTimedStatus.Controls.Add(lblStatusText);
+            pnlTimedStatus.Controls.Add(panel2);
+            pnlTimedStatus.Location = new Point(18, 95);
+            pnlTimedStatus.Name = "pnlTimedStatus";
+            pnlTimedStatus.Size = new Size(394, 150);
+            pnlTimedStatus.TabIndex = 10;
+
+            // 
+            // MSTimeSetLabel
+            // 
+            MSTimeSetLabel.AutoSize = true;
+            MSTimeSetLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            MSTimeSetLabel.ForeColor = Color.Black;
+            MSTimeSetLabel.Location = new Point(16, 16);
+            MSTimeSetLabel.Name = "MSTimeSetLabel";
+            MSTimeSetLabel.Size = new Size(139, 20);
+            MSTimeSetLabel.TabIndex = 0;
+            MSTimeSetLabel.Text = "(MS) No Time Set";
+
+            // 
+            // CountDownSeconds
+            // 
+            CountDownSeconds.AutoSize = true;
+            CountDownSeconds.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            CountDownSeconds.ForeColor = Color.FromArgb(50, 50, 50);
+            CountDownSeconds.Location = new Point(16, 50);
+            CountDownSeconds.Name = "CountDownSeconds";
+            CountDownSeconds.Size = new Size(198, 20);
+            CountDownSeconds.TabIndex = 1;
+            CountDownSeconds.Text = "Count down event : Stopped";
+
+            // 
+            // lblStatusText
+            // 
+            lblStatusText.AutoSize = true;
+            lblStatusText.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            lblStatusText.ForeColor = Color.FromArgb(70, 70, 70);
+            lblStatusText.Location = new Point(16, 105);
+            lblStatusText.Name = "lblStatusText";
+            lblStatusText.Size = new Size(106, 20);
+            lblStatusText.TabIndex = 2;
+            lblStatusText.Text = "Cleaner Status:";
+
+            // 
+            // panel2
+            // 
+            panel2.BackColor = Color.Red;
+            panel2.BorderStyle = BorderStyle.FixedSingle;
+            panel2.Location = new Point(130, 104);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(22, 22);
+            panel2.TabIndex = 3;
+
+            // 
+            // Run1
+            // 
+            Run1.BackColor = Color.Black;
+            Run1.Cursor = Cursors.Hand;
+            Run1.FlatAppearance.BorderColor = Color.Black;
+            Run1.FlatStyle = FlatStyle.Flat;
+            Run1.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold, GraphicsUnit.Point);
+            Run1.ForeColor = Color.White;
+            Run1.Location = new Point(18, 260);
+            Run1.Name = "Run1";
+            Run1.Size = new Size(394, 65);
+            Run1.TabIndex = 5;
+            Run1.Text = "Run";
+            Run1.UseVisualStyleBackColor = false;
+            Run1.Click += Run1_Click;
+
+            // 
+            // gbHandlers (Left Column 3)
+            // 
+            gbHandlers.BackColor = Color.White;
+            gbHandlers.Controls.Add(label7);
+            gbHandlers.Controls.Add(lblBulkSub);
+            gbHandlers.Controls.Add(OpenBulkWindow);
+            gbHandlers.Controls.Add(TextWinHandler);
+            gbHandlers.Controls.Add(lblImportSub);
+            gbHandlers.Controls.Add(OpenWindowImportThing);
+            gbHandlers.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
+            gbHandlers.ForeColor = Color.Black;
+            gbHandlers.Location = new Point(20, 648);
+            gbHandlers.Name = "gbHandlers";
+            gbHandlers.Size = new Size(430, 240);
+            gbHandlers.TabIndex = 6;
+            gbHandlers.TabStop = false;
+            gbHandlers.Text = "EXTERNAL TOOLS && HANDLERS";
+
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            label7.ForeColor = Color.Black;
+            label7.Location = new Point(18, 28);
+            label7.Name = "label7";
+            label7.Size = new Size(133, 20);
+            label7.TabIndex = 0;
+            label7.Text = "Bulk App Handler";
+
+            // 
+            // lblBulkSub
+            // 
+            lblBulkSub.AutoSize = true;
+            lblBulkSub.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            lblBulkSub.ForeColor = Color.FromArgb(100, 100, 100);
+            lblBulkSub.Location = new Point(18, 50);
+            lblBulkSub.Name = "lblBulkSub";
+            lblBulkSub.Size = new Size(302, 19);
+            lblBulkSub.TabIndex = 1;
+            lblBulkSub.Text = "Manage multi-client instances and window titles";
+
+            // 
+            // OpenBulkWindow
+            // 
+            OpenBulkWindow.BackColor = Color.White;
+            OpenBulkWindow.Cursor = Cursors.Hand;
+            OpenBulkWindow.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            OpenBulkWindow.FlatStyle = FlatStyle.Flat;
+            OpenBulkWindow.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            OpenBulkWindow.ForeColor = Color.Black;
+            OpenBulkWindow.Location = new Point(18, 73);
+            OpenBulkWindow.Name = "OpenBulkWindow";
+            OpenBulkWindow.Size = new Size(394, 40);
+            OpenBulkWindow.TabIndex = 6;
+            OpenBulkWindow.Text = "Open Bulk App Handler";
+            OpenBulkWindow.UseVisualStyleBackColor = false;
+            OpenBulkWindow.Click += OpenBulkWindow_Click;
+
+            // 
+            // TextWinHandler
+            // 
+            TextWinHandler.AutoSize = true;
+            TextWinHandler.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            TextWinHandler.ForeColor = Color.Black;
+            TextWinHandler.Location = new Point(18, 128);
+            TextWinHandler.Name = "TextWinHandler";
+            TextWinHandler.Size = new Size(150, 20);
+            TextWinHandler.TabIndex = 3;
+            TextWinHandler.Text = "Text Import Handler";
+
+            // 
+            // lblImportSub
+            // 
+            lblImportSub.AutoSize = true;
+            lblImportSub.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            lblImportSub.ForeColor = Color.FromArgb(100, 100, 100);
+            lblImportSub.Location = new Point(18, 150);
+            lblImportSub.Name = "lblImportSub";
+            lblImportSub.Size = new Size(301, 19);
+            lblImportSub.TabIndex = 4;
+            lblImportSub.Text = "Configure imported application titles and status";
+
+            // 
+            // OpenWindowImportThing
+            // 
+            OpenWindowImportThing.BackColor = Color.White;
+            OpenWindowImportThing.Cursor = Cursors.Hand;
+            OpenWindowImportThing.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            OpenWindowImportThing.FlatStyle = FlatStyle.Flat;
+            OpenWindowImportThing.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            OpenWindowImportThing.ForeColor = Color.Black;
+            OpenWindowImportThing.Location = new Point(18, 173);
+            OpenWindowImportThing.Name = "OpenWindowImportThing";
+            OpenWindowImportThing.Size = new Size(394, 40);
+            OpenWindowImportThing.TabIndex = 7;
+            OpenWindowImportThing.Text = "Open Text Import Handler";
+            OpenWindowImportThing.UseVisualStyleBackColor = false;
+            OpenWindowImportThing.Click += OpenWindowImportThing_Click;
+
+            // 
+            // gbBulkApp (Middle Column)
+            // 
+            gbBulkApp.BackColor = Color.White;
+            gbBulkApp.Controls.Add(label5);
+            gbBulkApp.Controls.Add(label6);
+            gbBulkApp.Controls.Add(FilePathName);
+            gbBulkApp.Controls.Add(BrowseFile);
+            gbBulkApp.Controls.Add(label8);
+            gbBulkApp.Controls.Add(ComboBox);
+            gbBulkApp.Controls.Add(pnlRenameOptions);
+            gbBulkApp.Controls.Add(DelayLabel);
+            gbBulkApp.Controls.Add(pnlDelaySettings);
+            gbBulkApp.Controls.Add(pnlValidationRow);
+            gbBulkApp.Controls.Add(Run2);
+            gbBulkApp.Controls.Add(Terminate);
+            gbBulkApp.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
+            gbBulkApp.ForeColor = Color.Black;
+            gbBulkApp.Location = new Point(475, 130);
+            gbBulkApp.Name = "gbBulkApp";
+            gbBulkApp.Size = new Size(665, 758);
+            gbBulkApp.TabIndex = 8;
+            gbBulkApp.TabStop = false;
+            gbBulkApp.Text = "RUN BULK APPLICATION";
+
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label5.ForeColor = Color.FromArgb(90, 90, 90);
+            label5.Location = new Point(20, 28);
+            label5.Name = "label5";
+            label5.Size = new Size(428, 19);
+            label5.TabIndex = 0;
+            label5.Text = "Configure multi-instance launch settings, renaming rules, and pacing.";
+
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            label6.ForeColor = Color.Black;
+            label6.Location = new Point(20, 56);
+            label6.Name = "label6";
+            label6.Size = new Size(187, 20);
+            label6.TabIndex = 1;
+            label6.Text = "Executable File Path (.exe):";
+
+            // 
+            // FilePathName
+            // 
+            FilePathName.BackColor = Color.White;
+            FilePathName.BorderStyle = BorderStyle.FixedSingle;
+            FilePathName.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            FilePathName.ForeColor = Color.Black;
+            FilePathName.Location = new Point(20, 80);
+            FilePathName.Name = "FilePathName";
+            FilePathName.PlaceholderText = "(Path to game or application executable...)";
+            FilePathName.Size = new Size(485, 29);
+            FilePathName.TabIndex = 8;
+
+            // 
+            // BrowseFile
+            // 
+            BrowseFile.BackColor = Color.White;
+            BrowseFile.Cursor = Cursors.Hand;
+            BrowseFile.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            BrowseFile.FlatStyle = FlatStyle.Flat;
+            BrowseFile.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            BrowseFile.ForeColor = Color.Black;
+            BrowseFile.Location = new Point(515, 78);
+            BrowseFile.Name = "BrowseFile";
+            BrowseFile.Size = new Size(130, 33);
+            BrowseFile.TabIndex = 9;
+            BrowseFile.Text = "Browse...";
+            BrowseFile.UseVisualStyleBackColor = false;
+            BrowseFile.Click += BrowseFile_Click_1;
+
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            label8.ForeColor = Color.Black;
+            label8.Location = new Point(20, 125);
+            label8.Name = "label8";
+            label8.Size = new Size(254, 20);
+            label8.TabIndex = 4;
+            label8.Text = "Application Title Renaming Mode:";
+
+            // 
+            // ComboBox
+            // 
+            ComboBox.BackColor = Color.White;
+            ComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            ComboBox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            ComboBox.ForeColor = Color.Black;
+            ComboBox.FormattingEnabled = true;
+            ComboBox.Items.AddRange(new object[] {
+                "None...",
+                "Rename Title Manually (Advanced)",
+                "Rename Title To Integer Increment (Advanced)",
+                "Rename Title Using Notepad Import (Advanced)"
+            });
+            ComboBox.Location = new Point(20, 150);
+            ComboBox.Name = "ComboBox";
+            ComboBox.Size = new Size(625, 29);
+            ComboBox.TabIndex = 10;
+            ComboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+
+            // 
+            // pnlRenameOptions
+            // 
+            pnlRenameOptions.BackColor = Color.WhiteSmoke;
+            pnlRenameOptions.BorderStyle = BorderStyle.FixedSingle;
+            pnlRenameOptions.Controls.Add(RenameLabel);
+            pnlRenameOptions.Controls.Add(RunTotalLabel);
+            pnlRenameOptions.Controls.Add(RenameTextbox);
+            pnlRenameOptions.Controls.Add(numericUpDown1);
+            pnlRenameOptions.Controls.Add(DelimiterToLabel);
+            pnlRenameOptions.Controls.Add(numericUpDown2);
+            pnlRenameOptions.Controls.Add(numericUpDown5);
+            pnlRenameOptions.Controls.Add(MaxLabel);
+            pnlRenameOptions.Controls.Add(NotepadPathTextbox);
+            pnlRenameOptions.Controls.Add(BrowseFileNotepad);
+            pnlRenameOptions.Location = new Point(20, 192);
+            pnlRenameOptions.Name = "pnlRenameOptions";
+            pnlRenameOptions.Size = new Size(625, 130);
+            pnlRenameOptions.TabIndex = 11;
+
+            // 
+            // RenameLabel
+            // 
+            RenameLabel.AutoSize = true;
+            RenameLabel.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            RenameLabel.ForeColor = Color.Black;
+            RenameLabel.Location = new Point(16, 12);
+            RenameLabel.Name = "RenameLabel";
+            RenameLabel.Size = new Size(191, 20);
+            RenameLabel.TabIndex = 0;
+            RenameLabel.Text = "Rename Application Name";
+
+            // 
+            // RunTotalLabel
+            // 
+            RunTotalLabel.AutoSize = true;
+            RunTotalLabel.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            RunTotalLabel.ForeColor = Color.Black;
+            RunTotalLabel.Location = new Point(440, 12);
+            RunTotalLabel.Name = "RunTotalLabel";
+            RunTotalLabel.Size = new Size(74, 20);
+            RunTotalLabel.TabIndex = 1;
+            RunTotalLabel.Text = "Run Total";
+
+            // 
+            // RenameTextbox
+            // 
+            RenameTextbox.BackColor = Color.White;
+            RenameTextbox.BorderStyle = BorderStyle.FixedSingle;
+            RenameTextbox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            RenameTextbox.ForeColor = Color.Black;
+            RenameTextbox.Location = new Point(16, 36);
+            RenameTextbox.Name = "RenameTextbox";
+            RenameTextbox.Size = new Size(405, 29);
+            RenameTextbox.TabIndex = 11;
+
+            // 
+            // numericUpDown1
+            // 
+            numericUpDown1.BackColor = Color.White;
+            numericUpDown1.BorderStyle = BorderStyle.FixedSingle;
+            numericUpDown1.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            numericUpDown1.ForeColor = Color.Black;
+            numericUpDown1.Location = new Point(16, 36);
+            numericUpDown1.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
+            numericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown1.Name = "numericUpDown1";
+            numericUpDown1.Size = new Size(85, 29);
+            numericUpDown1.TabIndex = 12;
+            numericUpDown1.Value = new decimal(new int[] { 1, 0, 0, 0 });
+
+            // 
+            // DelimiterToLabel
+            // 
+            DelimiterToLabel.AutoSize = true;
+            DelimiterToLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            DelimiterToLabel.ForeColor = Color.Black;
+            DelimiterToLabel.Location = new Point(108, 40);
+            DelimiterToLabel.Name = "DelimiterToLabel";
+            DelimiterToLabel.Size = new Size(26, 20);
+            DelimiterToLabel.TabIndex = 4;
+            DelimiterToLabel.Text = "To";
+
+            // 
+            // numericUpDown2
+            // 
+            numericUpDown2.BackColor = Color.White;
+            numericUpDown2.BorderStyle = BorderStyle.FixedSingle;
+            numericUpDown2.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            numericUpDown2.ForeColor = Color.Black;
+            numericUpDown2.Location = new Point(138, 36);
+            numericUpDown2.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
+            numericUpDown2.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown2.Name = "numericUpDown2";
+            numericUpDown2.Size = new Size(85, 29);
+            numericUpDown2.TabIndex = 13;
+            numericUpDown2.Value = new decimal(new int[] { 25, 0, 0, 0 });
+
+            // 
+            // numericUpDown5
+            // 
+            numericUpDown5.BackColor = Color.White;
+            numericUpDown5.BorderStyle = BorderStyle.FixedSingle;
+            numericUpDown5.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            numericUpDown5.ForeColor = Color.Black;
+            numericUpDown5.Location = new Point(440, 36);
+            numericUpDown5.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
+            numericUpDown5.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown5.Name = "numericUpDown5";
+            numericUpDown5.Size = new Size(90, 29);
+            numericUpDown5.TabIndex = 14;
+            numericUpDown5.Value = new decimal(new int[] { 1, 0, 0, 0 });
+
+            // 
+            // MaxLabel
+            // 
+            MaxLabel.AutoSize = true;
+            MaxLabel.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            MaxLabel.ForeColor = Color.FromArgb(100, 100, 100);
+            MaxLabel.Location = new Point(538, 40);
+            MaxLabel.Name = "MaxLabel";
+            MaxLabel.Size = new Size(76, 19);
+            MaxLabel.TabIndex = 7;
+            MaxLabel.Text = "Max (999x)";
+
+            // 
+            // NotepadPathTextbox
+            // 
+            NotepadPathTextbox.BackColor = Color.White;
+            NotepadPathTextbox.BorderStyle = BorderStyle.FixedSingle;
+            NotepadPathTextbox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            NotepadPathTextbox.ForeColor = Color.Black;
+            NotepadPathTextbox.Location = new Point(16, 36);
+            NotepadPathTextbox.Name = "NotepadPathTextbox";
+            NotepadPathTextbox.PlaceholderText = "(Path to titles text file...)";
+            NotepadPathTextbox.Size = new Size(590, 29);
+            NotepadPathTextbox.TabIndex = 15;
+
+            // 
+            // BrowseFileNotepad
+            // 
+            BrowseFileNotepad.BackColor = Color.White;
+            BrowseFileNotepad.Cursor = Cursors.Hand;
+            BrowseFileNotepad.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            BrowseFileNotepad.FlatStyle = FlatStyle.Flat;
+            BrowseFileNotepad.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            BrowseFileNotepad.ForeColor = Color.Black;
+            BrowseFileNotepad.Location = new Point(16, 75);
+            BrowseFileNotepad.Name = "BrowseFileNotepad";
+            BrowseFileNotepad.Size = new Size(590, 38);
+            BrowseFileNotepad.TabIndex = 16;
+            BrowseFileNotepad.Text = "Browse Text File Location...";
+            BrowseFileNotepad.UseVisualStyleBackColor = false;
+            BrowseFileNotepad.Click += BrowseFileNotepad_Click;
+
+            // 
+            // DelayLabel
+            // 
+            DelayLabel.AutoSize = true;
+            DelayLabel.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            DelayLabel.ForeColor = Color.Black;
+            DelayLabel.Location = new Point(20, 338);
+            DelayLabel.Name = "DelayLabel";
+            DelayLabel.Size = new Size(224, 20);
+            DelayLabel.TabIndex = 8;
+            DelayLabel.Text = "Batch Delay && CPU Throttling:";
+
+            // 
+            // pnlDelaySettings
+            // 
+            pnlDelaySettings.BackColor = Color.WhiteSmoke;
+            pnlDelaySettings.BorderStyle = BorderStyle.FixedSingle;
+            pnlDelaySettings.Controls.Add(DelayInformation);
+            pnlDelaySettings.Controls.Add(numericUpDown3);
+            pnlDelaySettings.Controls.Add(label3);
+            pnlDelaySettings.Controls.Add(DelayInformation1);
+            pnlDelaySettings.Controls.Add(numericUpDown4);
+            pnlDelaySettings.Controls.Add(label4);
+            pnlDelaySettings.Controls.Add(CPUChecker);
+            pnlDelaySettings.Location = new Point(20, 362);
+            pnlDelaySettings.Name = "pnlDelaySettings";
+            pnlDelaySettings.Size = new Size(625, 140);
+            pnlDelaySettings.TabIndex = 17;
+
+            // 
+            // DelayInformation
+            // 
+            DelayInformation.AutoSize = true;
+            DelayInformation.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            DelayInformation.ForeColor = Color.Black;
+            DelayInformation.Location = new Point(16, 14);
+            DelayInformation.Name = "DelayInformation";
+            DelayInformation.Size = new Size(153, 20);
+            DelayInformation.TabIndex = 0;
+            DelayInformation.Text = "Instances Per Batch:";
+
+            // 
+            // numericUpDown3
+            // 
+            numericUpDown3.BackColor = Color.White;
+            numericUpDown3.BorderStyle = BorderStyle.FixedSingle;
+            numericUpDown3.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            numericUpDown3.ForeColor = Color.Black;
+            numericUpDown3.Location = new Point(16, 38);
+            numericUpDown3.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numericUpDown3.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown3.Name = "numericUpDown3";
+            numericUpDown3.Size = new Size(120, 29);
+            numericUpDown3.TabIndex = 17;
+            numericUpDown3.Value = new decimal(new int[] { 1, 0, 0, 0 });
+
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            label3.ForeColor = Color.Black;
+            label3.Location = new Point(145, 36);
+            label3.Name = "label3";
+            label3.Size = new Size(21, 28);
+            label3.TabIndex = 2;
+            label3.Text = "/";
+
+            // 
+            // DelayInformation1
+            // 
+            DelayInformation1.AutoSize = true;
+            DelayInformation1.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            DelayInformation1.ForeColor = Color.Black;
+            DelayInformation1.Location = new Point(175, 14);
+            DelayInformation1.Name = "DelayInformation1";
+            DelayInformation1.Size = new Size(279, 20);
+            DelayInformation1.TabIndex = 3;
+            DelayInformation1.Text = "Delay Between Batches (Milliseconds):";
+
+            // 
+            // numericUpDown4
+            // 
+            numericUpDown4.BackColor = Color.White;
+            numericUpDown4.BorderStyle = BorderStyle.FixedSingle;
+            numericUpDown4.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            numericUpDown4.ForeColor = Color.Black;
+            numericUpDown4.Increment = new decimal(new int[] { 1000, 0, 0, 0 });
+            numericUpDown4.Location = new Point(175, 38);
+            numericUpDown4.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
+            numericUpDown4.Name = "numericUpDown4";
+            numericUpDown4.Size = new Size(430, 29);
+            numericUpDown4.TabIndex = 18;
+
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            label4.ForeColor = Color.Black;
+            label4.Location = new Point(16, 92);
+            label4.Name = "label4";
+            label4.Size = new Size(260, 20);
+            label4.TabIndex = 5;
+            label4.Text = "Pause Execution if CPU Usage > 80%:";
+
+            // 
+            // CPUChecker
+            // 
+            CPUChecker.BackColor = Color.Red;
+            CPUChecker.Cursor = Cursors.Hand;
+            CPUChecker.FlatAppearance.BorderSize = 0;
+            CPUChecker.FlatStyle = FlatStyle.Flat;
+            CPUChecker.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            CPUChecker.ForeColor = Color.White;
+            CPUChecker.Location = new Point(320, 86);
+            CPUChecker.Name = "CPUChecker";
+            CPUChecker.Size = new Size(95, 34);
+            CPUChecker.TabIndex = 19;
+            CPUChecker.Text = "Off";
+            CPUChecker.UseVisualStyleBackColor = false;
+            CPUChecker.Click += CPUChecker_Click;
+
+            // 
+            // pnlValidationRow
+            // 
+            pnlValidationRow.BackColor = Color.WhiteSmoke;
+            pnlValidationRow.BorderStyle = BorderStyle.FixedSingle;
+            pnlValidationRow.Controls.Add(TestButton);
+            pnlValidationRow.Controls.Add(label10);
+            pnlValidationRow.Controls.Add(panel3);
+            pnlValidationRow.Location = new Point(20, 520);
+            pnlValidationRow.Name = "pnlValidationRow";
+            pnlValidationRow.Size = new Size(625, 58);
+            pnlValidationRow.TabIndex = 20;
+
+            // 
+            // TestButton
+            // 
+            TestButton.BackColor = Color.White;
+            TestButton.Cursor = Cursors.Hand;
+            TestButton.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            TestButton.FlatStyle = FlatStyle.Flat;
+            TestButton.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            TestButton.ForeColor = Color.Black;
+            TestButton.Location = new Point(16, 11);
+            TestButton.Name = "TestButton";
+            TestButton.Size = new Size(115, 34);
+            TestButton.TabIndex = 20;
+            TestButton.Text = "Test Setup";
+            TestButton.UseVisualStyleBackColor = false;
+            TestButton.Click += TestButton_Click;
+
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            label10.ForeColor = Color.FromArgb(70, 70, 70);
+            label10.Location = new Point(142, 18);
+            label10.Name = "label10";
+            label10.Size = new Size(157, 20);
+            label10.TabIndex = 1;
+            label10.Text = "Click \"Test\" to validate";
+
+            // 
+            // panel3
+            // 
+            panel3.BackColor = Color.Red;
+            panel3.BorderStyle = BorderStyle.FixedSingle;
+            panel3.Location = new Point(580, 16);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(24, 24);
+            panel3.TabIndex = 2;
+
+            // 
+            // Run2
+            // 
+            Run2.BackColor = Color.Black;
+            Run2.Cursor = Cursors.Hand;
+            Run2.FlatAppearance.BorderColor = Color.Black;
+            Run2.FlatStyle = FlatStyle.Flat;
+            Run2.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            Run2.ForeColor = Color.White;
+            Run2.Location = new Point(20, 600);
+            Run2.Name = "Run2";
+            Run2.Size = new Size(300, 65);
+            Run2.TabIndex = 21;
+            Run2.Text = "Run";
+            Run2.UseVisualStyleBackColor = false;
+            Run2.Click += Run2_Click;
+
+            // 
+            // Terminate
+            // 
+            Terminate.BackColor = Color.FromArgb(170, 30, 30);
+            Terminate.Cursor = Cursors.Hand;
+            Terminate.FlatAppearance.BorderColor = Color.FromArgb(170, 30, 30);
+            Terminate.FlatStyle = FlatStyle.Flat;
+            Terminate.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            Terminate.ForeColor = Color.White;
+            Terminate.Location = new Point(345, 600);
+            Terminate.Name = "Terminate";
+            Terminate.Size = new Size(300, 65);
+            Terminate.TabIndex = 22;
+            Terminate.Text = "Terminate";
+            Terminate.UseVisualStyleBackColor = false;
+            Terminate.Click += Terminate_Click;
+
+            // 
+            // gbAutoLogin (Right Column)
+            // 
+            gbAutoLogin.BackColor = Color.White;
+            gbAutoLogin.Controls.Add(label9);
+            gbAutoLogin.Controls.Add(label13);
+            gbAutoLogin.Controls.Add(label12);
+            gbAutoLogin.Controls.Add(FilePathNameLogin);
+            gbAutoLogin.Controls.Add(browseAccount);
+            gbAutoLogin.Controls.Add(accountFileHandler);
+            gbAutoLogin.Controls.Add(pnlLoginListToolbar);
+            gbAutoLogin.Controls.Add(pnlLoginColumnHeaders);
+            gbAutoLogin.Controls.Add(flowLayoutPanel);
+            gbAutoLogin.Controls.Add(pnlLoginBottom);
+            gbAutoLogin.Controls.Add(runLogin);
+            gbAutoLogin.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
+            gbAutoLogin.ForeColor = Color.Black;
+            gbAutoLogin.Location = new Point(1165, 130);
+            gbAutoLogin.Name = "gbAutoLogin";
+            gbAutoLogin.Size = new Size(695, 758);
+            gbAutoLogin.TabIndex = 23;
+            gbAutoLogin.TabStop = false;
+            gbAutoLogin.Text = "AUTO LOGIN AUTOMATION";
+
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            label9.ForeColor = Color.Black;
+            label9.Location = new Point(20, 26);
+            label9.Name = "label9";
+            label9.Size = new Size(86, 20);
+            label9.TabIndex = 0;
+            label9.Text = "Auto Login";
+
+            // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label13.ForeColor = Color.FromArgb(90, 90, 90);
+            label13.Location = new Point(20, 48);
+            label13.Name = "label13";
+            label13.Size = new Size(187, 19);
+            label13.TabIndex = 1;
+            label13.Text = "Auto-Login For All Exist Apps";
+
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            label12.ForeColor = Color.Black;
+            label12.Location = new Point(20, 75);
+            label12.Name = "label12";
+            label12.Size = new Size(172, 20);
+            label12.TabIndex = 2;
+            label12.Text = "Account Data File Path:";
+
+            // 
+            // FilePathNameLogin
+            // 
+            FilePathNameLogin.BackColor = Color.White;
+            FilePathNameLogin.BorderStyle = BorderStyle.FixedSingle;
+            FilePathNameLogin.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            FilePathNameLogin.ForeColor = Color.Black;
+            FilePathNameLogin.Location = new Point(20, 98);
+            FilePathNameLogin.Name = "FilePathNameLogin";
+            FilePathNameLogin.PlaceholderText = "(Your Account Data File...)";
+            FilePathNameLogin.Size = new Size(385, 29);
+            FilePathNameLogin.TabIndex = 23;
+
+            // 
+            // browseAccount
+            // 
+            browseAccount.BackColor = Color.White;
+            browseAccount.Cursor = Cursors.Hand;
+            browseAccount.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            browseAccount.FlatStyle = FlatStyle.Flat;
+            browseAccount.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            browseAccount.ForeColor = Color.Black;
+            browseAccount.Location = new Point(415, 96);
+            browseAccount.Name = "browseAccount";
+            browseAccount.Size = new Size(120, 33);
+            browseAccount.TabIndex = 24;
+            browseAccount.Text = "Browse...";
+            browseAccount.UseVisualStyleBackColor = false;
+            browseAccount.Click += browseAccount_Click;
+
+            // 
+            // accountFileHandler
+            // 
+            accountFileHandler.BackColor = Color.White;
+            accountFileHandler.Cursor = Cursors.Hand;
+            accountFileHandler.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            accountFileHandler.FlatStyle = FlatStyle.Flat;
+            accountFileHandler.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            accountFileHandler.ForeColor = Color.Black;
+            accountFileHandler.Location = new Point(545, 96);
+            accountFileHandler.Name = "accountFileHandler";
+            accountFileHandler.Size = new Size(130, 33);
+            accountFileHandler.TabIndex = 25;
+            accountFileHandler.Text = "Accounts Window";
+            accountFileHandler.UseVisualStyleBackColor = false;
+            accountFileHandler.Click += accountFileHandler_Click;
+
+            // 
+            // pnlLoginListToolbar
+            // 
+            pnlLoginListToolbar.BackColor = Color.WhiteSmoke;
+            pnlLoginListToolbar.BorderStyle = BorderStyle.FixedSingle;
+            pnlLoginListToolbar.Controls.Add(label15);
+            pnlLoginListToolbar.Controls.Add(refreshButton);
+            pnlLoginListToolbar.Controls.Add(resetButton);
+            pnlLoginListToolbar.Controls.Add(lblSearchPrompt);
+            pnlLoginListToolbar.Controls.Add(txtSearchLogin);
+            pnlLoginListToolbar.Controls.Add(btnSearchLogin);
+            pnlLoginListToolbar.Controls.Add(btnClearSearchLogin);
+            pnlLoginListToolbar.Location = new Point(20, 142);
+            pnlLoginListToolbar.Name = "pnlLoginListToolbar";
+            pnlLoginListToolbar.Size = new Size(655, 82);
+            pnlLoginListToolbar.TabIndex = 26;
+
+            // 
+            // label15
+            // 
+            label15.AutoSize = true;
+            label15.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            label15.ForeColor = Color.Black;
+            label15.Location = new Point(12, 10);
+            label15.Name = "label15";
+            label15.Size = new Size(201, 20);
+            label15.TabIndex = 0;
+            label15.Text = "Exist Apps List - Auto Login";
+
+            // 
+            // refreshButton
+            // 
+            refreshButton.BackColor = Color.White;
+            refreshButton.Cursor = Cursors.Hand;
+            refreshButton.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            refreshButton.FlatStyle = FlatStyle.Flat;
+            refreshButton.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            refreshButton.ForeColor = Color.Black;
+            refreshButton.Location = new Point(410, 6);
+            refreshButton.Name = "refreshButton";
+            refreshButton.Size = new Size(110, 30);
+            refreshButton.TabIndex = 26;
+            refreshButton.Text = "Refresh";
+            refreshButton.UseVisualStyleBackColor = false;
+            refreshButton.Click += refreshButton_Click;
+
+            // 
+            // resetButton
+            // 
+            resetButton.BackColor = Color.White;
+            resetButton.Cursor = Cursors.Hand;
+            resetButton.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            resetButton.FlatStyle = FlatStyle.Flat;
+            resetButton.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            resetButton.ForeColor = Color.Black;
+            resetButton.Location = new Point(530, 6);
+            resetButton.Name = "resetButton";
+            resetButton.Size = new Size(110, 30);
+            resetButton.TabIndex = 27;
+            resetButton.Text = "Reset";
+            resetButton.UseVisualStyleBackColor = false;
+            resetButton.Click += resetButton_Click;
+
+            // 
+            // lblSearchPrompt
+            // 
+            lblSearchPrompt.AutoSize = true;
+            lblSearchPrompt.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            lblSearchPrompt.ForeColor = Color.FromArgb(70, 70, 70);
+            lblSearchPrompt.Location = new Point(12, 47);
+            lblSearchPrompt.Name = "lblSearchPrompt";
+            lblSearchPrompt.Size = new Size(56, 20);
+            lblSearchPrompt.TabIndex = 3;
+            lblSearchPrompt.Text = "Search:";
+
+            // 
+            // txtSearchLogin
+            // 
+            txtSearchLogin.BackColor = Color.White;
+            txtSearchLogin.BorderStyle = BorderStyle.FixedSingle;
+            txtSearchLogin.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            txtSearchLogin.ForeColor = Color.Black;
+            txtSearchLogin.Location = new Point(70, 44);
+            txtSearchLogin.MaxLength = 100;
+            txtSearchLogin.Name = "txtSearchLogin";
+            txtSearchLogin.PlaceholderText = "(Search apps...)";
+            txtSearchLogin.Size = new Size(380, 27);
+            txtSearchLogin.TabIndex = 28;
+            txtSearchLogin.TextChanged += txtSearchLogin_TextChanged;
+
+            // 
+            // btnSearchLogin
+            // 
+            btnSearchLogin.BackColor = Color.Black;
+            btnSearchLogin.Cursor = Cursors.Hand;
+            btnSearchLogin.FlatAppearance.BorderColor = Color.Black;
+            btnSearchLogin.FlatStyle = FlatStyle.Flat;
+            btnSearchLogin.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
+            btnSearchLogin.ForeColor = Color.White;
+            btnSearchLogin.Location = new Point(460, 42);
+            btnSearchLogin.Name = "btnSearchLogin";
+            btnSearchLogin.Size = new Size(85, 30);
+            btnSearchLogin.TabIndex = 29;
+            btnSearchLogin.Text = "Search";
+            btnSearchLogin.UseVisualStyleBackColor = false;
+
+            // 
+            // btnClearSearchLogin
+            // 
+            btnClearSearchLogin.BackColor = Color.White;
+            btnClearSearchLogin.Cursor = Cursors.Hand;
+            btnClearSearchLogin.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            btnClearSearchLogin.FlatStyle = FlatStyle.Flat;
+            btnClearSearchLogin.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
+            btnClearSearchLogin.ForeColor = Color.Black;
+            btnClearSearchLogin.Location = new Point(555, 42);
+            btnClearSearchLogin.Name = "btnClearSearchLogin";
+            btnClearSearchLogin.Size = new Size(85, 30);
+            btnClearSearchLogin.TabIndex = 30;
+            btnClearSearchLogin.Text = "Clear";
+            btnClearSearchLogin.UseVisualStyleBackColor = false;
+
+            // 
+            // pnlLoginColumnHeaders
+            // 
+            pnlLoginColumnHeaders.BackColor = Color.Black;
+            pnlLoginColumnHeaders.Controls.Add(lblColTitle);
+            pnlLoginColumnHeaders.Controls.Add(lblColStatus);
+            pnlLoginColumnHeaders.Controls.Add(lblColAction);
+            pnlLoginColumnHeaders.Location = new Point(20, 230);
+            pnlLoginColumnHeaders.Name = "pnlLoginColumnHeaders";
+            pnlLoginColumnHeaders.Size = new Size(655, 28);
+            pnlLoginColumnHeaders.TabIndex = 105;
+
+            // 
+            // lblColTitle
+            // 
+            lblColTitle.AutoSize = true;
+            lblColTitle.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
+            lblColTitle.ForeColor = Color.White;
+            lblColTitle.Location = new Point(14, 5);
+            lblColTitle.Name = "lblColTitle";
+            lblColTitle.Size = new Size(196, 19);
+            lblColTitle.TabIndex = 0;
+            lblColTitle.Text = "PROCESS TITLE / NICKNAME";
+
+            // 
+            // lblColStatus
+            // 
+            lblColStatus.AutoSize = true;
+            lblColStatus.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
+            lblColStatus.ForeColor = Color.White;
+            lblColStatus.Location = new Point(350, 5);
+            lblColStatus.Name = "lblColStatus";
+            lblColStatus.Size = new Size(105, 19);
+            lblColStatus.TabIndex = 1;
+            lblColStatus.Text = "LOGIN STATUS";
+
+            // 
+            // lblColAction
+            // 
+            lblColAction.AutoSize = true;
+            lblColAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
+            lblColAction.ForeColor = Color.White;
+            lblColAction.Location = new Point(500, 5);
+            lblColAction.Name = "lblColAction";
+            lblColAction.Size = new Size(61, 19);
+            lblColAction.TabIndex = 2;
+            lblColAction.Text = "ACTION";
+
+            // 
+            // 
+            // flowLayoutPanel
+            // 
+            flowLayoutPanel.AutoScroll = true;
+            flowLayoutPanel.BackColor = Color.White;
+            flowLayoutPanel.BorderStyle = BorderStyle.FixedSingle;
+            flowLayoutPanel.Location = new Point(20, 258);
+            flowLayoutPanel.Name = "flowLayoutPanel";
+            flowLayoutPanel.Size = new Size(655, 360);
+            flowLayoutPanel.TabIndex = 31;
+
+            // 
+            // pnlLoginBottom
+            // 
+            pnlLoginBottom.BackColor = Color.WhiteSmoke;
+            pnlLoginBottom.BorderStyle = BorderStyle.FixedSingle;
+            pnlLoginBottom.Controls.Add(testLogin);
+            pnlLoginBottom.Controls.Add(label14);
+            pnlLoginBottom.Controls.Add(panel8);
+            pnlLoginBottom.Location = new Point(20, 628);
+            pnlLoginBottom.Name = "pnlLoginBottom";
+            pnlLoginBottom.Size = new Size(655, 46);
+            pnlLoginBottom.TabIndex = 32;
+
+            // 
+            // testLogin
+            // 
+            testLogin.BackColor = Color.White;
+            testLogin.Cursor = Cursors.Hand;
+            testLogin.FlatAppearance.BorderColor = Color.FromArgb(200, 200, 200);
+            testLogin.FlatStyle = FlatStyle.Flat;
+            testLogin.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            testLogin.ForeColor = Color.Black;
+            testLogin.Location = new Point(12, 8);
+            testLogin.Name = "testLogin";
+            testLogin.Size = new Size(100, 30);
+            testLogin.TabIndex = 32;
+            testLogin.Text = "Test";
+            testLogin.UseVisualStyleBackColor = false;
+            testLogin.Click += testLogin_Click;
+
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+            label14.ForeColor = Color.FromArgb(70, 70, 70);
+            label14.Location = new Point(125, 13);
+            label14.Name = "label14";
+            label14.Size = new Size(157, 20);
+            label14.TabIndex = 1;
+            label14.Text = "Click \"Test\" to validate";
+
+            // 
+            // panel8
+            // 
+            panel8.BackColor = Color.Red;
+            panel8.BorderStyle = BorderStyle.FixedSingle;
+            panel8.Location = new Point(618, 12);
+            panel8.Name = "panel8";
+            panel8.Size = new Size(22, 22);
+            panel8.TabIndex = 2;
+
+            // 
+            // runLogin
+            // 
+            runLogin.BackColor = Color.Black;
+            runLogin.Cursor = Cursors.Hand;
+            runLogin.FlatAppearance.BorderColor = Color.Black;
+            runLogin.FlatStyle = FlatStyle.Flat;
+            runLogin.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            runLogin.ForeColor = Color.White;
+            runLogin.Location = new Point(20, 684);
+            runLogin.Name = "runLogin";
+            runLogin.Size = new Size(655, 52);
+            runLogin.TabIndex = 33;
+            runLogin.Text = "RUN AUTO LOGIN";
+            runLogin.UseVisualStyleBackColor = false;
+            runLogin.Click += runLogin_Click;
+
+            // 
+            // panel1 (legacy non-visible)
+            // 
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(0, 0);
+            panel1.Visible = false;
+
+            // 
+            // panel4 (legacy non-visible)
+            // 
+            panel4.Location = new Point(0, 0);
+            panel4.Name = "panel4";
+            panel4.Size = new Size(0, 0);
+            panel4.Visible = false;
+
+            // 
+            // panel5 (legacy non-visible)
+            // 
+            panel5.Location = new Point(0, 0);
+            panel5.Name = "panel5";
+            panel5.Size = new Size(0, 0);
+            panel5.Visible = false;
+
+            // 
+            // panel6 (legacy non-visible)
+            // 
+            panel6.Location = new Point(0, 0);
+            panel6.Name = "panel6";
+            panel6.Size = new Size(0, 0);
+            panel6.Visible = false;
+
+            // 
+            // panel7 (legacy non-visible)
+            // 
+            panel7.Location = new Point(0, 0);
+            panel7.Name = "panel7";
+            panel7.Size = new Size(0, 0);
+            panel7.Visible = false;
+
+            // 
+            // panel9 (legacy non-visible)
+            // 
+            panel9.Location = new Point(0, 0);
+            panel9.Name = "panel9";
+            panel9.Size = new Size(0, 0);
+            panel9.Visible = false;
+
             // 
             // CountDownTimer
             // 
             CountDownTimer.Interval = 10000;
             CountDownTimer.Tick += CountDownTimer_Tick;
+
             // 
             // TimerForSeconds
             // 
             TimerForSeconds.Interval = 1000;
             TimerForSeconds.Tick += TimerForSeconds_Tick;
-            // 
-            // RenameTextbox
-            // 
-            RenameTextbox.BackColor = SystemColors.Desktop;
-            RenameTextbox.Font = new Font("Segoe UI Symbol", 12F);
-            RenameTextbox.ForeColor = Color.White;
-            RenameTextbox.Location = new Point(671, 492);
-            RenameTextbox.Name = "RenameTextbox";
-            RenameTextbox.Size = new Size(434, 39);
-            RenameTextbox.TabIndex = 25;
-            // 
-            // RenameLabel
-            // 
-            RenameLabel.AutoSize = true;
-            RenameLabel.Font = new Font("Segoe UI Symbol", 12F);
-            RenameLabel.ForeColor = Color.White;
-            RenameLabel.Location = new Point(671, 443);
-            RenameLabel.Name = "RenameLabel";
-            RenameLabel.Size = new Size(299, 32);
-            RenameLabel.TabIndex = 24;
-            RenameLabel.Text = "Rename Application Name";
-            // 
-            // numericUpDown1
-            // 
-            numericUpDown1.BackColor = SystemColors.Desktop;
-            numericUpDown1.Font = new Font("Segoe UI Symbol", 12F);
-            numericUpDown1.ForeColor = Color.White;
-            numericUpDown1.Location = new Point(676, 493);
-            numericUpDown1.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
-            numericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numericUpDown1.Name = "numericUpDown1";
-            numericUpDown1.Size = new Size(57, 39);
-            numericUpDown1.TabIndex = 26;
-            numericUpDown1.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
-            // numericUpDown2
-            // 
-            numericUpDown2.BackColor = SystemColors.Desktop;
-            numericUpDown2.Font = new Font("Segoe UI Symbol", 12F);
-            numericUpDown2.ForeColor = Color.White;
-            numericUpDown2.Location = new Point(783, 493);
-            numericUpDown2.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
-            numericUpDown2.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numericUpDown2.Name = "numericUpDown2";
-            numericUpDown2.Size = new Size(66, 39);
-            numericUpDown2.TabIndex = 27;
-            numericUpDown2.Value = new decimal(new int[] { 25, 0, 0, 0 });
-            // 
-            // RunTotalLabel
-            // 
-            RunTotalLabel.AutoSize = true;
-            RunTotalLabel.Font = new Font("Segoe UI Symbol", 12F);
-            RunTotalLabel.ForeColor = Color.White;
-            RunTotalLabel.Location = new Point(1101, 443);
-            RunTotalLabel.Name = "RunTotalLabel";
-            RunTotalLabel.Size = new Size(116, 32);
-            RunTotalLabel.TabIndex = 28;
-            RunTotalLabel.Text = "Run Total";
-            // 
-            // DelimiterToLabel
-            // 
-            DelimiterToLabel.AutoSize = true;
-            DelimiterToLabel.Font = new Font("Segoe UI Symbol", 12F);
-            DelimiterToLabel.ForeColor = Color.White;
-            DelimiterToLabel.Location = new Point(739, 495);
-            DelimiterToLabel.Name = "DelimiterToLabel";
-            DelimiterToLabel.Size = new Size(41, 32);
-            DelimiterToLabel.TabIndex = 30;
-            DelimiterToLabel.Text = "To";
-            // 
-            // BrowseFileNotepad
-            // 
-            BrowseFileNotepad.BackColor = SystemColors.Desktop;
-            BrowseFileNotepad.Font = new Font("Segoe UI Symbol", 12F);
-            BrowseFileNotepad.ForeColor = Color.White;
-            BrowseFileNotepad.Location = new Point(671, 565);
-            BrowseFileNotepad.Name = "BrowseFileNotepad";
-            BrowseFileNotepad.Size = new Size(529, 72);
-            BrowseFileNotepad.TabIndex = 32;
-            BrowseFileNotepad.Text = "Browse File Location...";
-            BrowseFileNotepad.UseVisualStyleBackColor = false;
-            BrowseFileNotepad.Click += BrowseFileNotepad_Click;
-            // 
-            // NotepadPathTextbox
-            // 
-            NotepadPathTextbox.BackColor = SystemColors.Desktop;
-            NotepadPathTextbox.Font = new Font("Segoe UI Symbol", 12F);
-            NotepadPathTextbox.ForeColor = Color.White;
-            NotepadPathTextbox.Location = new Point(671, 492);
-            NotepadPathTextbox.Name = "NotepadPathTextbox";
-            NotepadPathTextbox.Size = new Size(527, 39);
-            NotepadPathTextbox.TabIndex = 31;
-            // 
-            // DelayLabel
-            // 
-            DelayLabel.AutoSize = true;
-            DelayLabel.Font = new Font("Segoe UI Symbol", 14F);
-            DelayLabel.ForeColor = Color.White;
-            DelayLabel.Location = new Point(671, 687);
-            DelayLabel.Name = "DelayLabel";
-            DelayLabel.Size = new Size(87, 38);
-            DelayLabel.TabIndex = 33;
-            DelayLabel.Text = "Delay";
-            // 
-            // numericUpDown3
-            // 
-            numericUpDown3.BackColor = SystemColors.Desktop;
-            numericUpDown3.Font = new Font("Segoe UI Symbol", 12F);
-            numericUpDown3.ForeColor = Color.White;
-            numericUpDown3.Location = new Point(676, 777);
-            numericUpDown3.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
-            numericUpDown3.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numericUpDown3.Name = "numericUpDown3";
-            numericUpDown3.Size = new Size(121, 39);
-            numericUpDown3.TabIndex = 34;
-            numericUpDown3.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
-            // numericUpDown4
-            // 
-            numericUpDown4.BackColor = SystemColors.Desktop;
-            numericUpDown4.Font = new Font("Segoe UI Symbol", 12F);
-            numericUpDown4.ForeColor = Color.White;
-            numericUpDown4.Increment = new decimal(new int[] { 1000, 0, 0, 0 });
-            numericUpDown4.Location = new Point(837, 777);
-            numericUpDown4.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
-            numericUpDown4.Name = "numericUpDown4";
-            numericUpDown4.Size = new Size(359, 39);
-            numericUpDown4.TabIndex = 35;
-            // 
-            // DelayInformation
-            // 
-            DelayInformation.AutoSize = true;
-            DelayInformation.Font = new Font("Segoe UI Symbol", 12F);
-            DelayInformation.ForeColor = Color.White;
-            DelayInformation.Location = new Point(671, 737);
-            DelayInformation.Name = "DelayInformation";
-            DelayInformation.Size = new Size(134, 32);
-            DelayInformation.TabIndex = 36;
-            DelayInformation.Text = "Application";
-            // 
-            // DelayInformation1
-            // 
-            DelayInformation1.AutoSize = true;
-            DelayInformation1.Font = new Font("Segoe UI Symbol", 12F);
-            DelayInformation1.ForeColor = Color.White;
-            DelayInformation1.Location = new Point(837, 737);
-            DelayInformation1.Name = "DelayInformation1";
-            DelayInformation1.Size = new Size(146, 32);
-            DelayInformation1.TabIndex = 37;
-            DelayInformation1.Text = "Milliseconds";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI Symbol", 12F);
-            label3.ForeColor = Color.White;
-            label3.Location = new Point(809, 780);
-            label3.Name = "label3";
-            label3.Size = new Size(23, 32);
-            label3.TabIndex = 38;
-            label3.Text = "/";
-            // 
-            // panel1
-            // 
-            panel1.BackColor = Color.Transparent;
-            panel1.BorderStyle = BorderStyle.Fixed3D;
-            panel1.ForeColor = SystemColors.ActiveCaptionText;
-            panel1.Location = new Point(11, 268);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(454, 14);
-            panel1.TabIndex = 39;
-            // 
-            // panel2
-            // 
-            panel2.BackColor = Color.Red;
-            panel2.BorderStyle = BorderStyle.Fixed3D;
-            panel2.Location = new Point(423, 505);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(41, 42);
-            panel2.TabIndex = 40;
-            // 
-            // panel3
-            // 
-            panel3.BackColor = Color.Red;
-            panel3.BorderStyle = BorderStyle.Fixed3D;
-            panel3.Location = new Point(1156, 845);
-            panel3.Name = "panel3";
-            panel3.Size = new Size(38, 37);
-            panel3.TabIndex = 41;
-            // 
-            // numericUpDown5
-            // 
-            numericUpDown5.BackColor = SystemColors.Desktop;
-            numericUpDown5.Font = new Font("Segoe UI Symbol", 12F);
-            numericUpDown5.ForeColor = Color.White;
-            numericUpDown5.Location = new Point(1113, 492);
-            numericUpDown5.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
-            numericUpDown5.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numericUpDown5.Name = "numericUpDown5";
-            numericUpDown5.Size = new Size(87, 39);
-            numericUpDown5.TabIndex = 42;
-            numericUpDown5.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI Symbol", 12F);
-            label4.ForeColor = Color.White;
-            label4.Location = new Point(883, 693);
-            label4.Name = "label4";
-            label4.Size = new Size(224, 32);
-            label4.TabIndex = 44;
-            label4.Text = "Pause if CPU% > 80";
-            // 
-            // CPUChecker
-            // 
-            CPUChecker.BackColor = Color.Red;
-            CPUChecker.Font = new Font("Segoe UI Symbol", 9F);
-            CPUChecker.ForeColor = Color.Black;
-            CPUChecker.Location = new Point(1101, 693);
-            CPUChecker.Name = "CPUChecker";
-            CPUChecker.Size = new Size(94, 35);
-            CPUChecker.TabIndex = 45;
-            CPUChecker.Text = "Off";
-            CPUChecker.UseVisualStyleBackColor = false;
-            CPUChecker.Click += CPUChecker_Click;
-            // 
-            // panel4
-            // 
-            panel4.BackColor = Color.Transparent;
-            panel4.BorderStyle = BorderStyle.Fixed3D;
-            panel4.ForeColor = SystemColors.ActiveCaptionText;
-            panel4.Location = new Point(13, 655);
-            panel4.Name = "panel4";
-            panel4.Size = new Size(454, 14);
-            panel4.TabIndex = 40;
-            // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Segoe UI Symbol", 14F);
-            label7.ForeColor = Color.White;
-            label7.Location = new Point(11, 680);
-            label7.Name = "label7";
-            label7.Size = new Size(234, 38);
-            label7.TabIndex = 46;
-            label7.Text = "Bulk App Handler";
-            // 
-            // OpenBulkWindow
-            // 
-            OpenBulkWindow.BackColor = SystemColors.Desktop;
-            OpenBulkWindow.Font = new Font("Segoe UI Symbol", 12F);
-            OpenBulkWindow.ForeColor = Color.White;
-            OpenBulkWindow.Location = new Point(11, 735);
-            OpenBulkWindow.Name = "OpenBulkWindow";
-            OpenBulkWindow.Size = new Size(457, 73);
-            OpenBulkWindow.TabIndex = 47;
-            OpenBulkWindow.Text = "Open";
-            OpenBulkWindow.UseVisualStyleBackColor = false;
-            OpenBulkWindow.Click += OpenBulkWindow_Click;
-            // 
-            // TextWinHandler
-            // 
-            TextWinHandler.AutoSize = true;
-            TextWinHandler.Font = new Font("Segoe UI Symbol", 14F);
-            TextWinHandler.ForeColor = Color.White;
-            TextWinHandler.Location = new Point(11, 820);
-            TextWinHandler.Name = "TextWinHandler";
-            TextWinHandler.Size = new Size(265, 38);
-            TextWinHandler.TabIndex = 48;
-            TextWinHandler.Text = "Text Import Handler";
-            // 
-            // OpenWindowImportThing
-            // 
-            OpenWindowImportThing.BackColor = SystemColors.Desktop;
-            OpenWindowImportThing.Font = new Font("Segoe UI Symbol", 12F);
-            OpenWindowImportThing.ForeColor = Color.White;
-            OpenWindowImportThing.Location = new Point(11, 875);
-            OpenWindowImportThing.Name = "OpenWindowImportThing";
-            OpenWindowImportThing.Size = new Size(457, 82);
-            OpenWindowImportThing.TabIndex = 49;
-            OpenWindowImportThing.Text = "Open";
-            OpenWindowImportThing.UseVisualStyleBackColor = false;
-            OpenWindowImportThing.Click += OpenWindowImportThing_Click;
-            // 
-            // panel5
-            // 
-            panel5.BackColor = Color.Transparent;
-            panel5.BorderStyle = BorderStyle.Fixed3D;
-            panel5.ForeColor = SystemColors.ActiveCaptionText;
-            panel5.Location = new Point(671, 658);
-            panel5.Name = "panel5";
-            panel5.Size = new Size(523, 14);
-            panel5.TabIndex = 41;
-            // 
-            // panel6
-            // 
-            panel6.BackColor = Color.Transparent;
-            panel6.BorderStyle = BorderStyle.Fixed3D;
-            panel6.ForeColor = SystemColors.ActiveCaptionText;
-            panel6.Location = new Point(1222, 26);
-            panel6.Name = "panel6";
-            panel6.Size = new Size(10, 934);
-            panel6.TabIndex = 40;
-            // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Segoe UI Symbol", 14F);
-            label9.ForeColor = Color.White;
-            label9.Location = new Point(1248, 15);
-            label9.Name = "label9";
-            label9.Size = new Size(152, 38);
-            label9.TabIndex = 50;
-            label9.Text = "Auto Login";
-            // 
-            // browseAccount
-            // 
-            browseAccount.BackColor = SystemColors.Desktop;
-            browseAccount.Font = new Font("Segoe UI Symbol", 12F);
-            browseAccount.ForeColor = Color.White;
-            browseAccount.Location = new Point(1248, 199);
-            browseAccount.Name = "browseAccount";
-            browseAccount.Size = new Size(288, 67);
-            browseAccount.TabIndex = 54;
-            browseAccount.Text = "Browse File Location...";
-            browseAccount.UseVisualStyleBackColor = false;
-            browseAccount.Click += browseAccount_Click;
-            // 
-            // FilePathNameLogin
-            // 
-            FilePathNameLogin.BackColor = SystemColors.Desktop;
-            FilePathNameLogin.Font = new Font("Segoe UI Symbol", 12F);
-            FilePathNameLogin.ForeColor = Color.White;
-            FilePathNameLogin.Location = new Point(1248, 148);
-            FilePathNameLogin.Name = "FilePathNameLogin";
-            FilePathNameLogin.PlaceholderText = "(Your Account Data File...)";
-            FilePathNameLogin.Size = new Size(602, 39);
-            FilePathNameLogin.TabIndex = 53;
-            // 
-            // label12
-            // 
-            label12.AutoSize = true;
-            label12.Font = new Font("Segoe UI Symbol", 12F);
-            label12.ForeColor = Color.White;
-            label12.Location = new Point(1248, 110);
-            label12.Name = "label12";
-            label12.Size = new Size(255, 32);
-            label12.TabIndex = 52;
-            label12.Text = "Account Data File Path";
-            // 
-            // label13
-            // 
-            label13.AutoSize = true;
-            label13.BackColor = SystemColors.Desktop;
-            label13.Font = new Font("Segoe UI Symbol", 14F);
-            label13.ForeColor = Color.White;
-            label13.Location = new Point(1248, 68);
-            label13.Name = "label13";
-            label13.Size = new Size(376, 38);
-            label13.TabIndex = 51;
-            label13.Text = "Auto-Login For All Exist Apps";
-            // 
-            // panel7
-            // 
-            panel7.BackColor = Color.Transparent;
-            panel7.BorderStyle = BorderStyle.Fixed3D;
-            panel7.ForeColor = SystemColors.ActiveCaptionText;
-            panel7.Location = new Point(1248, 813);
-            panel7.Name = "panel7";
-            panel7.Size = new Size(602, 14);
-            panel7.TabIndex = 42;
-            // 
-            // runLogin
-            // 
-            runLogin.BackColor = SystemColors.Desktop;
-            runLogin.Font = new Font("Segoe UI Symbol", 12F);
-            runLogin.ForeColor = Color.White;
-            runLogin.Location = new Point(1248, 892);
-            runLogin.Name = "runLogin";
-            runLogin.Size = new Size(602, 65);
-            runLogin.TabIndex = 55;
-            runLogin.Text = "Run";
-            runLogin.UseVisualStyleBackColor = false;
-            runLogin.Click += runLogin_Click;
-            // 
-            // panel8
-            // 
-            panel8.BackColor = Color.Red;
-            panel8.BorderStyle = BorderStyle.Fixed3D;
-            panel8.Location = new Point(1812, 845);
-            panel8.Name = "panel8";
-            panel8.Size = new Size(38, 37);
-            panel8.TabIndex = 42;
-            // 
-            // label14
-            // 
-            label14.AutoSize = true;
-            label14.Font = new Font("Segoe UI Symbol", 12F);
-            label14.ForeColor = Color.White;
-            label14.Location = new Point(1375, 843);
-            label14.Name = "label14";
-            label14.Size = new Size(252, 32);
-            label14.TabIndex = 58;
-            label14.Text = "Click \"Test\" to validate";
-            // 
-            // testLogin
-            // 
-            testLogin.BackColor = SystemColors.Desktop;
-            testLogin.Font = new Font("Segoe UI Symbol", 12F);
-            testLogin.ForeColor = Color.White;
-            testLogin.Location = new Point(1248, 833);
-            testLogin.Name = "testLogin";
-            testLogin.Size = new Size(121, 53);
-            testLogin.TabIndex = 57;
-            testLogin.Text = "Test";
-            testLogin.UseVisualStyleBackColor = false;
-            testLogin.Click += testLogin_Click;
-            // 
-            // flowLayoutPanel
-            // 
-            flowLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-            flowLayoutPanel.AutoScroll = true;
-            flowLayoutPanel.Location = new Point(1248, 473);
-            flowLayoutPanel.Name = "flowLayoutPanel";
-            flowLayoutPanel.Size = new Size(602, 334);
-            flowLayoutPanel.TabIndex = 69;
-            // 
-            // refreshButton
-            // 
-            refreshButton.BackColor = SystemColors.Desktop;
-            refreshButton.Font = new Font("Segoe UI Symbol", 12F);
-            refreshButton.ForeColor = Color.White;
-            refreshButton.Location = new Point(1248, 355);
-            refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(288, 65);
-            refreshButton.TabIndex = 70;
-            refreshButton.Text = "Refresh";
-            refreshButton.UseVisualStyleBackColor = false;
-            refreshButton.Click += refreshButton_Click;
-            // 
-            // resetButton
-            // 
-            resetButton.BackColor = SystemColors.Desktop;
-            resetButton.Font = new Font("Segoe UI Symbol", 12F);
-            resetButton.ForeColor = Color.White;
-            resetButton.Location = new Point(1542, 355);
-            resetButton.Name = "resetButton";
-            resetButton.Size = new Size(308, 65);
-            resetButton.TabIndex = 71;
-            resetButton.Text = "Reset";
-            resetButton.UseVisualStyleBackColor = false;
-            resetButton.Click += resetButton_Click;
-            // 
-            // txtSearchLogin
-            // 
-            txtSearchLogin.BackColor = SystemColors.Desktop;
-            txtSearchLogin.Font = new Font("Segoe UI Symbol", 12F);
-            txtSearchLogin.ForeColor = Color.White;
-            txtSearchLogin.Location = new Point(1248, 428);
-            txtSearchLogin.MaxLength = 100;
-            txtSearchLogin.Name = "txtSearchLogin";
-            txtSearchLogin.PlaceholderText = "(Searching...)";
-            txtSearchLogin.Size = new Size(602, 39);
-            txtSearchLogin.TabIndex = 72;
-            txtSearchLogin.TextAlign = HorizontalAlignment.Center;
-            txtSearchLogin.TextChanged += txtSearchLogin_TextChanged;
-            // 
-            // accountFileHandler
-            // 
-            accountFileHandler.BackColor = SystemColors.Desktop;
-            accountFileHandler.Font = new Font("Segoe UI Symbol", 12F);
-            accountFileHandler.ForeColor = Color.White;
-            accountFileHandler.Location = new Point(1542, 199);
-            accountFileHandler.Name = "accountFileHandler";
-            accountFileHandler.Size = new Size(308, 67);
-            accountFileHandler.TabIndex = 73;
-            accountFileHandler.Text = "Account File Handler";
-            accountFileHandler.UseVisualStyleBackColor = false;
-            accountFileHandler.Click += accountFileHandler_Click;
-            // 
-            // panel9
-            // 
-            panel9.BackColor = Color.Transparent;
-            panel9.BorderStyle = BorderStyle.Fixed3D;
-            panel9.ForeColor = SystemColors.ActiveCaptionText;
-            panel9.Location = new Point(1248, 279);
-            panel9.Name = "panel9";
-            panel9.Size = new Size(602, 14);
-            panel9.TabIndex = 43;
-            // 
-            // label15
-            // 
-            label15.AutoSize = true;
-            label15.Font = new Font("Segoe UI Symbol", 12F);
-            label15.ForeColor = Color.White;
-            label15.Location = new Point(1248, 308);
-            label15.Name = "label15";
-            label15.Size = new Size(304, 32);
-            label15.TabIndex = 74;
-            label15.Text = "Exist Apps List - Auto Login";
-            // 
-            // settingForm
-            // 
-            settingForm.BackColor = SystemColors.Desktop;
-            settingForm.Font = new Font("Segoe UI Symbol", 12F);
-            settingForm.ForeColor = Color.White;
-            settingForm.Location = new Point(1677, 26);
-            settingForm.Name = "settingForm";
-            settingForm.Size = new Size(173, 53);
-            settingForm.TabIndex = 75;
-            settingForm.Text = "Settings";
-            settingForm.UseVisualStyleBackColor = false;
-            settingForm.Click += settingForm_Click;
+
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Desktop;
-            BackgroundImageLayout = ImageLayout.None;
-            ClientSize = new Size(1884, 998);
-            Controls.Add(settingForm);
-            Controls.Add(label15);
-            Controls.Add(panel9);
-            Controls.Add(accountFileHandler);
-            Controls.Add(txtSearchLogin);
-            Controls.Add(resetButton);
-            Controls.Add(refreshButton);
-            Controls.Add(flowLayoutPanel);
-            Controls.Add(label14);
-            Controls.Add(testLogin);
-            Controls.Add(panel8);
-            Controls.Add(runLogin);
-            Controls.Add(panel7);
-            Controls.Add(browseAccount);
-            Controls.Add(FilePathNameLogin);
-            Controls.Add(label12);
-            Controls.Add(label13);
-            Controls.Add(label9);
-            Controls.Add(panel6);
-            Controls.Add(panel5);
-            Controls.Add(OpenWindowImportThing);
-            Controls.Add(TextWinHandler);
-            Controls.Add(OpenBulkWindow);
-            Controls.Add(label7);
-            Controls.Add(panel4);
-            Controls.Add(CPUChecker);
-            Controls.Add(label4);
-            Controls.Add(numericUpDown5);
-            Controls.Add(panel3);
-            Controls.Add(panel2);
+            BackColor = Color.White;
+            ClientSize = new Size(1884, 915);
+            Controls.Add(gbAutoLogin);
+            Controls.Add(gbBulkApp);
+            Controls.Add(gbHandlers);
+            Controls.Add(gbTimedMemory);
+            Controls.Add(gbMemoryManagement);
+            Controls.Add(pnlProcessToolbar);
+            Controls.Add(pnlHeader);
             Controls.Add(panel1);
-            Controls.Add(label3);
-            Controls.Add(DelayInformation1);
-            Controls.Add(DelayInformation);
-            Controls.Add(numericUpDown4);
-            Controls.Add(numericUpDown3);
-            Controls.Add(DelayLabel);
-            Controls.Add(BrowseFileNotepad);
-            Controls.Add(NotepadPathTextbox);
-            Controls.Add(DelimiterToLabel);
-            Controls.Add(RunTotalLabel);
-            Controls.Add(numericUpDown2);
-            Controls.Add(numericUpDown1);
-            Controls.Add(RenameTextbox);
-            Controls.Add(RenameLabel);
-            Controls.Add(TimeSetForClearRAM);
-            Controls.Add(label11);
-            Controls.Add(ProcessName);
-            Controls.Add(ComboBox);
-            Controls.Add(Terminate);
-            Controls.Add(Run2);
-            Controls.Add(label10);
-            Controls.Add(TestButton);
-            Controls.Add(MaxLabel);
-            Controls.Add(label8);
-            Controls.Add(BrowseFile);
-            Controls.Add(FilePathName);
-            Controls.Add(label6);
-            Controls.Add(label5);
-            Controls.Add(Run1);
-            Controls.Add(CountDownSeconds);
-            Controls.Add(MSTimeSetLabel);
-            Controls.Add(ValidatingEvent);
-            Controls.Add(label2);
-            Controls.Add(ClearRAM);
-            Controls.Add(label1);
+            Controls.Add(panel4);
+            Controls.Add(panel5);
+            Controls.Add(panel6);
+            Controls.Add(panel7);
+            Controls.Add(panel9);
+            Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
             FormBorderStyle = FormBorderStyle.Fixed3D;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Process Forge - Kingdom Heroes 2 Edition";
             ((System.ComponentModel.ISupportInitialize)TimeSetForClearRAM).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).EndInit();
@@ -968,14 +1474,39 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDown3).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown4).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown5).EndInit();
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
+            pnlProcessToolbar.ResumeLayout(false);
+            pnlProcessToolbar.PerformLayout();
+            gbMemoryManagement.ResumeLayout(false);
+            gbTimedMemory.ResumeLayout(false);
+            gbTimedMemory.PerformLayout();
+            pnlTimedStatus.ResumeLayout(false);
+            pnlTimedStatus.PerformLayout();
+            gbHandlers.ResumeLayout(false);
+            gbHandlers.PerformLayout();
+            gbBulkApp.ResumeLayout(false);
+            gbBulkApp.PerformLayout();
+            pnlRenameOptions.ResumeLayout(false);
+            pnlRenameOptions.PerformLayout();
+            pnlDelaySettings.ResumeLayout(false);
+            pnlDelaySettings.PerformLayout();
+            pnlValidationRow.ResumeLayout(false);
+            pnlValidationRow.PerformLayout();
+            gbAutoLogin.ResumeLayout(false);
+            gbAutoLogin.PerformLayout();
+            pnlLoginListToolbar.ResumeLayout(false);
+            pnlLoginListToolbar.PerformLayout();
+            pnlLoginColumnHeaders.ResumeLayout(false);
+            pnlLoginColumnHeaders.PerformLayout();
+            pnlLoginBottom.ResumeLayout(false);
+            pnlLoginBottom.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
-
-
 
         #endregion
 
+        // Controls used by business logic
         private Label label1;
         private Button ClearRAM;
         private Button ValidatingEvent;
@@ -1044,5 +1575,32 @@
         private Button refreshButton;
         private Button resetButton;
         private Button settingForm;
+
+        // Modern UI layout containers and labels
+        private Panel pnlHeader;
+        private Label lblHeaderTitle;
+        private Label lblHeaderSubtitle;
+        private Panel pnlProcessToolbar;
+        private GroupBox gbMemoryManagement;
+        private GroupBox gbTimedMemory;
+        private Panel pnlTimedStatus;
+        private Label lblStatusText;
+        private GroupBox gbHandlers;
+        private Label lblBulkSub;
+        private Label lblImportSub;
+        private GroupBox gbBulkApp;
+        private Panel pnlRenameOptions;
+        private Panel pnlDelaySettings;
+        private Panel pnlValidationRow;
+        private GroupBox gbAutoLogin;
+        private Panel pnlLoginListToolbar;
+        private Label lblSearchPrompt;
+        internal Button btnSearchLogin;
+        internal Button btnClearSearchLogin;
+        private Panel pnlLoginColumnHeaders;
+        private Label lblColTitle;
+        private Label lblColStatus;
+        private Label lblColAction;
+        private Panel pnlLoginBottom;
     }
 }

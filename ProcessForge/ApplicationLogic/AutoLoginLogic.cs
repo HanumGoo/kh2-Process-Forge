@@ -214,7 +214,7 @@ namespace ProcessForge.ApplicationLogic
                 btn.Size = new Size(135, 40);
                 btn.Width = (int)(flowLayoutPanel.Width * 0.50);
                 btn.Font = new Font("Segoe UI Symbol", 10F);
-                btn.ForeColor = Color.White;
+                btn.ForeColor = Color.Black;
                 btn.Click += (sender, e) => ButtonRestoreWindow_Click(sender, e, ProcessId);
 
                 Button btn2 = new Button();
