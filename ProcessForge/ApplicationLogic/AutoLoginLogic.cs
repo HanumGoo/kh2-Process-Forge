@@ -147,13 +147,13 @@ namespace ProcessForge.ApplicationLogic
                             break;
                         case 1:
                             AllCase.Case_2(windowSize, step);
-                            return;
                             break;
                         case 2:
                             AllCase.Case_3(windowSize, step);
                             break;
                         case 3:
                             AllCase.Case_4(windowSize, step);
+                            return;
                             break;
                         case 4:
                             AllCase.Case_5(windowSize, step);

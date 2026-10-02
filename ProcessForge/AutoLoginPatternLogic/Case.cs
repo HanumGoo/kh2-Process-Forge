@@ -30,141 +30,60 @@ namespace ProcessForge.AutoLoginPatternLogic
         //public bool UseRelativeOffset { get; set; } = true;
         public void Case_1(Rectangle windowSize, TargetStepModel step)
         {
-            string templatePath = step.ImagePath;
-            using Bitmap captureWindow = new Bitmap(windowSize.Width, windowSize.Height);
-            using Mat template = Cv2.ImRead(templatePath, ImreadModes.Color);
+            DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
 
-            while (true)
-            {
-                using (Graphics g = Graphics.FromImage(captureWindow))
-                {
-                    g.CopyFromScreen(windowSize.Location, System.Drawing.Point.Empty, windowSize.Size);
-                }
-
-                using (Mat screen = BitmapConverter.ToMat(captureWindow))
-                using (Mat result = new Mat())
-                {
-                    Cv2.CvtColor(
-                            screen,
-                            screen,
-                            ColorConversionCodes.BGRA2BGR
-                        );
-
-                    Cv2.MatchTemplate(
-                        screen,
-                        template,
-                        result,
-                        TemplateMatchModes.CCoeffNormed
-                    );
-
-                    Cv2.MinMaxLoc(
-                        result,
-                        out double minValue,
-                        out double maxValue,
-                        out OpenCvSharp.Point minLocation,
-                        out OpenCvSharp.Point maxLocation
-                    );
-
-                    //MessageBox.Show(
-                    //    $"Best Match:\n" +
-                    //    $"X: {maxLocation.X}\n" +
-                    //    $"Y: {maxLocation.Y}\n" +
-                    //    $"Score: {maxValue}" +
-                    //    $"Score: {minValue}"
-                    //);
-
-                    // for center
-                    if (maxValue >= 0.9)
-                    {
-                        SendKeys.SendWait(accountData.username);
-                        SendKeys.SendWait("{TAB}");
-                        SendKeys.SendWait(accountData.password);
-                        SendKeys.SendWait("{ENTER}");
-                        // InputWindowLogic.InputWindow.ClickAt(maxLocation.X + template.Width / 2, maxLocation.Y + template.Height / 2);
-                        break;
-                    }
-                    else
-                    {
-                        Thread.Sleep(1000); // Wait for 1 second before trying again
-                    }
-                }
-            }
+            SendKeys.SendWait(accountData.username);
+            SendKeys.SendWait("{TAB}");
+            SendKeys.SendWait(accountData.password);
+            SendKeys.SendWait("{ENTER}");
+            // InputWindowLogic.InputWindow.ClickAt(maxLocation.X + template.Width / 2, maxLocation.Y + template.Height / 2);
+                       
         }
         public void Case_2(Rectangle windowSize, TargetStepModel step)
         {
-            string templatePath = step.ImagePath;
-            using Bitmap captureWindow = new Bitmap(windowSize.Width, windowSize.Height);
-            using Mat template = Cv2.ImRead(templatePath, ImreadModes.Color);
+            DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
 
-            while (true)
+            if (step.UseRelativeOffset)
             {
-                using (Graphics g = Graphics.FromImage(captureWindow))
-                {
-                    g.CopyFromScreen(windowSize.Location, System.Drawing.Point.Empty, windowSize.Size);
-                }
-
-                using (Mat screen = BitmapConverter.ToMat(captureWindow))
-                using (Mat result = new Mat())
-                {
-                    Cv2.CvtColor(
-                            screen,
-                            screen,
-                            ColorConversionCodes.BGRA2BGR
-                        );
-
-                    Cv2.MatchTemplate(
-                        screen,
-                        template,
-                        result,
-                        TemplateMatchModes.CCoeffNormed
-                    );
-
-                    Cv2.MinMaxLoc(
-                        result,
-                        out double minValue,
-                        out double maxValue,
-                        out OpenCvSharp.Point minLocation,
-                        out OpenCvSharp.Point maxLocation
-                    );
-
-                    //MessageBox.Show(
-                    //    $"Best Match:\n" +
-                    //    $"X: {maxLocation.X}\n" +
-                    //    $"Y: {maxLocation.Y}\n" +
-                    //    $"Score: {maxValue}" +
-                    //    $"Score: {minValue}"
-                    //);
-
-                    // for center
-                    if (maxValue >= 0.9)
-                    {
-                        //SendKeys.SendWait(accountData.username);
-                        //SendKeys.SendWait("{TAB}");
-                        //SendKeys.SendWait(accountData.password);
-                        if (step.UseRelativeOffset)
-                        {
-                            InputWindowLogic.InputWindow.ClickAt(maxLocation.X + step.TargetX, maxLocation.Y + step.TargetY);
-                            SendKeys.SendWait("{ENTER}");
-                        }
-                        else
-                        {
-                            InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
-                            SendKeys.SendWait("{ENTER}");
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        Thread.Sleep(1000); // Wait for 1 second before trying again
-                    }
-                }
+                InputWindowLogic.InputWindow.ClickAt(matchLocation.X + step.TargetX, matchLocation.Y + step.TargetY);
+                SendKeys.SendWait("{ENTER}");
             }
+            else
+            {
+                InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
+                SendKeys.SendWait("{ENTER}");
+            }
+            Thread.Sleep(500);
         }
         public void Case_3(Rectangle windowSize, TargetStepModel step)
         {
+            DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
+            Thread.Sleep(2000); // Wait for 2 seconds before clicking
+            if (step.UseRelativeOffset)
+            {
+                InputWindowLogic.InputWindow.ClickAt(matchLocation.X + step.TargetX, matchLocation.Y + step.TargetY);
+            }
+            else
+            {
+                InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
+            }
+            Thread.Sleep(500);
         }
         public void Case_4(Rectangle windowSize, TargetStepModel step)
         {
+            DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
+
+            SendKeys.SendWait(accountData.secondPassword == "NotUsingSecondPassword" ? "" : accountData.secondPassword);
+
+            if (step.UseRelativeOffset)
+            {
+                InputWindowLogic.InputWindow.ClickAt(matchLocation.X + step.TargetX, matchLocation.Y + step.TargetY);
+            }
+            else
+            {
+                InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
+            }
+            Thread.Sleep(500);
         }
         public void Case_5(Rectangle windowSize, TargetStepModel step)
         {
@@ -180,6 +99,66 @@ namespace ProcessForge.AutoLoginPatternLogic
         }
         public void Case_9(Rectangle windowSize, TargetStepModel step)
         {
+        }
+
+        public void DetectImage(Rectangle windowSize, TargetStepModel step, out OpenCvSharp.Point matchLocation, out double matchScore)
+        {
+            string templatePath = step.ImagePath;
+            using Bitmap captureWindow = new Bitmap(windowSize.Width, windowSize.Height);
+            using Mat template = Cv2.ImRead(templatePath, ImreadModes.Color);
+
+            while (true)
+            {
+                using (Graphics g = Graphics.FromImage(captureWindow))
+                {
+                    g.CopyFromScreen(windowSize.Location, System.Drawing.Point.Empty, windowSize.Size);
+                }
+
+                using (Mat screen = BitmapConverter.ToMat(captureWindow))
+                using (Mat result = new Mat())
+                {
+                    Cv2.CvtColor(
+                            screen,
+                            screen,
+                            ColorConversionCodes.BGRA2BGR
+                        );
+
+                    Cv2.MatchTemplate(
+                        screen,
+                        template,
+                        result,
+                        TemplateMatchModes.CCoeffNormed
+                    );
+
+                    Cv2.MinMaxLoc(
+                        result,
+                        out double minValue,
+                        out double maxValue,
+                        out OpenCvSharp.Point minLocation,
+                        out OpenCvSharp.Point maxLocation
+                    );
+
+                    //MessageBox.Show(
+                    //    $"Best Match:\n" +
+                    //    $"X: {maxLocation.X}\n" +
+                    //    $"Y: {maxLocation.Y}\n" +
+                    //    $"Score: {maxValue}" +
+                    //    $"Score: {minValue}"
+                    //);
+
+                    // for center
+                    if (maxValue >= 0.9)
+                    {
+                        matchLocation = maxLocation;
+                        matchScore = maxValue;
+                        break;
+                    }
+                    else
+                    {
+                        Thread.Sleep(1000); // Wait for 1 second before trying again
+                    }
+                }
+            }
         }
     }
 }
