@@ -1,15 +1,20 @@
-﻿using System;
+﻿using OpenCvSharp;
+using ProcessForge.ApplicationLogic;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
-using ProcessForge.ApplicationLogic;
 
 namespace ProcessForge.FindWindowLogic
 {
     public static class GetAndFindWindow
     {
         private const int SW_RESTORE = 9;
+        [DllImport("user32.dll")]
+        static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
         [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         
@@ -127,5 +132,29 @@ namespace ProcessForge.FindWindowLogic
                 MessageBox.Show("Window not found.");
             }
         }
+        public static Rectangle WindowSize(int processId)
+        {
+            Process? process = Process.GetProcessById(processId);
+
+            IntPtr hWnd = process.MainWindowHandle;
+
+            if (hWnd != IntPtr.Zero)
+            {
+                GetWindowRect(hWnd, out RECT rect);
+                return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+            }
+            else
+            {
+                MessageBox.Show("Window not found.");
+                return Rectangle.Empty;
+            }
+        }
+    }
+    public struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 }

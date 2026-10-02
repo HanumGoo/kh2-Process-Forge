@@ -1,10 +1,14 @@
-﻿using ProcessForge.FindWindowLogic;
+﻿using OpenCvSharp;
+using OpenCvSharp.Extensions;
+using ProcessForge.AutoLoginPatternLogic;
+using ProcessForge.FindWindowLogic;
 using ProcessForge.RefreshLogic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 
 namespace ProcessForge.ApplicationLogic
 {
@@ -14,6 +18,9 @@ namespace ProcessForge.ApplicationLogic
 
         public async static Task RunAutoLogin(string processName, string accountDataFilePath)
         {
+            // Detected Process
+            #region Get All Process and Extract Account Data
+
             if (string.IsNullOrEmpty(processName) || string.IsNullOrEmpty(accountDataFilePath))
             {
                 MessageBox.Show("please add process name and account data file path first at the main form", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -98,14 +105,83 @@ namespace ProcessForge.ApplicationLogic
                 }
             }
 
+            #endregion
 
+            // Data from config
+            #region Get Config Data
+            string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
+            string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
 
+            string json = File.ReadAllText(configFilePath);
+            var loaded = JsonSerializer.Deserialize<List<TargetStepModel>>(json);
 
+            #endregion
 
+            foreach (DataLoginFormat item in DetectedProcess)
+            {
+                if (item.isLogin)
+                {
+                    continue; // Skip if already logged in
+                }
 
+                // Restore the window and bring it to the foreground
+                Process process = Process.GetProcessById(item.ProcessId);
+                GetAndFindWindow.WindowRestore(item.ProcessId);
+                process.WaitForInputIdle(); // Wait for the process to be ready for input
+                Thread.Sleep(1000); // Optional: Add a small delay to ensure the window is fully restored
+
+                // get the window size
+                Rectangle windowSize = GetAndFindWindow.WindowSize(item.ProcessId);
+
+                Case AllCase = new Case(storageDirectory, configFilePath, item);
+                
+
+                for (int i = 0; i < loaded?.Count; i++)
+                {
+                    TargetStepModel step = loaded[i];
+
+                    switch (step.StepIndex)
+                    {
+                        case 0:
+                            AllCase.Case_1(windowSize, step);
+                            return;
+                            break;
+                        case 1:
+                            AllCase.Case_2(windowSize, step);
+                            break;
+                        case 2:
+                            AllCase.Case_3(windowSize, step);
+                            break;
+                        case 3:
+                            AllCase.Case_4(windowSize, step);
+                            break;
+                        case 4:
+                            AllCase.Case_5(windowSize, step);
+                            break;
+                        case 5:
+                            AllCase.Case_6(windowSize, step);
+                            break;
+                        case 6:
+                            AllCase.Case_7(windowSize, step);
+                            break;
+                        case 7:
+                            AllCase.Case_8(windowSize, step);
+                            break;
+                        case 8:
+                            AllCase.Case_9(windowSize, step);
+                            break;
+                        default:
+                                MessageBox.Show("There is no case", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                    }
+                }
+                // Logic for automatic login
+                // You can implement the login logic here using the username, password, and secondPassword from the item object.
+                // For example, you can use SendKeys or other methods to input the credentials into the application window.
+                // Make sure to handle any exceptions or errors that may occur during the login process.
+            }
 
             // restore window and accepts 1 parameter that is the title process name
-            // GetAndFindWindow.WindowRestore();
         }
         public static void RefreshLogin(FlowLayoutPanel flowLayoutPanel, string processName, string accountDataFilePath)
         {
@@ -211,7 +287,7 @@ namespace ProcessForge.ApplicationLogic
                     Text = item.nickname
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
-                btn.Size = new Size(135, 40);
+                btn.Size = new System.Drawing.Size(135, 40);
                 btn.Width = (int)(flowLayoutPanel.Width * 0.50);
                 btn.Font = new Font("Segoe UI Symbol", 10F);
                 btn.ForeColor = Color.Black;
@@ -221,7 +297,7 @@ namespace ProcessForge.ApplicationLogic
                 btn2.Text = item.isLogin ? "Logined" : "Not Logined";
                 btn2.Tag = item.LineIndex;
                 btn2.Margin = new Padding(5, 5, 5, 5);
-                btn2.Size = new Size(135, 40);
+                btn2.Size = new System.Drawing.Size(135, 40);
                 btn2.Width = (int)(flowLayoutPanel.Width * 0.20);
                 btn2.Font = new Font("Segoe UI Symbol", 10F);
                 btn2.ForeColor = Color.White;
@@ -233,7 +309,7 @@ namespace ProcessForge.ApplicationLogic
                 btn3.Text = "Terminate";
                 btn3.Tag = item.LineIndex;
                 btn3.Margin = new Padding(5, 5, 5, 5);
-                btn3.Size = new Size(135, 40);
+                btn3.Size = new System.Drawing.Size(135, 40);
                 btn3.Width = (int)(flowLayoutPanel.Width * 0.20);
                 btn3.Font = new Font("Segoe UI Symbol", 10F);
                 btn3.ForeColor = Color.White;
@@ -312,7 +388,7 @@ namespace ProcessForge.ApplicationLogic
                     Text = item.nickname
                 };
                 btn.Margin = new Padding(5, 5, 5, 5);
-                btn.Size = new Size(135, 40);
+                btn.Size = new System.Drawing.Size(135, 40);
                 btn.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn.Font = new Font("Segoe UI Symbol", 10F);
                 btn.ForeColor = Color.Black;
@@ -322,7 +398,7 @@ namespace ProcessForge.ApplicationLogic
                 btn2.Text = item.username;
                 btn2.Tag = item.LineIndex;
                 btn2.Margin = new Padding(5, 5, 5, 5);
-                btn2.Size = new Size(135, 40);
+                btn2.Size = new System.Drawing.Size(135, 40);
                 btn2.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn2.Font = new Font("Segoe UI Symbol", 10F);
                 btn2.ForeColor = Color.Black;
@@ -332,7 +408,7 @@ namespace ProcessForge.ApplicationLogic
                 btn3.Text = item.password;
                 btn3.Tag = item.LineIndex;
                 btn3.Margin = new Padding(5, 5, 5, 5);
-                btn3.Size = new Size(135, 40);
+                btn3.Size = new System.Drawing.Size(135, 40);
                 btn3.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn3.Font = new Font("Segoe UI Symbol", 10F);
                 btn3.ForeColor = Color.Black;
@@ -342,7 +418,7 @@ namespace ProcessForge.ApplicationLogic
                 btn4.Text = item.secondPassword;
                 btn4.Tag = item.LineIndex;
                 btn4.Margin = new Padding(5, 5, 5, 5);
-                btn4.Size = new Size(135, 40);
+                btn4.Size = new System.Drawing.Size(135, 40);
                 btn4.Width = (int)(flowLayoutPanel.Width * 0.18);
                 btn4.Font = new Font("Segoe UI Symbol", 10F);
                 btn4.ForeColor = Color.Black;
@@ -352,7 +428,7 @@ namespace ProcessForge.ApplicationLogic
                 btn5.Text = item.isLogin ? "Logined" : "Not Logined";
                 btn5.Tag = item.LineIndex;
                 btn5.Margin = new Padding(5, 5, 5, 5);
-                btn5.Size = new Size(135, 40);
+                btn5.Size = new System.Drawing.Size(135, 40);
                 btn5.Width = (int)(flowLayoutPanel.Width * 0.10);
                 btn5.Font = new Font("Segoe UI Symbol", 10F);
                 btn5.ForeColor = Color.White;
@@ -364,7 +440,7 @@ namespace ProcessForge.ApplicationLogic
                 btn6.Text = "Delete";
                 btn6.Tag = item.LineIndex;
                 btn6.Margin = new Padding(5, 5, 5, 5);
-                btn6.Size = new Size(135, 40);
+                btn6.Size = new System.Drawing.Size(135, 40);
                 btn6.Width = (int)(flowLayoutPanel.Width * 0.10);
                 btn6.Font = new Font("Segoe UI Symbol", 10F);
                 btn6.ForeColor = Color.White;

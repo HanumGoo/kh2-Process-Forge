@@ -13,17 +13,7 @@ using Size = System.Drawing.Size;
 
 namespace ProcessForge
 {
-    public class TargetStepModel
-    {
-        public int StepIndex { get; set; }
-        public string StepTitle { get; set; } = string.Empty;
-        public string TemplateName { get; set; } = string.Empty;
-        public string ImagePath { get; set; } = string.Empty;
-        public int TargetX { get; set; }
-        public int TargetY { get; set; }
-        public int ClickTypeIndex { get; set; } = 0;
-        public bool UseRelativeOffset { get; set; } = true;
-    }
+    
 
     public partial class AutoLoginSettingsForm : Form
     {
@@ -680,5 +670,17 @@ namespace ProcessForge
         }
 
         #endregion
+    }
+
+    public class TargetStepModel
+    {
+        public int StepIndex { get; set; }
+        public string StepTitle { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = string.Empty;
+        public int TargetX { get; set; }
+        public int TargetY { get; set; }
+        public int ClickTypeIndex { get; set; } = 0;
+        public bool UseRelativeOffset { get; set; } = true;
     }
 }

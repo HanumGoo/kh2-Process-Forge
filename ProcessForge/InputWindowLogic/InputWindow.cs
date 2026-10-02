@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace ProcessForge.InputWindowLogic
+{
+    public static class InputWindow
+    {
+        [DllImport("user32.dll")]
+        static extern void SetCursorPos(int X, int Y);
+
+        [DllImport("user32.dll")]
+        static extern void mouse_event(
+            uint dwFlags,
+            uint dx,
+            uint dy,
+            uint dwData,
+            UIntPtr dwExtraInfo
+        );
+
+        const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+        const uint MOUSEEVENTF_LEFTUP = 0x0004;
+
+        public static void ClickAt(int x, int y)
+        {
+            SetCursorPos(x, y);
+
+            mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, UIntPtr.Zero);
+            mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, UIntPtr.Zero);
+        }
+
+    }
+}
