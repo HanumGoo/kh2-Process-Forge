@@ -144,10 +144,10 @@ namespace ProcessForge.ApplicationLogic
                     {
                         case 0:
                             AllCase.Case_1(windowSize, step);
-                            return;
                             break;
                         case 1:
                             AllCase.Case_2(windowSize, step);
+                            return;
                             break;
                         case 2:
                             AllCase.Case_3(windowSize, step);

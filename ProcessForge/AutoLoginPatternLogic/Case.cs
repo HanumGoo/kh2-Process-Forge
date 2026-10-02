@@ -92,6 +92,73 @@ namespace ProcessForge.AutoLoginPatternLogic
         }
         public void Case_2(Rectangle windowSize, TargetStepModel step)
         {
+            string templatePath = step.ImagePath;
+            using Bitmap captureWindow = new Bitmap(windowSize.Width, windowSize.Height);
+            using Mat template = Cv2.ImRead(templatePath, ImreadModes.Color);
+
+            while (true)
+            {
+                using (Graphics g = Graphics.FromImage(captureWindow))
+                {
+                    g.CopyFromScreen(windowSize.Location, System.Drawing.Point.Empty, windowSize.Size);
+                }
+
+                using (Mat screen = BitmapConverter.ToMat(captureWindow))
+                using (Mat result = new Mat())
+                {
+                    Cv2.CvtColor(
+                            screen,
+                            screen,
+                            ColorConversionCodes.BGRA2BGR
+                        );
+
+                    Cv2.MatchTemplate(
+                        screen,
+                        template,
+                        result,
+                        TemplateMatchModes.CCoeffNormed
+                    );
+
+                    Cv2.MinMaxLoc(
+                        result,
+                        out double minValue,
+                        out double maxValue,
+                        out OpenCvSharp.Point minLocation,
+                        out OpenCvSharp.Point maxLocation
+                    );
+
+                    //MessageBox.Show(
+                    //    $"Best Match:\n" +
+                    //    $"X: {maxLocation.X}\n" +
+                    //    $"Y: {maxLocation.Y}\n" +
+                    //    $"Score: {maxValue}" +
+                    //    $"Score: {minValue}"
+                    //);
+
+                    // for center
+                    if (maxValue >= 0.9)
+                    {
+                        //SendKeys.SendWait(accountData.username);
+                        //SendKeys.SendWait("{TAB}");
+                        //SendKeys.SendWait(accountData.password);
+                        if (step.UseRelativeOffset)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(maxLocation.X + step.TargetX, maxLocation.Y + step.TargetY);
+                            SendKeys.SendWait("{ENTER}");
+                        }
+                        else
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
+                            SendKeys.SendWait("{ENTER}");
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        Thread.Sleep(1000); // Wait for 1 second before trying again
+                    }
+                }
+            }
         }
         public void Case_3(Rectangle windowSize, TargetStepModel step)
         {
