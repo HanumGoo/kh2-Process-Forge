@@ -2,6 +2,7 @@
 using OpenCvSharp.Extensions;
 using ProcessForge.ApplicationLogic;
 using ProcessForge.FindWindowLogic;
+using ProcessForge.InputWindowLogic;
 using System;
 using System.Collections.Generic;
 using System.Security.Policy;
@@ -28,76 +29,135 @@ namespace ProcessForge.AutoLoginPatternLogic
         //public int TargetY { get; set; }
         //public int ClickTypeIndex { get; set; } = 0;
         //public bool UseRelativeOffset { get; set; } = true;
+
         public void Case_1(Rectangle windowSize, TargetStepModel step)
         {
             DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
-
+            // InputWindowLogic.InputWindow.ClickAt(maxLocation.X + template.Width / 2, maxLocation.Y + template.Height / 2);
             SendKeys.SendWait(accountData.username);
             SendKeys.SendWait("{TAB}");
             SendKeys.SendWait(accountData.password);
             SendKeys.SendWait("{ENTER}");
-            // InputWindowLogic.InputWindow.ClickAt(maxLocation.X + template.Width / 2, maxLocation.Y + template.Height / 2);
-                       
+            foreach (var action in step.Actions)
+            {
+                if (action.ActionType == "Mouse")
+                {
+                    if (action.UseRelativeOffset == true)
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(matchLocation.X + action.X ?? 0, matchLocation.Y + action.Y ?? 0);
+                        }    
+                    }
+                    else
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(action.X ?? 0, action.Y ?? 0);
+                        }
+                    }
+                }
+                else if (action.ActionType == "Keyboard")
+                {
+                    SendKeys.SendWait(action.Word ?? string.Empty);
+                }
+                    Thread.Sleep(500); // Wait for 0.5 seconds before performing the next action
+            }
         }
         public void Case_2(Rectangle windowSize, TargetStepModel step)
         {
             DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
-
-            if (step.UseRelativeOffset)
+            foreach (var action in step.Actions)
             {
-                InputWindowLogic.InputWindow.ClickAt(matchLocation.X + step.TargetX, matchLocation.Y + step.TargetY);
-                SendKeys.SendWait("{ENTER}");
-            }
-            else
-            {
-                InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
-                SendKeys.SendWait("{ENTER}");
+                if (action.ActionType == "Mouse")
+                {
+                    if (action.UseRelativeOffset == true)
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(matchLocation.X + action.X ?? 0, matchLocation.Y + action.Y ?? 0);
+                        }
+                    }
+                    else
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(action.X ?? 0, action.Y ?? 0);
+                        }
+                    }
+                }
+                else if (action.ActionType == "Keyboard")
+                {
+                    SendKeys.SendWait(action.Word ?? string.Empty);
+                }
+                Thread.Sleep(500); // Wait for 0.5 seconds before performing the next action
             }
             Thread.Sleep(500);
         }
         public void Case_3(Rectangle windowSize, TargetStepModel step)
         {
             DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
-            Thread.Sleep(2000); // Wait for 2 seconds before clicking
-            if (step.UseRelativeOffset)
+            Thread.Sleep(2000); // Wait for 2 seconds before performing the next action
+            foreach (var action in step.Actions)
             {
-                InputWindowLogic.InputWindow.ClickAt(matchLocation.X + step.TargetX, matchLocation.Y + step.TargetY);
-            }
-            else
-            {
-                InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
+                if (action.ActionType == "Mouse")
+                {
+                    if (action.UseRelativeOffset == true)
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(matchLocation.X + action.X ?? 0, matchLocation.Y + action.Y ?? 0);
+                        }
+                    }
+                    else
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(action.X ?? 0, action.Y ?? 0);
+                        }
+                    }
+                }
+                else if (action.ActionType == "Keyboard")
+                {
+                    SendKeys.SendWait(action.Word ?? string.Empty);
+                }
+                Thread.Sleep(500); // Wait for 0.5 seconds before performing the next action
             }
             Thread.Sleep(500);
         }
         public void Case_4(Rectangle windowSize, TargetStepModel step)
         {
             DetectImage(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
-
-            SendKeys.SendWait(accountData.secondPassword == "NotUsingSecondPassword" ? "" : accountData.secondPassword);
-
-            if (step.UseRelativeOffset)
+            Thread.Sleep(500);
+            SendKeys.SendWait(accountData.secondPassword == "NotUsingSecondPassword" ? string.Empty : accountData.secondPassword);
+            foreach (var action in step.Actions)
             {
-                InputWindowLogic.InputWindow.ClickAt(matchLocation.X + step.TargetX, matchLocation.Y + step.TargetY);
-            }
-            else
-            {
-                InputWindowLogic.InputWindow.ClickAt(step.TargetX, step.TargetY);
+                if (action.ActionType == "Mouse")
+                {
+                    if (action.UseRelativeOffset == true)
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(matchLocation.X + action.X ?? 0, matchLocation.Y + action.Y ?? 0);
+                        }
+                    }
+                    else
+                    {
+                        if (action.X.HasValue && action.Y.HasValue)
+                        {
+                            InputWindowLogic.InputWindow.ClickAt(action.X ?? 0, action.Y ?? 0);
+                        }
+                    }
+                }
+                else if (action.ActionType == "Keyboard")
+                {
+                    SendKeys.SendWait(action.Word ?? string.Empty);
+                }
+                Thread.Sleep(500); // Wait for 0.5 seconds before performing the next action
             }
             Thread.Sleep(500);
         }
         public void Case_5(Rectangle windowSize, TargetStepModel step)
-        {
-        }
-        public void Case_6(Rectangle windowSize, TargetStepModel step)
-        {
-        }
-        public void Case_7(Rectangle windowSize, TargetStepModel step)
-        {
-        }
-        public void Case_8(Rectangle windowSize, TargetStepModel step)
-        {
-        }
-        public void Case_9(Rectangle windowSize, TargetStepModel step)
         {
         }
 

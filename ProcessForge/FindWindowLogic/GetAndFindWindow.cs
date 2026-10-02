@@ -12,6 +12,8 @@ namespace ProcessForge.FindWindowLogic
     public static class GetAndFindWindow
     {
         private const int SW_RESTORE = 9;
+        private const int SW_MINIMIZE = 6;
+        private const int SW_SHOW = 5;
         [DllImport("user32.dll")]
         static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
@@ -107,6 +109,7 @@ namespace ProcessForge.FindWindowLogic
                 if (hWnd != IntPtr.Zero)
                 {
                     ShowWindow(hWnd, SW_RESTORE);
+                    ShowWindow(hWnd, SW_SHOW);
 
                 }
                 else
@@ -126,6 +129,20 @@ namespace ProcessForge.FindWindowLogic
             if (hWnd != IntPtr.Zero)
             {
                 ShowWindow(hWnd, SW_RESTORE);
+                ShowWindow(hWnd, SW_SHOW);
+            }
+            else
+            {
+                MessageBox.Show("Window not found.");
+            }
+        }
+        public static void WindowMinimize(int processId)
+        {
+            Process? process = Process.GetProcessById(processId);
+            IntPtr hWnd = process.MainWindowHandle;
+            if (hWnd != IntPtr.Zero)
+            {
+                ShowWindow(hWnd, SW_MINIMIZE); // SW_MINIMIZE is the command for minimizing a window
             }
             else
             {

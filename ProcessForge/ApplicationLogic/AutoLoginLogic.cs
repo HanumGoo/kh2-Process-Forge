@@ -134,7 +134,7 @@ namespace ProcessForge.ApplicationLogic
                 Rectangle windowSize = GetAndFindWindow.WindowSize(item.ProcessId);
 
                 Case AllCase = new Case(storageDirectory, configFilePath, item);
-                
+
 
                 for (int i = 0; i < loaded?.Count; i++)
                 {
@@ -153,28 +153,17 @@ namespace ProcessForge.ApplicationLogic
                             break;
                         case 3:
                             AllCase.Case_4(windowSize, step);
-                            return;
                             break;
                         case 4:
                             AllCase.Case_5(windowSize, step);
                             break;
-                        case 5:
-                            AllCase.Case_6(windowSize, step);
-                            break;
-                        case 6:
-                            AllCase.Case_7(windowSize, step);
-                            break;
-                        case 7:
-                            AllCase.Case_8(windowSize, step);
-                            break;
-                        case 8:
-                            AllCase.Case_9(windowSize, step);
-                            break;
                         default:
-                                MessageBox.Show("There is no case", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("There is no case", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                     }
                 }
+
+                GetAndFindWindow.WindowMinimize(item.ProcessId); // Minimize the window after processing
                 // Logic for automatic login
                 // You can implement the login logic here using the username, password, and secondPassword from the item object.
                 // For example, you can use SendKeys or other methods to input the credentials into the application window.

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenCvSharp;
@@ -13,8 +14,6 @@ using Size = System.Drawing.Size;
 
 namespace ProcessForge
 {
-    
-
     public partial class AutoLoginSettingsForm : Form
     {
         [DllImport("user32.dll")]
@@ -26,7 +25,7 @@ namespace ProcessForge
         private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
         private const uint MOUSEEVENTF_LEFTUP = 0x0004;
 
-        private const int TotalSteps = 9;
+        private const int TotalSteps = 5;
         private int currentStepIndex = 0;
         private static readonly string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
         private static readonly string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
@@ -81,6 +80,34 @@ namespace ProcessForge
                         {
                             if (item.StepIndex >= 0 && item.StepIndex < TotalSteps)
                             {
+                                // Migrate legacy TargetX/TargetY to Actions if Actions is empty
+                                if ((item.Actions == null || item.Actions.Count == 0) && item.TargetX.HasValue && item.TargetY.HasValue)
+                                {
+                                    item.Actions = new List<StepInputAction>();
+                                    if (item.TargetX.Value != 0 || item.TargetY.Value != 0)
+                                    {
+                                        item.Actions.Add(new StepInputAction
+                                        {
+                                            ActionType = "Mouse",
+                                            X = item.TargetX.Value,
+                                            Y = item.TargetY.Value,
+                                            ClickTypeIndex = item.ClickTypeIndex ?? 0,
+                                            UseRelativeOffset = item.UseRelativeOffset ?? false
+                                        });
+                                    }
+                                }
+
+                                if (item.Actions == null)
+                                {
+                                    item.Actions = new List<StepInputAction>();
+                                }
+
+                                // Clear legacy properties so they are not re-serialized
+                                item.TargetX = null;
+                                item.TargetY = null;
+                                item.ClickTypeIndex = null;
+                                item.UseRelativeOffset = null;
+
                                 steps[item.StepIndex] = item;
                             }
                         }
@@ -104,22 +131,6 @@ namespace ProcessForge
                     {
                         steps[i].ImagePath = expectedPath;
                     }
-
-                    // Default X/Y to image center if uninitialized
-                    if (steps[i].TargetX == 0 && steps[i].TargetY == 0)
-                    {
-                        try
-                        {
-                            using (var stream = new FileStream(expectedPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                            using (var bmp = new Bitmap(stream))
-                            {
-                                steps[i].TargetX = bmp.Width / 2;
-                                steps[i].TargetY = bmp.Height / 2;
-                                steps[i].UseRelativeOffset = true;
-                            }
-                        }
-                        catch { }
-                    }
                 }
             }
 
@@ -131,6 +142,16 @@ namespace ProcessForge
             try
             {
                 Directory.CreateDirectory(storageDirectory);
+
+                // Ensure legacy fields are null so only clean Actions list is serialized
+                foreach (var step in Steps)
+                {
+                    step.TargetX = null;
+                    step.TargetY = null;
+                    step.ClickTypeIndex = null;
+                    step.UseRelativeOffset = null;
+                }
+
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(Steps, options);
                 File.WriteAllText(configFilePath, json);
@@ -179,9 +200,27 @@ namespace ProcessForge
             btnPrevStep.Click += (s, e) => NavigateToStep(currentStepIndex - 1);
             btnNextStep.Click += (s, e) => NavigateToStep(currentStepIndex + 1);
 
-            // Action triggers
+            // Image anchor events
             btnCaptureImage.Click += BtnCaptureImage_Click;
+
+            // Action sequence list events
+            lstActions.SelectedIndexChanged += LstActions_SelectedIndexChanged;
+            btnMoveUp.Click += BtnMoveUp_Click;
+            btnMoveDown.Click += BtnMoveDown_Click;
+            btnRemoveAction.Click += BtnRemoveAction_Click;
+            btnClearActions.Click += BtnClearActions_Click;
+            btnUpdateSelected.Click += BtnUpdateSelected_Click;
+
+            // Mouse action events
             btnCaptureCoords.Click += BtnCaptureCoords_Click;
+            btnAddMouseAction.Click += BtnAddMouseAction_Click;
+
+            // Keyboard action events
+            btnAddKeyAction.Click += BtnAddKeyAction_Click;
+            btnQuickTab.Click += (s, e) => AppendKeyText("{TAB}");
+            btnQuickEnter.Click += (s, e) => AppendKeyText("{ENTER}");
+
+            // Test execution
             btnTestExecution.Click += BtnTestExecution_Click;
 
             // Preview click to set coordinate directly on the template
@@ -223,10 +262,6 @@ namespace ProcessForge
             var model = Steps[currentStepIndex];
             model.TemplateName = txtTemplateName.Text;
             model.ImagePath = txtImagePath.Text;
-            model.TargetX = (int)numCoordX.Value;
-            model.TargetY = (int)numCoordY.Value;
-            model.ClickTypeIndex = cmbClickType.SelectedIndex;
-            model.UseRelativeOffset = chkUseRelativeOffset.Checked;
         }
 
         private void LoadStepToForm(int index)
@@ -235,14 +270,6 @@ namespace ProcessForge
 
             txtTemplateName.Text = model.TemplateName;
             txtImagePath.Text = model.ImagePath;
-            numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, model.TargetX));
-            numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, model.TargetY));
-
-            if (model.ClickTypeIndex >= 0 && model.ClickTypeIndex < cmbClickType.Items.Count)
-            {
-                cmbClickType.SelectedIndex = model.ClickTypeIndex;
-            }
-            chkUseRelativeOffset.Checked = model.UseRelativeOffset;
 
             // Load Preview Safely (without locking image file or stream disposal bug)
             if (picPreview.Image != null)
@@ -272,7 +299,86 @@ namespace ProcessForge
             btnPrevStep.Enabled = index > 0;
             btnNextStep.Enabled = index < TotalSteps - 1;
 
+            if (index == 0)
+            {
+                lblActionList.Text = "Linear Action Order (Step 1 hardcoded input; optional extra actions):";
+            }
+            else
+            {
+                lblActionList.Text = "Linear Action Order (Executed in sequence):";
+            }
+
             UpdatePaginationButtonsStyle();
+            RefreshActionsList(model.Actions.Count > 0 ? 0 : -1);
+        }
+
+        private void RefreshActionsList(int selectIndex = -1)
+        {
+            lstActions.BeginUpdate();
+            lstActions.Items.Clear();
+
+            var currentStep = Steps[currentStepIndex];
+            for (int i = 0; i < currentStep.Actions.Count; i++)
+            {
+                var act = currentStep.Actions[i];
+                lstActions.Items.Add($"{i + 1}. {act}");
+            }
+
+            if (selectIndex >= 0 && selectIndex < lstActions.Items.Count)
+            {
+                lstActions.SelectedIndex = selectIndex;
+            }
+            else if (lstActions.Items.Count > 0)
+            {
+                lstActions.SelectedIndex = 0;
+            }
+            else
+            {
+                lstActions.SelectedIndex = -1;
+            }
+
+            lstActions.EndUpdate();
+            UpdateActionButtonsState();
+            picPreview.Invalidate();
+        }
+
+        private void UpdateActionButtonsState()
+        {
+            int selIdx = lstActions.SelectedIndex;
+            int count = lstActions.Items.Count;
+
+            btnMoveUp.Enabled = selIdx > 0;
+            btnMoveDown.Enabled = selIdx >= 0 && selIdx < count - 1;
+            btnRemoveAction.Enabled = selIdx >= 0;
+            btnClearActions.Enabled = count > 0;
+            btnUpdateSelected.Enabled = selIdx >= 0;
+        }
+
+        private void LstActions_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            UpdateActionButtonsState();
+            var currentStep = Steps[currentStepIndex];
+            int selIdx = lstActions.SelectedIndex;
+
+            if (selIdx >= 0 && selIdx < currentStep.Actions.Count)
+            {
+                var act = currentStep.Actions[selIdx];
+                if (act.ActionType == "Mouse")
+                {
+                    numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, act.X ?? 0));
+                    numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, act.Y ?? 0));
+                    if (act.ClickTypeIndex.HasValue && act.ClickTypeIndex.Value >= 0 && act.ClickTypeIndex.Value < cmbClickType.Items.Count)
+                    {
+                        cmbClickType.SelectedIndex = act.ClickTypeIndex.Value;
+                    }
+                    chkUseRelativeOffset.Checked = act.UseRelativeOffset ?? true;
+                }
+                else if (act.ActionType == "Keyboard")
+                {
+                    txtKeyboardWord.Text = act.Word ?? string.Empty;
+                }
+            }
+
             picPreview.Invalidate();
         }
 
@@ -293,6 +399,141 @@ namespace ProcessForge
                         btn.ForeColor = Color.Black;
                     }
                 }
+            }
+        }
+
+        #endregion
+
+        #region Action List Management
+
+        private void BtnAddMouseAction_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "Mouse",
+                X = (int)numCoordX.Value,
+                Y = (int)numCoordY.Value,
+                ClickTypeIndex = cmbClickType.SelectedIndex,
+                UseRelativeOffset = chkUseRelativeOffset.Checked
+            };
+
+            currentStep.Actions.Add(action);
+            RefreshActionsList(currentStep.Actions.Count - 1);
+            SaveStepsToConfig();
+        }
+
+        private void BtnAddKeyAction_Click(object? sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtKeyboardWord.Text))
+            {
+                MessageBox.Show("Please enter the keys or word to send.", "Input Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtKeyboardWord.Focus();
+                return;
+            }
+
+            var currentStep = Steps[currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "Keyboard",
+                Word = txtKeyboardWord.Text
+            };
+
+            currentStep.Actions.Add(action);
+            txtKeyboardWord.Clear();
+            RefreshActionsList(currentStep.Actions.Count - 1);
+            SaveStepsToConfig();
+        }
+
+        private void AppendKeyText(string key)
+        {
+            txtKeyboardWord.Text += key;
+            txtKeyboardWord.Focus();
+            txtKeyboardWord.SelectionStart = txtKeyboardWord.Text.Length;
+        }
+
+        private void BtnUpdateSelected_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            int selIdx = lstActions.SelectedIndex;
+
+            if (selIdx >= 0 && selIdx < currentStep.Actions.Count)
+            {
+                var act = currentStep.Actions[selIdx];
+                if (act.ActionType == "Mouse")
+                {
+                    act.X = (int)numCoordX.Value;
+                    act.Y = (int)numCoordY.Value;
+                    act.ClickTypeIndex = cmbClickType.SelectedIndex;
+                    act.UseRelativeOffset = chkUseRelativeOffset.Checked;
+                }
+                else if (act.ActionType == "Keyboard")
+                {
+                    if (string.IsNullOrEmpty(txtKeyboardWord.Text))
+                    {
+                        MessageBox.Show("Please enter keys or text to update the selected keyboard action.", "Input Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        txtKeyboardWord.Focus();
+                        return;
+                    }
+                    act.Word = txtKeyboardWord.Text;
+                }
+
+                RefreshActionsList(selIdx);
+                SaveStepsToConfig();
+            }
+        }
+
+        private void BtnMoveUp_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            int selIdx = lstActions.SelectedIndex;
+            if (selIdx > 0)
+            {
+                var item = currentStep.Actions[selIdx];
+                currentStep.Actions.RemoveAt(selIdx);
+                currentStep.Actions.Insert(selIdx - 1, item);
+                RefreshActionsList(selIdx - 1);
+                SaveStepsToConfig();
+            }
+        }
+
+        private void BtnMoveDown_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            int selIdx = lstActions.SelectedIndex;
+            if (selIdx >= 0 && selIdx < currentStep.Actions.Count - 1)
+            {
+                var item = currentStep.Actions[selIdx];
+                currentStep.Actions.RemoveAt(selIdx);
+                currentStep.Actions.Insert(selIdx + 1, item);
+                RefreshActionsList(selIdx + 1);
+                SaveStepsToConfig();
+            }
+        }
+
+        private void BtnRemoveAction_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            int selIdx = lstActions.SelectedIndex;
+            if (selIdx >= 0 && selIdx < currentStep.Actions.Count)
+            {
+                currentStep.Actions.RemoveAt(selIdx);
+                int newIdx = Math.Min(selIdx, currentStep.Actions.Count - 1);
+                RefreshActionsList(newIdx);
+                SaveStepsToConfig();
+            }
+        }
+
+        private void BtnClearActions_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            if (currentStep.Actions.Count == 0) return;
+
+            if (MessageBox.Show("Clear all actions for this step?", "Confirm Clear", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                currentStep.Actions.Clear();
+                RefreshActionsList(-1);
+                SaveStepsToConfig();
             }
         }
 
@@ -372,24 +613,74 @@ namespace ProcessForge
                 numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, imgPt.Value.Y));
                 chkUseRelativeOffset.Checked = true;
 
-                SaveCurrentFormToModel();
-                SaveStepsToConfig();
+                // If a mouse action is selected in the list, update it directly
+                var currentStep = Steps[currentStepIndex];
+                int selIdx = lstActions.SelectedIndex;
+                if (selIdx >= 0 && selIdx < currentStep.Actions.Count)
+                {
+                    var selectedAction = currentStep.Actions[selIdx];
+                    if (selectedAction.ActionType == "Mouse")
+                    {
+                        selectedAction.X = (int)numCoordX.Value;
+                        selectedAction.Y = (int)numCoordY.Value;
+                        selectedAction.UseRelativeOffset = true;
+                        RefreshActionsList(selIdx);
+                        SaveStepsToConfig();
+                    }
+                }
+
                 picPreview.Invalidate();
             }
         }
 
         private void PicPreview_Paint(object? sender, PaintEventArgs e)
         {
-            if (picPreview.Image != null && chkUseRelativeOffset.Checked)
-            {
-                Point? prevPt = TranslateImageToPreview((int)numCoordX.Value, (int)numCoordY.Value);
-                if (prevPt.HasValue)
-                {
-                    int x = prevPt.Value.X;
-                    int y = prevPt.Value.Y;
+            if (picPreview.Image == null) return;
 
-                    using (Pen pen = new Pen(Color.Red, 2))
-                    using (Brush brush = new SolidBrush(Color.Red))
+            var step = Steps[currentStepIndex];
+            int selectedIdx = lstActions.SelectedIndex;
+
+            // Draw crosshairs for all relative mouse actions in the sequence
+            for (int i = 0; i < step.Actions.Count; i++)
+            {
+                var action = step.Actions[i];
+                if (action.ActionType == "Mouse" && (action.UseRelativeOffset ?? false))
+                {
+                    Point? prevPt = TranslateImageToPreview(action.X ?? 0, action.Y ?? 0);
+                    if (prevPt.HasValue)
+                    {
+                        int x = prevPt.Value.X;
+                        int y = prevPt.Value.Y;
+                        bool isSelected = (i == selectedIdx);
+
+                        Color color = isSelected ? Color.Red : Color.DodgerBlue;
+                        using (Pen pen = new Pen(color, isSelected ? 2 : 1))
+                        using (Brush brush = new SolidBrush(color))
+                        using (Font font = new Font("Segoe UI", 8F, FontStyle.Bold))
+                        {
+                            e.Graphics.DrawEllipse(pen, x - 8, y - 8, 16, 16);
+                            e.Graphics.DrawLine(pen, x - 12, y, x + 12, y);
+                            e.Graphics.DrawLine(pen, x, y - 12, x, y + 12);
+                            e.Graphics.FillEllipse(brush, x - 2, y - 2, 4, 4);
+
+                            // Draw sequence badge
+                            string badge = (i + 1).ToString();
+                            e.Graphics.DrawString(badge, font, brush, x + 8, y - 12);
+                        }
+                    }
+                }
+            }
+
+            // If no actions exist or none selected, draw current inputs indicator in LimeGreen
+            if (chkUseRelativeOffset.Checked && (step.Actions.Count == 0 || selectedIdx < 0))
+            {
+                Point? inputPt = TranslateImageToPreview((int)numCoordX.Value, (int)numCoordY.Value);
+                if (inputPt.HasValue)
+                {
+                    int x = inputPt.Value.X;
+                    int y = inputPt.Value.Y;
+                    using (Pen pen = new Pen(Color.LimeGreen, 2))
+                    using (Brush brush = new SolidBrush(Color.LimeGreen))
                     {
                         e.Graphics.DrawEllipse(pen, x - 8, y - 8, 16, 16);
                         e.Graphics.DrawLine(pen, x - 12, y, x + 12, y);
@@ -435,6 +726,19 @@ namespace ProcessForge
                             numCoordY.Value = selectedArea.Height / 2;
                             chkUseRelativeOffset.Checked = true;
                         }
+
+                        // If no actions exist (and not step 1 hardcoded login), add default center mouse click action
+                        if (Steps[currentStepIndex].Actions.Count == 0 && currentStepIndex != 0)
+                        {
+                            Steps[currentStepIndex].Actions.Add(new StepInputAction
+                            {
+                                ActionType = "Mouse",
+                                X = selectedArea.Width / 2,
+                                Y = selectedArea.Height / 2,
+                                ClickTypeIndex = 0,
+                                UseRelativeOffset = true
+                            });
+                        }
                     }
 
                     SaveCurrentFormToModel();
@@ -467,17 +771,19 @@ namespace ProcessForge
                     if (form.ShowDialog() == DialogResult.OK)
                     {
                         Point clickedPoint = form.SelectedPoint;
+                        int finalX = clickedPoint.X;
+                        int finalY = clickedPoint.Y;
+                        bool finalRelative = isRelative;
 
                         if (!isRelative)
                         {
-                            // Relative coordinate is disabled: capture absolute screen coordinates starting from screen 0, 0
-                            numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, clickedPoint.X));
-                            numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, clickedPoint.Y));
-                            chkUseRelativeOffset.Checked = false;
+                            finalX = clickedPoint.X;
+                            finalY = clickedPoint.Y;
+                            finalRelative = false;
                         }
                         else
                         {
-                            // Relative coordinate is enabled: calculate offset relative to matched template
+                            // Relative coordinate: calculate offset relative to matched template
                             bool matched = false;
                             if (!string.IsNullOrEmpty(step.ImagePath) && File.Exists(step.ImagePath))
                             {
@@ -495,47 +801,74 @@ namespace ProcessForge
 
                                         if (maxVal >= 0.70)
                                         {
-                                            int relX = clickedPoint.X - maxLoc.X;
-                                            int relY = clickedPoint.Y - maxLoc.Y;
-
-                                            numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, relX));
-                                            numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, relY));
-                                            chkUseRelativeOffset.Checked = true;
+                                            finalX = clickedPoint.X - maxLoc.X;
+                                            finalY = clickedPoint.Y - maxLoc.Y;
+                                            finalRelative = true;
                                             matched = true;
                                         }
                                     }
                                 }
-                                catch
-                                {
-                                    // In case OpenCV matching fails, fallback
-                                }
+                                catch { }
                             }
 
                             if (!matched)
                             {
-                                // If user captured region in this session on the same step
                                 if (lastCapturedArea.Width > 0 && lastCapturedArea.Height > 0 &&
                                     lastCapturedStepIndex == currentStepIndex)
                                 {
-                                    int relX = clickedPoint.X - lastCapturedArea.X;
-                                    int relY = clickedPoint.Y - lastCapturedArea.Y;
-
-                                    numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, relX));
-                                    numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, relY));
-                                    chkUseRelativeOffset.Checked = true;
+                                    finalX = clickedPoint.X - lastCapturedArea.X;
+                                    finalY = clickedPoint.Y - lastCapturedArea.Y;
+                                    finalRelative = true;
                                 }
                                 else
                                 {
-                                    // Direct screen coordinate fallback
-                                    numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, clickedPoint.X));
-                                    numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, clickedPoint.Y));
-                                    chkUseRelativeOffset.Checked = false;
+                                    finalX = clickedPoint.X;
+                                    finalY = clickedPoint.Y;
+                                    finalRelative = false;
                                 }
                             }
                         }
 
-                        SaveCurrentFormToModel();
-                        SaveStepsToConfig();
+                        numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, finalX));
+                        numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, finalY));
+                        chkUseRelativeOffset.Checked = finalRelative;
+
+                        // Add directly if first action, or ask user
+                        if (step.Actions.Count == 0)
+                        {
+                            step.Actions.Add(new StepInputAction
+                            {
+                                ActionType = "Mouse",
+                                X = (int)numCoordX.Value,
+                                Y = (int)numCoordY.Value,
+                                ClickTypeIndex = cmbClickType.SelectedIndex,
+                                UseRelativeOffset = chkUseRelativeOffset.Checked
+                            });
+                            RefreshActionsList(0);
+                            SaveStepsToConfig();
+                        }
+                        else
+                        {
+                            DialogResult result = MessageBox.Show(
+                                $"Captured coordinate: X = {numCoordX.Value}, Y = {numCoordY.Value} ({(chkUseRelativeOffset.Checked ? "Relative" : "Absolute")}).\n\nAdd this as a new mouse action to the sequence?",
+                                "Coordinate Captured",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question);
+
+                            if (result == DialogResult.Yes)
+                            {
+                                step.Actions.Add(new StepInputAction
+                                {
+                                    ActionType = "Mouse",
+                                    X = (int)numCoordX.Value,
+                                    Y = (int)numCoordY.Value,
+                                    ClickTypeIndex = cmbClickType.SelectedIndex,
+                                    UseRelativeOffset = chkUseRelativeOffset.Checked
+                                });
+                                RefreshActionsList(step.Actions.Count - 1);
+                                SaveStepsToConfig();
+                            }
+                        }
                     }
                 }
             }
@@ -561,6 +894,12 @@ namespace ProcessForge
                 return;
             }
 
+            if (step.Actions.Count == 0 && currentStepIndex != 0)
+            {
+                MessageBox.Show("No actions configured for this step. Please add at least one mouse or keyboard action.", "No Actions", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             this.Hide();
             await Task.Delay(300);
 
@@ -582,23 +921,48 @@ namespace ProcessForge
 
                     if (maxVal >= 0.85) // Confidence threshold
                     {
-                        int targetX, targetY;
+                        int executedCount = 0;
 
-                        if (step.UseRelativeOffset)
+                        // Execute linear action sequence in order
+                        foreach (var action in step.Actions)
                         {
-                            targetX = maxLoc.X + step.TargetX;
-                            targetY = maxLoc.Y + step.TargetY;
+                            if (action.ActionType == "Mouse")
+                            {
+                                int targetX, targetY;
+                                if (action.UseRelativeOffset ?? false)
+                                {
+                                    targetX = maxLoc.X + (action.X ?? 0);
+                                    targetY = maxLoc.Y + (action.Y ?? 0);
+                                }
+                                else
+                                {
+                                    targetX = action.X ?? 0;
+                                    targetY = action.Y ?? 0;
+                                }
+
+                                PerformClick(targetX, targetY, action.ClickTypeIndex ?? 0);
+                                executedCount++;
+                                await Task.Delay(250);
+                            }
+                            else if (action.ActionType == "Keyboard")
+                            {
+                                if (!string.IsNullOrEmpty(action.Word))
+                                {
+                                    SendKeys.SendWait(action.Word);
+                                    executedCount++;
+                                    await Task.Delay(250);
+                                }
+                            }
+                        }
+
+                        if (executedCount > 0)
+                        {
+                            MessageBox.Show($"Match Found! (Score: {maxVal:F2})\nExecuted {executedCount} action(s) in sequence successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
-                            targetX = step.TargetX;
-                            targetY = step.TargetY;
+                            MessageBox.Show($"Match Found! (Score: {maxVal:F2})\nTemplate detected successfully on screen.\n(0 macro actions configured; Step 1 input is handled by custom code in Case 1).", "Template Match Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
-
-                        // Execute Click Simulation
-                        PerformClick(targetX, targetY, step.ClickTypeIndex);
-
-                        MessageBox.Show($"Match Found! (Score: {maxVal:F2})\nClicked At X: {targetX}, Y: {targetY}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -672,15 +1036,68 @@ namespace ProcessForge
         #endregion
     }
 
+    public class StepInputAction
+    {
+        public string ActionType { get; set; } = "Mouse"; // "Mouse" or "Keyboard"
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? X { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? Y { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? ClickTypeIndex { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UseRelativeOffset { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Word { get; set; }
+
+        public override string ToString()
+        {
+            if (ActionType == "Keyboard")
+            {
+                return $"⌨ [Keyboard] SendKeys: \"{Word}\"";
+            }
+            else
+            {
+                string clickDesc = (ClickTypeIndex ?? 0) switch
+                {
+                    0 => "Single Left Click",
+                    1 => "Double Left Click",
+                    2 => "Single Right Click",
+                    3 => "Hover Only",
+                    _ => "Click"
+                };
+                string mode = (UseRelativeOffset ?? true) ? "Relative" : "Absolute";
+                return $"🖱 [Mouse] {clickDesc} at ({X ?? 0}, {Y ?? 0}) [{mode}]";
+            }
+        }
+    }
+
     public class TargetStepModel
     {
         public int StepIndex { get; set; }
         public string StepTitle { get; set; } = string.Empty;
         public string TemplateName { get; set; } = string.Empty;
         public string ImagePath { get; set; } = string.Empty;
-        public int TargetX { get; set; }
-        public int TargetY { get; set; }
-        public int ClickTypeIndex { get; set; } = 0;
-        public bool UseRelativeOffset { get; set; } = true;
+
+        // Linear input action macro sequence
+        public List<StepInputAction> Actions { get; set; } = new List<StepInputAction>();
+
+        // Legacy properties for backward compatibility
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? TargetX { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? TargetY { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? ClickTypeIndex { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UseRelativeOffset { get; set; }
     }
 }
