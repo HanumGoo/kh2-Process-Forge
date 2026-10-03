@@ -1,4 +1,4 @@
-﻿using OpenCvSharp;
+using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using ProcessForge.AutoLoginPatternLogic;
 using ProcessForge.FindWindowLogic;
@@ -6,9 +6,14 @@ using ProcessForge.RefreshLogic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ProcessForge.ApplicationLogic
 {
@@ -16,8 +21,57 @@ namespace ProcessForge.ApplicationLogic
     {
         //this is for fully automatic login for every NotLogin status in Account Data.
 
-        public async static Task RunAutoLogin(string processName, string accountDataFilePath)
+        private static CancellationTokenSource? _autoLoginCts;
+
+        public static bool IsRunning => _autoLoginCts != null && !_autoLoginCts.IsCancellationRequested;
+
+        public static void StopAutoLogin()
         {
+            if (_autoLoginCts != null && !_autoLoginCts.IsCancellationRequested)
+            {
+                try
+                {
+                    _autoLoginCts.Cancel();
+                }
+                catch { }
+            }
+        }
+
+        public async static Task RunAutoLogin(string processName, string accountDataFilePath, Action? onProcessCompleted = null, CancellationToken externalToken = default)
+        {
+            if (IsRunning)
+            {
+                return;
+            }
+
+            using var linkedCts = externalToken != default
+                ? CancellationTokenSource.CreateLinkedTokenSource(externalToken)
+                : new CancellationTokenSource();
+
+            _autoLoginCts = linkedCts;
+            var token = linkedCts.Token;
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    ExecuteAutoLogin(processName, accountDataFilePath, onProcessCompleted, token);
+                }, token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Operation cancelled cleanly
+            }
+            finally
+            {
+                _autoLoginCts = null;
+            }
+        }
+
+        private static void ExecuteAutoLogin(string processName, string accountDataFilePath, Action? onProcessCompleted, CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested) return;
+
             // Detected Process
             #region Get All Process and Extract Account Data
 
@@ -31,6 +85,8 @@ namespace ProcessForge.ApplicationLogic
 
             foreach (Process item in AllProcess)
             {
+                if (cancellationToken.IsCancellationRequested) return;
+
                 if (string.IsNullOrEmpty(item.MainWindowTitle))
                 {
 
@@ -53,6 +109,8 @@ namespace ProcessForge.ApplicationLogic
             int counter = 0;
             foreach (string line in FileExtract)
             {
+                if (cancellationToken.IsCancellationRequested) return;
+
                 if (string.IsNullOrEmpty(line))
                 {
                     MessageBox.Show("Found empty line in account data file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -91,6 +149,8 @@ namespace ProcessForge.ApplicationLogic
 
             foreach (ProcessData item in ProcessTitle)
             {
+                if (cancellationToken.IsCancellationRequested) return;
+
                 // Logic for detecting processes
                 DataLoginFormat? matchedData = DetectedData.Find(data => data.nickname == item.TitleName);
                 if (matchedData != null)
@@ -119,6 +179,8 @@ namespace ProcessForge.ApplicationLogic
 
             foreach (DataLoginFormat item in DetectedProcess)
             {
+                if (cancellationToken.IsCancellationRequested) break;
+
                 if (item.isLogin)
                 {
                     continue; // Skip if already logged in
@@ -128,16 +190,19 @@ namespace ProcessForge.ApplicationLogic
                 Process process = Process.GetProcessById(item.ProcessId);
                 GetAndFindWindow.WindowRestore(item.ProcessId);
                 process.WaitForInputIdle(); // Wait for the process to be ready for input
-                Thread.Sleep(1000); // Optional: Add a small delay to ensure the window is fully restored
+
+                if (cancellationToken.WaitHandle.WaitOne(1000)) break; // Optional: Add a small delay to ensure the window is fully restored
 
                 // get the window size
                 Rectangle windowSize = GetAndFindWindow.WindowSize(item.ProcessId);
 
-                Case AllCase = new Case(storageDirectory, configFilePath, item);
+                Case AllCase = new Case(storageDirectory, configFilePath, item, cancellationToken);
 
 
                 for (int i = 0; i < loaded?.Count; i++)
                 {
+                    if (cancellationToken.IsCancellationRequested) break;
+
                     TargetStepModel step = loaded[i];
 
                     if (step.IsSubStep)
@@ -168,12 +233,62 @@ namespace ProcessForge.ApplicationLogic
                     }
                 }
 
+                if (cancellationToken.IsCancellationRequested) break;
                 GetAndFindWindow.WindowMinimize(item.ProcessId); // Minimize the window after processing
+
+                // Mark item as logged in
+                item.isLogin = true;
+
+                // Update account data file: change false to True
+                try
+                {
+                    if (File.Exists(accountDataFilePath))
+                    {
+                        string[] fileLines = File.ReadAllLines(accountDataFilePath);
+                        bool updated = false;
+
+                        if (item.LineIndex >= 0 && item.LineIndex < fileLines.Length)
+                        {
+                            string[] parts = fileLines[item.LineIndex].Split(',');
+                            if (parts.Length == 5 && parts[0] == item.nickname)
+                            {
+                                fileLines[item.LineIndex] = $"{parts[0]},{parts[1]},{parts[2]},{parts[3]},True";
+                                updated = true;
+                            }
+                        }
+
+                        if (!updated)
+                        {
+                            for (int lineIdx = 0; lineIdx < fileLines.Length; lineIdx++)
+                            {
+                                string[] parts = fileLines[lineIdx].Split(',');
+                                if (parts.Length == 5 && parts[0] == item.nickname)
+                                {
+                                    fileLines[lineIdx] = $"{parts[0]},{parts[1]},{parts[2]},{parts[3]},True";
+                                    updated = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (updated)
+                        {
+                            File.WriteAllLines(accountDataFilePath, fileLines);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to update account file for {item.nickname}: {ex.Message}");
+                }
+
+                // Trigger UI refresh callback
+                onProcessCompleted?.Invoke();
+            }
                 // Logic for automatic login
                 // You can implement the login logic here using the username, password, and secondPassword from the item object.
                 // For example, you can use SendKeys or other methods to input the credentials into the application window.
                 // Make sure to handle any exceptions or errors that may occur during the login process.
-            }
 
             // restore window and accepts 1 parameter that is the title process name
         }
@@ -503,7 +618,229 @@ namespace ProcessForge.ApplicationLogic
         }
         public static void TestLogin()
         {
+            MessageBox.Show("Please use the Test button on MainForm with process name and account file path provided.", "Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
+        public static void TestLogin(string processName, string accountDataFilePath)
+        {
+            // 1. Validate Process Name
+            if (string.IsNullOrWhiteSpace(processName))
+            {
+                MessageBox.Show("Please enter a Process Name in the 'Process Name' field.", "Test - Missing Process Name", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 2. Validate Account Data File Path
+            if (string.IsNullOrWhiteSpace(accountDataFilePath))
+            {
+                MessageBox.Show("Please select or enter an Account Data file path first.", "Test - Missing File Path", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!File.Exists(accountDataFilePath))
+            {
+                MessageBox.Show($"The specified account data file does not exist:\n{accountDataFilePath}", "Test - File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 3. Check Running Processes
+            Process[] allProcesses = Process.GetProcessesByName(processName);
+            if (allProcesses.Length == 0)
+            {
+                MessageBox.Show($"No running processes found matching: \"{processName}\".\nPlease ensure your application is running.", "Test - No Processes Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            List<ProcessData> processTitles = new List<ProcessData>();
+            int emptyTitleCount = 0;
+            foreach (Process p in allProcesses)
+            {
+                if (string.IsNullOrEmpty(p.MainWindowTitle))
+                {
+                    emptyTitleCount++;
+                }
+                else
+                {
+                    processTitles.Add(new ProcessData
+                    {
+                        TitleName = p.MainWindowTitle,
+                        ProcessId = p.Id
+                    });
+                }
+            }
+
+            // 4. Validate Account Data File Contents
+            string[] fileExtract;
+            try
+            {
+                fileExtract = File.ReadAllLines(accountDataFilePath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to read account data file:\n{ex.Message}", "Test - Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (fileExtract.Length == 0)
+            {
+                MessageBox.Show("The account data file is empty.", "Test - Empty File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            List<DataLoginFormat> detectedAccounts = new List<DataLoginFormat>();
+            List<string> formatErrors = new List<string>();
+
+            for (int i = 0; i < fileExtract.Length; i++)
+            {
+                string line = fileExtract[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    formatErrors.Add($"Line {i + 1}: Empty line");
+                    continue;
+                }
+
+                string[] parts = line.Split(',');
+                if (parts.Length != 5)
+                {
+                    formatErrors.Add($"Line {i + 1}: Expected 5 comma-separated values, found {parts.Length}");
+                    continue;
+                }
+
+                if (!bool.TryParse(parts[4], out bool isValidBool))
+                {
+                    formatErrors.Add($"Line {i + 1}: Invalid login status '{parts[4]}' (must be True or False)");
+                    continue;
+                }
+
+                detectedAccounts.Add(new DataLoginFormat
+                {
+                    nickname = parts[0],
+                    username = parts[1],
+                    password = parts[2],
+                    secondPassword = parts[3],
+                    isLogin = isValidBool,
+                    LineIndex = i
+                });
+            }
+
+            if (formatErrors.Count > 0)
+            {
+                string errorSummary = string.Join("\n", formatErrors.Take(5));
+                if (formatErrors.Count > 5) errorSummary += $"\n... and {formatErrors.Count - 5} more";
+                MessageBox.Show($"Found {formatErrors.Count} formatting error(s) in account data file:\n\n{errorSummary}", "Test - Format Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 5. Match Processes with Accounts
+            int matchedCount = 0;
+            int readyToLoginCount = 0;
+            int alreadyLoggedInCount = 0;
+            List<string> unmatchedProcessTitles = new List<string>();
+
+            foreach (ProcessData pData in processTitles)
+            {
+                DataLoginFormat? match = detectedAccounts.Find(d => d.nickname == pData.TitleName);
+                if (match != null)
+                {
+                    matchedCount++;
+                    if (match.isLogin)
+                    {
+                        alreadyLoggedInCount++;
+                    }
+                    else
+                    {
+                        readyToLoginCount++;
+                    }
+                }
+                else
+                {
+                    unmatchedProcessTitles.Add(pData.TitleName);
+                }
+            }
+
+            // 6. Check Steps Config
+            string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
+            string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
+            int mainStepsCount = 0;
+            int subStepsCount = 0;
+            bool configExists = File.Exists(configFilePath);
+
+            if (configExists)
+            {
+                try
+                {
+                    string json = File.ReadAllText(configFilePath);
+                    var steps = JsonSerializer.Deserialize<List<TargetStepModel>>(json);
+                    if (steps != null)
+                    {
+                        foreach (var s in steps)
+                        {
+                            if (s.IsSubStep) subStepsCount++;
+                            else mainStepsCount++;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            // 7. Compose and Display Report
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("=== AUTO LOGIN VALIDATION TEST ===");
+            sb.AppendLine();
+            sb.AppendLine($"• Target Process: {processName}");
+            sb.AppendLine($"• Total Instances Running: {allProcesses.Length} ({processTitles.Count} with window title)");
+            if (emptyTitleCount > 0)
+            {
+                sb.AppendLine($"  ({emptyTitleCount} process(es) have no main window title yet)");
+            }
+            sb.AppendLine();
+            sb.AppendLine($"• Account Data File: {Path.GetFileName(accountDataFilePath)}");
+            sb.AppendLine($"• Total Accounts in File: {detectedAccounts.Count}");
+            sb.AppendLine();
+            sb.AppendLine($"• Matched Processes: {matchedCount}");
+            sb.AppendLine($"  - Ready for Auto Login: {readyToLoginCount} process(es)");
+            sb.AppendLine($"  - Already Logged In: {alreadyLoggedInCount} process(es)");
+
+            if (unmatchedProcessTitles.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"[Warning] {unmatchedProcessTitles.Count} running process(es) do not match any account nickname:");
+                foreach (string title in unmatchedProcessTitles.Take(3))
+                {
+                    sb.AppendLine($"  • \"{title}\"");
+                }
+                if (unmatchedProcessTitles.Count > 3)
+                {
+                    sb.AppendLine($"  ... and {unmatchedProcessTitles.Count - 3} more");
+                }
+            }
+
+            sb.AppendLine();
+            if (!configExists)
+            {
+                sb.AppendLine("[Warning] 'steps_config.json' not found! Please configure steps first.");
+            }
+            else
+            {
+                sb.AppendLine($"• Steps Configured: {mainStepsCount} Main Step(s), {subStepsCount} Sub-Step(s)");
+            }
+
+            sb.AppendLine();
+            if (readyToLoginCount > 0)
+            {
+                sb.AppendLine($"Status: OK! Ready to login {readyToLoginCount} application(s).");
+            }
+            else if (matchedCount > 0 && readyToLoginCount == 0)
+            {
+                sb.AppendLine("Status: All matched applications are already logged in (isLogin = True).");
+            }
+            else
+            {
+                sb.AppendLine("Status: No applications are ready to login.");
+            }
+
+            MessageBoxIcon icon = readyToLoginCount > 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+            MessageBox.Show(sb.ToString(), "Auto Login Test", MessageBoxButtons.OK, icon);
         }
 
 

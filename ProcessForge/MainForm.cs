@@ -56,6 +56,52 @@ namespace ProcessForge
             };
 
             ComboBox.SelectedIndex = 0;
+            LoadMainFormConfig();
+        }
+
+        private void LoadMainFormConfig()
+        {
+            try
+            {
+                var config = ProcessForge.Config.AppConfigManager.LoadConfig();
+                if (config.MainForm != null)
+                {
+                    if (!string.IsNullOrEmpty(config.MainForm.ProcessName))
+                        ProcessName.Text = config.MainForm.ProcessName;
+                    if (!string.IsNullOrEmpty(config.MainForm.FilePathName))
+                        FilePathName.Text = config.MainForm.FilePathName;
+                    if (!string.IsNullOrEmpty(config.MainForm.RenameTextbox))
+                        RenameTextbox.Text = config.MainForm.RenameTextbox;
+                    if (!string.IsNullOrEmpty(config.MainForm.NotepadPathTextbox))
+                        NotepadPathTextbox.Text = config.MainForm.NotepadPathTextbox;
+                    if (!string.IsNullOrEmpty(config.MainForm.FilePathNameLogin))
+                        FilePathNameLogin.Text = config.MainForm.FilePathNameLogin;
+                }
+            }
+            catch { }
+
+            ProcessName.TextChanged += (s, e) => SaveMainFormConfig();
+            FilePathName.TextChanged += (s, e) => SaveMainFormConfig();
+            RenameTextbox.TextChanged += (s, e) => SaveMainFormConfig();
+            NotepadPathTextbox.TextChanged += (s, e) => SaveMainFormConfig();
+            FilePathNameLogin.TextChanged += (s, e) => SaveMainFormConfig();
+        }
+
+        private void SaveMainFormConfig()
+        {
+            try
+            {
+                var cfg = new ProcessForge.Config.MainFormConfig
+                {
+                    ProcessName = ProcessName.Text,
+                    FilePathName = FilePathName.Text,
+                    RenameTextbox = RenameTextbox.Text,
+                    NotepadPathTextbox = NotepadPathTextbox.Text,
+                    FilePathNameLogin = FilePathNameLogin.Text
+                };
+                ProcessForge.Config.AppConfigManager.SaveMainFormConfig(cfg);
+            }
+            catch { }
         }
 
         //clear the RAM by emptying the working set of the current process
@@ -534,12 +580,76 @@ namespace ProcessForge
 
         private void testLogin_Click(object sender, EventArgs e)
         {
-            AutoLoginLogic.TestLogin();
+            AutoLoginLogic.TestLogin(ProcessName.Text, FilePathNameLogin.Text);
         }
 
         private async void runLogin_Click(object sender, EventArgs e)
         {
-            await AutoLoginLogic.RunAutoLogin(ProcessName.Text, FilePathNameLogin.Text);
+            if (AutoLoginLogic.IsRunning)
+            {
+                runLogin.Text = "STOPPING...";
+                runLogin.Enabled = false;
+                AutoLoginLogic.StopAutoLogin();
+                return;
+            }
+
+            runLogin.Text = "STOP AUTO LOGIN PROCESS";
+            runLogin.BackColor = Color.FromArgb(190, 30, 45);
+            runLogin.ForeColor = Color.White;
+            panel8.BackColor = Color.Green;
+
+            Action onProcessCompleted = () =>
+            {
+                if (flowLayoutPanel.InvokeRequired)
+                {
+                    flowLayoutPanel.BeginInvoke(new Action(() =>
+                    {
+                        if (!string.IsNullOrEmpty(FilePathNameLogin.Text) && File.Exists(FilePathNameLogin.Text))
+                        {
+                            AutoLoginLogic.RefreshLogin(flowLayoutPanel, ProcessName.Text, FilePathNameLogin.Text);
+                        }
+                    }));
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(FilePathNameLogin.Text) && File.Exists(FilePathNameLogin.Text))
+                    {
+                        AutoLoginLogic.RefreshLogin(flowLayoutPanel, ProcessName.Text, FilePathNameLogin.Text);
+                    }
+                }
+            };
+
+            try
+            {
+                await AutoLoginLogic.RunAutoLogin(ProcessName.Text, FilePathNameLogin.Text, onProcessCompleted);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Auto login error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                panel8.BackColor = Color.Red;
+                runLogin.Text = "RUN AUTO LOGIN";
+                runLogin.BackColor = Color.Black;
+                runLogin.ForeColor = Color.White;
+                runLogin.Enabled = true;
+
+                if (!string.IsNullOrEmpty(FilePathNameLogin.Text) && File.Exists(FilePathNameLogin.Text))
+                {
+                    AutoLoginLogic.RefreshLogin(flowLayoutPanel, ProcessName.Text, FilePathNameLogin.Text);
+                }
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            SaveMainFormConfig();
+            if (AutoLoginLogic.IsRunning)
+            {
+                AutoLoginLogic.StopAutoLogin();
+            }
+            base.OnFormClosing(e);
         }
 
         private void txtSearchLogin_TextChanged(object sender, EventArgs e)

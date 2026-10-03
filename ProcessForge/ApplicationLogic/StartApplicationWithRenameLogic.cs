@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using ProcessForge.Config;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
@@ -19,6 +20,9 @@ namespace ProcessForge.ApplicationLogic
 
         [DllImport("user32.dll")]
         private static extern bool SetWindowText(IntPtr hWnd, string lpString);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
@@ -72,6 +76,7 @@ namespace ProcessForge.ApplicationLogic
                     }
                     else
                     {
+                        AppConfigManager.RecordInitialWindowBounds(DataID[i], ApplicationHandle);
                         ShowWindow(ApplicationHandle, SW_MINIMIZE);
                         SetWindowText(ApplicationHandle, DataID[i]);
                     }
@@ -173,6 +178,7 @@ namespace ProcessForge.ApplicationLogic
                         }
                         else
                         {
+                            AppConfigManager.RecordInitialWindowBounds(IDData[i], ApplicationHandle);
                             ShowWindow(ApplicationHandle, SW_MINIMIZE);
                             SetWindowText(ApplicationHandle, IDData[i]);
                             StatusData[i] = "Exist";
@@ -256,6 +262,12 @@ namespace ProcessForge.ApplicationLogic
                     }
                     else
                     {
+                        StringBuilder sbTitle = new StringBuilder(256);
+                        GetWindowText(ApplicationHandle, sbTitle, sbTitle.Capacity);
+                        string wTitle = sbTitle.ToString();
+                        if (string.IsNullOrWhiteSpace(wTitle)) wTitle = ProcessName;
+                        AppConfigManager.RecordInitialWindowBounds(wTitle, ApplicationHandle);
+
                         ShowWindow(ApplicationHandle, SW_MINIMIZE);
                         //MessageBox.Show("Handle Found! : " + ApplicationHandle.ToString());
                         
