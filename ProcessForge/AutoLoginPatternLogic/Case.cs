@@ -196,7 +196,7 @@ namespace ProcessForge.AutoLoginPatternLogic
                                     if (action.X.HasValue && action.Y.HasValue)
                                     {
                                         InputWindowLogic.InputWindow.ClickAt(matchLocation.X + (action.X ?? 0), matchLocation.Y + (action.Y ?? 0));
-                                            MessageBox.Show("match location + action x : " + (matchLocation.X + action.X ?? 0).ToString() + "\n" +  "match location + action y : " + (matchLocation.Y + action.Y ?? 0).ToString() + "\n" + "match score : " + matchScore.ToString() + "\n" + "match location: " + matchLocation.ToString() + "\n" + "action location: " + action.X.ToString() + ", " + action.Y.ToString());
+                                            //MessageBox.Show("match location + action x : " + (matchLocation.X + action.X ?? 0).ToString() + "\n" +  "match location + action y : " + (matchLocation.Y + action.Y ?? 0).ToString() + "\n" + "match score : " + matchScore.ToString() + "\n" + "match location: " + matchLocation.ToString() + "\n" + "action location: " + action.X.ToString() + ", " + action.Y.ToString());
                                         }
                                 }
                                 else
