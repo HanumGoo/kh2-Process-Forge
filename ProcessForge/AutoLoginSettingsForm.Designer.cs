@@ -15,6 +15,8 @@ namespace ProcessForge
         private System.Windows.Forms.Button btnNextStep;
         private System.Windows.Forms.Label lblStepIndicator;
         private System.Windows.Forms.FlowLayoutPanel flpPageButtons;
+        private System.Windows.Forms.Button btnAddSubStep;
+        private System.Windows.Forms.Button btnDeleteSubStep;
 
         private System.Windows.Forms.TableLayoutPanel tlpMainLayout;
 
@@ -22,10 +24,12 @@ namespace ProcessForge
         private System.Windows.Forms.GroupBox gbImageConfig;
         private System.Windows.Forms.PictureBox picPreview;
         private System.Windows.Forms.Button btnCaptureImage;
-        private System.Windows.Forms.Label lblImagePathTitle;
-        private System.Windows.Forms.TextBox txtImagePath;
+        private System.Windows.Forms.Label lblCaptureTitle;
+        private System.Windows.Forms.TextBox txtCaptureTitle;
         private System.Windows.Forms.Label lblTemplateName;
         private System.Windows.Forms.TextBox txtTemplateName;
+        private System.Windows.Forms.Label lblImagePathTitle;
+        private System.Windows.Forms.TextBox txtImagePath;
 
         // Linear Action Sequence Controls
         private System.Windows.Forms.GroupBox gbActionConfig;
@@ -84,10 +88,14 @@ namespace ProcessForge
             this.btnNextStep = new System.Windows.Forms.Button();
             this.lblStepIndicator = new System.Windows.Forms.Label();
             this.flpPageButtons = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnAddSubStep = new System.Windows.Forms.Button();
+            this.btnDeleteSubStep = new System.Windows.Forms.Button();
             this.tlpMainLayout = new System.Windows.Forms.TableLayoutPanel();
             this.gbImageConfig = new System.Windows.Forms.GroupBox();
             this.picPreview = new System.Windows.Forms.PictureBox();
             this.btnCaptureImage = new System.Windows.Forms.Button();
+            this.lblCaptureTitle = new System.Windows.Forms.Label();
+            this.txtCaptureTitle = new System.Windows.Forms.TextBox();
             this.lblTemplateName = new System.Windows.Forms.Label();
             this.txtTemplateName = new System.Windows.Forms.TextBox();
             this.lblImagePathTitle = new System.Windows.Forms.Label();
@@ -159,21 +167,23 @@ namespace ProcessForge
             this.lblHeaderSubtitle.ForeColor = System.Drawing.Color.LightGray;
             this.lblHeaderSubtitle.Location = new System.Drawing.Point(17, 30);
             this.lblHeaderSubtitle.Name = "lblHeaderSubtitle";
-            this.lblHeaderSubtitle.Size = new System.Drawing.Size(425, 13);
-            this.lblHeaderSubtitle.Text = "Capture image anchor and configure linear input macro sequence per step.";
+            this.lblHeaderSubtitle.Size = new System.Drawing.Size(550, 13);
+            this.lblHeaderSubtitle.Text = "Capture image anchor and configure linear input macro sequence per step (Main Steps 1-5 & Custom Sub-Steps).";
 
             // 
             // Pagination Bar
             // 
             this.pnlPagination.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.pnlPagination.Controls.Add(this.lblStepIndicator);
-            this.pnlPagination.Controls.Add(this.flpPageButtons);
-            this.pnlPagination.Controls.Add(this.btnPrevStep);
             this.pnlPagination.Controls.Add(this.btnNextStep);
+            this.pnlPagination.Controls.Add(this.btnDeleteSubStep);
+            this.pnlPagination.Controls.Add(this.btnAddSubStep);
+            this.pnlPagination.Controls.Add(this.flpPageButtons);
+            this.pnlPagination.Controls.Add(this.lblStepIndicator);
+            this.pnlPagination.Controls.Add(this.btnPrevStep);
             this.pnlPagination.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlPagination.Location = new System.Drawing.Point(0, 55);
             this.pnlPagination.Name = "pnlPagination";
-            this.pnlPagination.Size = new System.Drawing.Size(1000, 45);
+            this.pnlPagination.Size = new System.Drawing.Size(1000, 50);
             this.pnlPagination.TabIndex = 1;
 
             // btnPrevStep
@@ -182,9 +192,9 @@ namespace ProcessForge
             this.btnPrevStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPrevStep.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnPrevStep.ForeColor = System.Drawing.Color.Black;
-            this.btnPrevStep.Location = new System.Drawing.Point(12, 7);
+            this.btnPrevStep.Location = new System.Drawing.Point(10, 10);
             this.btnPrevStep.Name = "btnPrevStep";
-            this.btnPrevStep.Size = new System.Drawing.Size(80, 30);
+            this.btnPrevStep.Size = new System.Drawing.Size(65, 30);
             this.btnPrevStep.TabIndex = 0;
             this.btnPrevStep.Text = "< PREV";
             this.btnPrevStep.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -192,19 +202,48 @@ namespace ProcessForge
 
             // lblStepIndicator
             this.lblStepIndicator.AutoSize = true;
-            this.lblStepIndicator.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblStepIndicator.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblStepIndicator.ForeColor = System.Drawing.Color.Black;
-            this.lblStepIndicator.Location = new System.Drawing.Point(98, 15);
+            this.lblStepIndicator.Location = new System.Drawing.Point(78, 17);
             this.lblStepIndicator.Name = "lblStepIndicator";
-            this.lblStepIndicator.Size = new System.Drawing.Size(82, 15);
-            this.lblStepIndicator.Text = "STEP 1 OF 5";
+            this.lblStepIndicator.Size = new System.Drawing.Size(125, 15);
+            this.lblStepIndicator.Text = "MAIN STEP 1 OF 5";
 
             // flpPageButtons
-            this.flpPageButtons.AutoScroll = false;
-            this.flpPageButtons.Location = new System.Drawing.Point(190, 7);
+            this.flpPageButtons.AutoScroll = true;
+            this.flpPageButtons.WrapContents = false;
+            this.flpPageButtons.Location = new System.Drawing.Point(215, 6);
             this.flpPageButtons.Name = "flpPageButtons";
-            this.flpPageButtons.Size = new System.Drawing.Size(705, 32);
+            this.flpPageButtons.Size = new System.Drawing.Size(530, 38);
             this.flpPageButtons.TabIndex = 1;
+
+            // btnAddSubStep
+            this.btnAddSubStep.BackColor = System.Drawing.Color.Black;
+            this.btnAddSubStep.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnAddSubStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAddSubStep.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnAddSubStep.ForeColor = System.Drawing.Color.White;
+            this.btnAddSubStep.Location = new System.Drawing.Point(755, 10);
+            this.btnAddSubStep.Name = "btnAddSubStep";
+            this.btnAddSubStep.Size = new System.Drawing.Size(85, 30);
+            this.btnAddSubStep.TabIndex = 2;
+            this.btnAddSubStep.Text = "+ ADD SUB";
+            this.btnAddSubStep.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.btnAddSubStep.UseVisualStyleBackColor = false;
+
+            // btnDeleteSubStep
+            this.btnDeleteSubStep.BackColor = System.Drawing.Color.White;
+            this.btnDeleteSubStep.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDeleteSubStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDeleteSubStep.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnDeleteSubStep.ForeColor = System.Drawing.Color.Crimson;
+            this.btnDeleteSubStep.Location = new System.Drawing.Point(845, 10);
+            this.btnDeleteSubStep.Name = "btnDeleteSubStep";
+            this.btnDeleteSubStep.Size = new System.Drawing.Size(75, 30);
+            this.btnDeleteSubStep.TabIndex = 3;
+            this.btnDeleteSubStep.Text = "✕ DEL SUB";
+            this.btnDeleteSubStep.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.btnDeleteSubStep.UseVisualStyleBackColor = false;
 
             // btnNextStep
             this.btnNextStep.BackColor = System.Drawing.Color.Black;
@@ -212,10 +251,10 @@ namespace ProcessForge
             this.btnNextStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNextStep.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnNextStep.ForeColor = System.Drawing.Color.White;
-            this.btnNextStep.Location = new System.Drawing.Point(908, 7);
+            this.btnNextStep.Location = new System.Drawing.Point(925, 10);
             this.btnNextStep.Name = "btnNextStep";
-            this.btnNextStep.Size = new System.Drawing.Size(80, 30);
-            this.btnNextStep.TabIndex = 2;
+            this.btnNextStep.Size = new System.Drawing.Size(65, 30);
+            this.btnNextStep.TabIndex = 4;
             this.btnNextStep.Text = "NEXT >";
             this.btnNextStep.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.btnNextStep.UseVisualStyleBackColor = false;
@@ -229,12 +268,12 @@ namespace ProcessForge
             this.tlpMainLayout.Controls.Add(this.gbImageConfig, 0, 0);
             this.tlpMainLayout.Controls.Add(this.gbActionConfig, 1, 0);
             this.tlpMainLayout.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpMainLayout.Location = new System.Drawing.Point(0, 100);
+            this.tlpMainLayout.Location = new System.Drawing.Point(0, 105);
             this.tlpMainLayout.Name = "tlpMainLayout";
             this.tlpMainLayout.Padding = new System.Windows.Forms.Padding(10);
             this.tlpMainLayout.RowCount = 1;
             this.tlpMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpMainLayout.Size = new System.Drawing.Size(1000, 430);
+            this.tlpMainLayout.Size = new System.Drawing.Size(1000, 425);
             this.tlpMainLayout.TabIndex = 2;
 
             // 
@@ -244,6 +283,8 @@ namespace ProcessForge
             this.gbImageConfig.Controls.Add(this.lblImagePathTitle);
             this.gbImageConfig.Controls.Add(this.txtTemplateName);
             this.gbImageConfig.Controls.Add(this.lblTemplateName);
+            this.gbImageConfig.Controls.Add(this.txtCaptureTitle);
+            this.gbImageConfig.Controls.Add(this.lblCaptureTitle);
             this.gbImageConfig.Controls.Add(this.btnCaptureImage);
             this.gbImageConfig.Controls.Add(this.picPreview);
             this.gbImageConfig.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -251,10 +292,10 @@ namespace ProcessForge
             this.gbImageConfig.ForeColor = System.Drawing.Color.Black;
             this.gbImageConfig.Location = new System.Drawing.Point(13, 13);
             this.gbImageConfig.Name = "gbImageConfig";
-            this.gbImageConfig.Size = new System.Drawing.Size(395, 404);
+            this.gbImageConfig.Size = new System.Drawing.Size(395, 401);
             this.gbImageConfig.TabIndex = 0;
             this.gbImageConfig.TabStop = false;
-            this.gbImageConfig.Text = " IMAGE ANCHOR ";
+            this.gbImageConfig.Text = " CAPTURE - CHOOSE SERVER ";
 
             // picPreview
             this.picPreview.BackColor = System.Drawing.Color.White;
@@ -262,7 +303,7 @@ namespace ProcessForge
             this.picPreview.Cursor = System.Windows.Forms.Cursors.Cross;
             this.picPreview.Location = new System.Drawing.Point(15, 22);
             this.picPreview.Name = "picPreview";
-            this.picPreview.Size = new System.Drawing.Size(365, 175);
+            this.picPreview.Size = new System.Drawing.Size(365, 155);
             this.picPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picPreview.TabIndex = 0;
             this.picPreview.TabStop = false;
@@ -273,7 +314,7 @@ namespace ProcessForge
             this.btnCaptureImage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCaptureImage.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnCaptureImage.ForeColor = System.Drawing.Color.White;
-            this.btnCaptureImage.Location = new System.Drawing.Point(15, 206);
+            this.btnCaptureImage.Location = new System.Drawing.Point(15, 185);
             this.btnCaptureImage.Name = "btnCaptureImage";
             this.btnCaptureImage.Size = new System.Drawing.Size(365, 30);
             this.btnCaptureImage.TabIndex = 1;
@@ -281,10 +322,26 @@ namespace ProcessForge
             this.btnCaptureImage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.btnCaptureImage.UseVisualStyleBackColor = false;
 
+            // lblCaptureTitle
+            this.lblCaptureTitle.AutoSize = true;
+            this.lblCaptureTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblCaptureTitle.Location = new System.Drawing.Point(15, 222);
+            this.lblCaptureTitle.Name = "lblCaptureTitle";
+            this.lblCaptureTitle.Size = new System.Drawing.Size(160, 13);
+            this.lblCaptureTitle.Text = "Capture Title (Dynamic Header):";
+
+            // txtCaptureTitle
+            this.txtCaptureTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtCaptureTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.txtCaptureTitle.Location = new System.Drawing.Point(15, 239);
+            this.txtCaptureTitle.Name = "txtCaptureTitle";
+            this.txtCaptureTitle.Size = new System.Drawing.Size(365, 22);
+            this.txtCaptureTitle.TabIndex = 2;
+
             // lblTemplateName
             this.lblTemplateName.AutoSize = true;
             this.lblTemplateName.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblTemplateName.Location = new System.Drawing.Point(15, 245);
+            this.lblTemplateName.Location = new System.Drawing.Point(15, 267);
             this.lblTemplateName.Name = "lblTemplateName";
             this.lblTemplateName.Size = new System.Drawing.Size(81, 13);
             this.lblTemplateName.Text = "Step Identifier:";
@@ -292,15 +349,15 @@ namespace ProcessForge
             // txtTemplateName
             this.txtTemplateName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtTemplateName.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtTemplateName.Location = new System.Drawing.Point(15, 262);
+            this.txtTemplateName.Location = new System.Drawing.Point(15, 284);
             this.txtTemplateName.Name = "txtTemplateName";
             this.txtTemplateName.Size = new System.Drawing.Size(365, 22);
-            this.txtTemplateName.TabIndex = 2;
+            this.txtTemplateName.TabIndex = 3;
 
             // lblImagePathTitle
             this.lblImagePathTitle.AutoSize = true;
             this.lblImagePathTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblImagePathTitle.Location = new System.Drawing.Point(15, 292);
+            this.lblImagePathTitle.Location = new System.Drawing.Point(15, 312);
             this.lblImagePathTitle.Name = "lblImagePathTitle";
             this.lblImagePathTitle.Size = new System.Drawing.Size(88, 13);
             this.lblImagePathTitle.Text = "Image File Path:";
@@ -309,11 +366,11 @@ namespace ProcessForge
             this.txtImagePath.BackColor = System.Drawing.Color.WhiteSmoke;
             this.txtImagePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtImagePath.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtImagePath.Location = new System.Drawing.Point(15, 309);
+            this.txtImagePath.Location = new System.Drawing.Point(15, 329);
             this.txtImagePath.Name = "txtImagePath";
             this.txtImagePath.ReadOnly = true;
             this.txtImagePath.Size = new System.Drawing.Size(365, 22);
-            this.txtImagePath.TabIndex = 3;
+            this.txtImagePath.TabIndex = 4;
 
             // 
             // GroupBox: Linear Input Actions
@@ -346,7 +403,7 @@ namespace ProcessForge
             this.gbActionConfig.ForeColor = System.Drawing.Color.Black;
             this.gbActionConfig.Location = new System.Drawing.Point(414, 13);
             this.gbActionConfig.Name = "gbActionConfig";
-            this.gbActionConfig.Size = new System.Drawing.Size(573, 404);
+            this.gbActionConfig.Size = new System.Drawing.Size(573, 401);
             this.gbActionConfig.TabIndex = 1;
             this.gbActionConfig.TabStop = false;
             this.gbActionConfig.Text = " LINEAR INPUT ACTIONS (MACRO SEQUENCE) ";

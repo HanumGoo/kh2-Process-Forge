@@ -140,22 +140,27 @@ namespace ProcessForge.ApplicationLogic
                 {
                     TargetStepModel step = loaded[i];
 
+                    if (step.IsSubStep)
+                    {
+                        continue; // Skip sub-steps in the main loop
+                    }
+
                     switch (step.StepIndex)
                     {
                         case 0:
-                            AllCase.Case_1(windowSize, step);
+                            AllCase.Case_1(windowSize, step, loaded);
                             break;
                         case 1:
-                            AllCase.Case_2(windowSize, step);
+                            AllCase.Case_2(windowSize, step, loaded);
                             break;
                         case 2:
-                            AllCase.Case_3(windowSize, step);
+                            AllCase.Case_3(windowSize, step, loaded);
                             break;
                         case 3:
-                            AllCase.Case_4(windowSize, step);
+                            AllCase.Case_4(windowSize, step, loaded);
                             break;
                         case 4:
-                            AllCase.Case_5(windowSize, step);
+                            AllCase.Case_5(windowSize, step, loaded);
                             break;
                         default:
                             MessageBox.Show("There is no case", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

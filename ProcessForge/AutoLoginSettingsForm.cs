@@ -25,7 +25,18 @@ namespace ProcessForge
         private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
         private const uint MOUSEEVENTF_LEFTUP = 0x0004;
 
-        private const int TotalSteps = 5;
+        public const int MinMainSteps = 5;
+        public const int MaxTotalSteps = 20;
+
+        public static readonly string[] DefaultMainTitles = new[]
+        {
+            "Capture - Choose Server",
+            "Capture - Choose Channel",
+            "Capture - Set Pin",
+            "Capture - Input Pin",
+            "Capture - Auction Icon"
+        };
+
         private int currentStepIndex = 0;
         private static readonly string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
         private static readonly string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
@@ -58,13 +69,18 @@ namespace ProcessForge
             Directory.CreateDirectory(storageDirectory);
             List<TargetStepModel> steps = new List<TargetStepModel>();
 
-            for (int i = 0; i < TotalSteps; i++)
+            // Generate default 5 Main Steps
+            for (int i = 0; i < MinMainSteps; i++)
             {
                 steps.Add(new TargetStepModel
                 {
                     StepIndex = i,
                     StepTitle = $"Step_{i + 1}",
-                    TemplateName = $"Target_Step_{i + 1}"
+                    CaptureTitle = DefaultMainTitles[i],
+                    IsSubStep = false,
+                    TemplateName = $"Target_Step_{i + 1}",
+                    ImagePath = string.Empty,
+                    Actions = new List<StepInputAction>()
                 });
             }
 
@@ -74,42 +90,77 @@ namespace ProcessForge
                 {
                     string json = File.ReadAllText(configFilePath);
                     var loaded = JsonSerializer.Deserialize<List<TargetStepModel>>(json);
-                    if (loaded != null)
+                    if (loaded != null && loaded.Count > 0)
                     {
-                        foreach (var item in loaded)
+                        int totalToLoad = Math.Min(MaxTotalSteps, Math.Max(MinMainSteps, loaded.Count));
+
+                        // Pre-populate slots for loaded sub-steps
+                        while (steps.Count < totalToLoad)
                         {
-                            if (item.StepIndex >= 0 && item.StepIndex < TotalSteps)
+                            int nextIdx = steps.Count;
+                            steps.Add(new TargetStepModel
                             {
-                                // Migrate legacy TargetX/TargetY to Actions if Actions is empty
-                                if ((item.Actions == null || item.Actions.Count == 0) && item.TargetX.HasValue && item.TargetY.HasValue)
-                                {
-                                    item.Actions = new List<StepInputAction>();
-                                    if (item.TargetX.Value != 0 || item.TargetY.Value != 0)
-                                    {
-                                        item.Actions.Add(new StepInputAction
-                                        {
-                                            ActionType = "Mouse",
-                                            X = item.TargetX.Value,
-                                            Y = item.TargetY.Value,
-                                            ClickTypeIndex = item.ClickTypeIndex ?? 0,
-                                            UseRelativeOffset = item.UseRelativeOffset ?? false
-                                        });
-                                    }
-                                }
+                                StepIndex = nextIdx,
+                                StepTitle = $"SubStep_{nextIdx - 4}",
+                                CaptureTitle = "Capture - Custom Handling",
+                                IsSubStep = true,
+                                TemplateName = $"Target_SubStep_{nextIdx - 4}",
+                                ImagePath = string.Empty,
+                                Actions = new List<StepInputAction>()
+                            });
+                        }
 
-                                if (item.Actions == null)
-                                {
-                                    item.Actions = new List<StepInputAction>();
-                                }
+                        for (int i = 0; i < Math.Min(MaxTotalSteps, loaded.Count); i++)
+                        {
+                            var item = loaded[i];
+                            item.StepIndex = i;
+                            item.IsSubStep = (i >= MinMainSteps);
 
-                                // Clear legacy properties so they are not re-serialized
-                                item.TargetX = null;
-                                item.TargetY = null;
-                                item.ClickTypeIndex = null;
-                                item.UseRelativeOffset = null;
-
-                                steps[item.StepIndex] = item;
+                            // Apply default capture title if missing
+                            if (string.IsNullOrEmpty(item.CaptureTitle))
+                            {
+                                item.CaptureTitle = (i < MinMainSteps) ? DefaultMainTitles[i] : "Capture - Custom Handling";
                             }
+
+                            if (string.IsNullOrEmpty(item.StepTitle))
+                            {
+                                item.StepTitle = item.IsSubStep ? $"SubStep_{i - 4}" : $"Step_{i + 1}";
+                            }
+
+                            if (string.IsNullOrEmpty(item.TemplateName))
+                            {
+                                item.TemplateName = item.IsSubStep ? $"Target_SubStep_{i - 4}" : $"Target_Step_{i + 1}";
+                            }
+
+                            // Migrate legacy TargetX/TargetY to Actions if needed
+                            if ((item.Actions == null || item.Actions.Count == 0) && item.TargetX.HasValue && item.TargetY.HasValue)
+                            {
+                                item.Actions = new List<StepInputAction>();
+                                if (item.TargetX.Value != 0 || item.TargetY.Value != 0)
+                                {
+                                    item.Actions.Add(new StepInputAction
+                                    {
+                                        ActionType = "Mouse",
+                                        X = item.TargetX.Value,
+                                        Y = item.TargetY.Value,
+                                        ClickTypeIndex = item.ClickTypeIndex ?? 0,
+                                        UseRelativeOffset = item.UseRelativeOffset ?? false
+                                    });
+                                }
+                            }
+
+                            if (item.Actions == null)
+                            {
+                                item.Actions = new List<StepInputAction>();
+                            }
+
+                            // Clear legacy properties so they are omitted in serialization
+                            item.TargetX = null;
+                            item.TargetY = null;
+                            item.ClickTypeIndex = null;
+                            item.UseRelativeOffset = null;
+
+                            steps[i] = item;
                         }
                     }
                 }
@@ -119,8 +170,8 @@ namespace ProcessForge
                 }
             }
 
-            // Also check for existing screenshots in storageDirectory
-            for (int i = 0; i < TotalSteps; i++)
+            // Check for existing screenshots in storageDirectory
+            for (int i = 0; i < steps.Count; i++)
             {
                 string expectedFileName = $"template_step_{i + 1}.png";
                 string expectedPath = Path.Combine(storageDirectory, expectedFileName);
@@ -143,13 +194,15 @@ namespace ProcessForge
             {
                 Directory.CreateDirectory(storageDirectory);
 
-                // Ensure legacy fields are null so only clean Actions list is serialized
-                foreach (var step in Steps)
+                // Ensure legacy fields are null and indexes are clean
+                for (int i = 0; i < Steps.Count; i++)
                 {
-                    step.TargetX = null;
-                    step.TargetY = null;
-                    step.ClickTypeIndex = null;
-                    step.UseRelativeOffset = null;
+                    Steps[i].StepIndex = i;
+                    Steps[i].IsSubStep = (i >= MinMainSteps);
+                    Steps[i].TargetX = null;
+                    Steps[i].TargetY = null;
+                    Steps[i].ClickTypeIndex = null;
+                    Steps[i].UseRelativeOffset = null;
                 }
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -166,18 +219,31 @@ namespace ProcessForge
         {
             flpPageButtons.Controls.Clear();
 
-            for (int i = 0; i < TotalSteps; i++)
+            // 1. "MAIN:" Section Label
+            Label lblMain = new Label
+            {
+                Text = "MAIN:",
+                AutoSize = true,
+                Font = new Font("Segoe UI", 8.25F, FontStyle.Bold),
+                ForeColor = Color.Black,
+                Margin = new Padding(2, 8, 3, 0)
+            };
+            flpPageButtons.Controls.Add(lblMain);
+
+            // 2. Main Step Buttons (1 to 5)
+            int mainCount = Math.Min(MinMainSteps, Steps.Count);
+            for (int i = 0; i < mainCount; i++)
             {
                 int stepNum = i + 1;
                 Button btnPage = new Button
                 {
                     Text = stepNum.ToString(),
-                    Width = 42,
-                    Height = 30,
-                    Margin = new Padding(3, 0, 3, 0),
+                    Width = 34,
+                    Height = 28,
+                    Margin = new Padding(2, 1, 2, 1),
                     Tag = i,
                     FlatStyle = FlatStyle.Flat,
-                    Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                     TextAlign = ContentAlignment.MiddleCenter,
                     Cursor = Cursors.Hand
                 };
@@ -193,6 +259,63 @@ namespace ProcessForge
 
                 flpPageButtons.Controls.Add(btnPage);
             }
+
+            // 3. " |  SUB:" Section Label
+            Label lblSub = new Label
+            {
+                Text = " |  SUB:",
+                AutoSize = true,
+                Font = new Font("Segoe UI", 8.25F, FontStyle.Bold),
+                ForeColor = Color.DarkSlateBlue,
+                Margin = new Padding(5, 8, 3, 0)
+            };
+            flpPageButtons.Controls.Add(lblSub);
+
+            // 4. Sub Step Buttons (6 to Steps.Count)
+            if (Steps.Count > MinMainSteps)
+            {
+                for (int i = MinMainSteps; i < Steps.Count; i++)
+                {
+                    int stepNum = i + 1;
+                    Button btnPage = new Button
+                    {
+                        Text = stepNum.ToString(),
+                        Width = 34,
+                        Height = 28,
+                        Margin = new Padding(2, 1, 2, 1),
+                        Tag = i,
+                        FlatStyle = FlatStyle.Flat,
+                        Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        Cursor = Cursors.Hand
+                    };
+                    btnPage.FlatAppearance.BorderSize = 1;
+
+                    btnPage.Click += (s, e) =>
+                    {
+                        if (s is Button b && b.Tag is int targetIndex)
+                        {
+                            NavigateToStep(targetIndex);
+                        }
+                    };
+
+                    flpPageButtons.Controls.Add(btnPage);
+                }
+            }
+            else
+            {
+                Label lblNone = new Label
+                {
+                    Text = "(none)",
+                    AutoSize = true,
+                    Font = new Font("Segoe UI", 8F, FontStyle.Italic),
+                    ForeColor = Color.Gray,
+                    Margin = new Padding(2, 8, 2, 0)
+                };
+                flpPageButtons.Controls.Add(lblNone);
+            }
+
+            UpdatePaginationButtonsStyle();
         }
 
         private void WireFormEvents()
@@ -200,8 +323,20 @@ namespace ProcessForge
             btnPrevStep.Click += (s, e) => NavigateToStep(currentStepIndex - 1);
             btnNextStep.Click += (s, e) => NavigateToStep(currentStepIndex + 1);
 
+            // Sub-step management events
+            btnAddSubStep.Click += BtnAddSubStep_Click;
+            btnDeleteSubStep.Click += BtnDeleteSubStep_Click;
+
             // Image anchor events
             btnCaptureImage.Click += BtnCaptureImage_Click;
+
+            // Synchronize GroupBox header in real time when user edits Capture Title
+            txtCaptureTitle.TextChanged += (s, e) =>
+            {
+                string title = !string.IsNullOrEmpty(txtCaptureTitle.Text) ? txtCaptureTitle.Text.Trim().ToUpper() : "IMAGE ANCHOR";
+                gbImageConfig.Text = $" {title} ";
+                btnCaptureImage.Text = $"CAPTURE IMAGE — {title}";
+            };
 
             // Action sequence list events
             lstActions.SelectedIndexChanged += LstActions_SelectedIndexChanged;
@@ -250,7 +385,7 @@ namespace ProcessForge
 
         private void NavigateToStep(int targetStepIndex)
         {
-            if (targetStepIndex < 0 || targetStepIndex >= TotalSteps) return;
+            if (targetStepIndex < 0 || targetStepIndex >= Steps.Count) return;
 
             SaveCurrentFormToModel();
             currentStepIndex = targetStepIndex;
@@ -259,19 +394,42 @@ namespace ProcessForge
 
         private void SaveCurrentFormToModel()
         {
-            var model = Steps[currentStepIndex];
-            model.TemplateName = txtTemplateName.Text;
-            model.ImagePath = txtImagePath.Text;
+            if (currentStepIndex >= 0 && currentStepIndex < Steps.Count)
+            {
+                var model = Steps[currentStepIndex];
+                model.CaptureTitle = txtCaptureTitle.Text.Trim();
+                model.TemplateName = txtTemplateName.Text.Trim();
+                model.ImagePath = txtImagePath.Text.Trim();
+            }
         }
 
         private void LoadStepToForm(int index)
         {
             var model = Steps[index];
 
+            txtCaptureTitle.Text = model.CaptureTitle;
             txtTemplateName.Text = model.TemplateName;
             txtImagePath.Text = model.ImagePath;
 
-            // Load Preview Safely (without locking image file or stream disposal bug)
+            string displayTitle = !string.IsNullOrEmpty(model.CaptureTitle) ? model.CaptureTitle.ToUpper() : "IMAGE ANCHOR";
+            gbImageConfig.Text = $" {displayTitle} ";
+            btnCaptureImage.Text = $"CAPTURE IMAGE — {displayTitle}";
+
+            // Context-sensitive action list header
+            if (model.IsSubStep)
+            {
+                lblActionList.Text = $"Sub-Step Actions Sequence ({model.CaptureTitle}):";
+            }
+            else if (index == 0)
+            {
+                lblActionList.Text = "Main Step 1 Actions (Hardcoded login; optional extra actions):";
+            }
+            else
+            {
+                lblActionList.Text = $"Main Step {index + 1} Actions Sequence ({model.CaptureTitle}):";
+            }
+
+            // Load Preview Safely
             if (picPreview.Image != null)
             {
                 var oldImg = picPreview.Image;
@@ -293,19 +451,6 @@ namespace ProcessForge
                 {
                     picPreview.Image = null;
                 }
-            }
-
-            lblStepIndicator.Text = $"STEP {index + 1} OF {TotalSteps}";
-            btnPrevStep.Enabled = index > 0;
-            btnNextStep.Enabled = index < TotalSteps - 1;
-
-            if (index == 0)
-            {
-                lblActionList.Text = "Linear Action Order (Step 1 hardcoded input; optional extra actions):";
-            }
-            else
-            {
-                lblActionList.Text = "Linear Action Order (Executed in sequence):";
             }
 
             UpdatePaginationButtonsStyle();
@@ -384,22 +529,125 @@ namespace ProcessForge
 
         private void UpdatePaginationButtonsStyle()
         {
+            // Indicator text
+            if (currentStepIndex < MinMainSteps)
+            {
+                lblStepIndicator.Text = $"MAIN STEP {currentStepIndex + 1} OF {MinMainSteps}";
+                lblStepIndicator.ForeColor = Color.Black;
+                btnDeleteSubStep.Enabled = false;
+            }
+            else
+            {
+                int subNum = currentStepIndex - MinMainSteps + 1;
+                int totalSub = Steps.Count - MinMainSteps;
+                lblStepIndicator.Text = $"SUB-STEP {subNum} OF {totalSub} (TOTAL: {currentStepIndex + 1}/{Steps.Count})";
+                lblStepIndicator.ForeColor = Color.DarkSlateBlue;
+                btnDeleteSubStep.Enabled = true;
+            }
+
+            btnPrevStep.Enabled = (currentStepIndex > 0);
+            btnNextStep.Enabled = (currentStepIndex < Steps.Count - 1);
+            btnAddSubStep.Enabled = (Steps.Count < MaxTotalSteps);
+
+            // Styling for step buttons
             foreach (Control ctrl in flpPageButtons.Controls)
             {
                 if (ctrl is Button btn && btn.Tag is int pageIdx)
                 {
+                    bool isSub = (pageIdx >= MinMainSteps);
                     if (pageIdx == currentStepIndex)
                     {
-                        btn.BackColor = Color.Black;
+                        btn.BackColor = isSub ? Color.DarkSlateBlue : Color.Black;
                         btn.ForeColor = Color.White;
+                        btn.FlatAppearance.BorderColor = isSub ? Color.DarkSlateBlue : Color.Black;
                     }
                     else
                     {
                         btn.BackColor = Color.White;
-                        btn.ForeColor = Color.Black;
+                        btn.ForeColor = isSub ? Color.DarkSlateBlue : Color.Black;
+                        btn.FlatAppearance.BorderColor = isSub ? Color.MediumPurple : Color.Black;
                     }
                 }
             }
+        }
+
+        #endregion
+
+        #region Sub-Step Add & Delete
+
+        private void BtnAddSubStep_Click(object? sender, EventArgs e)
+        {
+            if (Steps.Count >= MaxTotalSteps)
+            {
+                MessageBox.Show($"Maximum limit of {MaxTotalSteps} steps (5 Main Steps + 15 Sub-Steps) reached.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            SaveCurrentFormToModel();
+
+            int newIndex = Steps.Count;
+            int subIndex = newIndex - MinMainSteps + 1;
+
+            var newStep = new TargetStepModel
+            {
+                StepIndex = newIndex,
+                StepTitle = $"SubStep_{subIndex}",
+                CaptureTitle = "Capture - Custom Handling",
+                IsSubStep = true,
+                TemplateName = $"Target_SubStep_{subIndex}",
+                ImagePath = string.Empty,
+                Actions = new List<StepInputAction>()
+            };
+
+            Steps.Add(newStep);
+            BuildPaginationUI();
+            NavigateToStep(newIndex);
+            SaveStepsToConfig();
+        }
+
+        private void BtnDeleteSubStep_Click(object? sender, EventArgs e)
+        {
+            if (currentStepIndex < MinMainSteps)
+            {
+                MessageBox.Show("Main Steps (Steps 1 to 5) are fixed and cannot be deleted.", "Action Not Allowed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var stepToDelete = Steps[currentStepIndex];
+            DialogResult confirm = MessageBox.Show(
+                $"Are you sure you want to delete Sub-Step '{stepToDelete.CaptureTitle}' (Step {currentStepIndex + 1})?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            Steps.RemoveAt(currentStepIndex);
+
+            // Re-index remaining steps
+            for (int i = 0; i < Steps.Count; i++)
+            {
+                Steps[i].StepIndex = i;
+                Steps[i].IsSubStep = (i >= MinMainSteps);
+                if (i >= MinMainSteps)
+                {
+                    int subNum = i - MinMainSteps + 1;
+                    if (Steps[i].StepTitle.StartsWith("SubStep_"))
+                    {
+                        Steps[i].StepTitle = $"SubStep_{subNum}";
+                    }
+                    if (Steps[i].TemplateName.StartsWith("Target_SubStep_"))
+                    {
+                        Steps[i].TemplateName = $"Target_SubStep_{subNum}";
+                    }
+                }
+            }
+
+            int targetIdx = Math.Min(currentStepIndex, Steps.Count - 1);
+            currentStepIndex = targetIdx;
+            BuildPaginationUI();
+            LoadStepToForm(currentStepIndex);
+            SaveStepsToConfig();
         }
 
         #endregion
@@ -834,7 +1082,7 @@ namespace ProcessForge
                         chkUseRelativeOffset.Checked = finalRelative;
 
                         // Add directly if first action, or ask user
-                        if (step.Actions.Count == 0)
+                        if (step.Actions.Count == 0 && currentStepIndex != 0)
                         {
                             step.Actions.Add(new StepInputAction
                             {
@@ -1081,6 +1329,8 @@ namespace ProcessForge
     {
         public int StepIndex { get; set; }
         public string StepTitle { get; set; } = string.Empty;
+        public string CaptureTitle { get; set; } = string.Empty;
+        public bool IsSubStep { get; set; } = false;
         public string TemplateName { get; set; } = string.Empty;
         public string ImagePath { get; set; } = string.Empty;
 
