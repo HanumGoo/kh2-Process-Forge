@@ -45,10 +45,10 @@ namespace ProcessForge
         {
             "Capture - Char Select",
             "Capture - Char Create",
-            "Capture - Char Class",
-            "Capture - Char Customize",
             "Capture - Char Name",
-            "Capture - Char Enter"
+            "Capture - Char Enter",
+            "Capture - Input Pin",
+            "Capture - Auction Icon"
         };
 
         private int currentStepIndex = 0;
