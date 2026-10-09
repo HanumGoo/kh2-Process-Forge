@@ -112,6 +112,8 @@ namespace ProcessForge
             flowLayoutPanel = new FlowLayoutPanel();
             pnlLoginBottom = new Panel();
             testLogin = new Button();
+            lblAutoLoginMode = new Label();
+            cmbAutoLoginMode = new ComboBox();
             label14 = new Label();
             panel8 = new Panel();
             runLogin = new Button();
@@ -154,7 +156,7 @@ namespace ProcessForge
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(1884, 65);
+            pnlHeader.Size = new Size(1900, 65);
             pnlHeader.TabIndex = 100;
             // 
             // lblHeaderTitle
@@ -188,7 +190,7 @@ namespace ProcessForge
             settingForm.FlatStyle = FlatStyle.Flat;
             settingForm.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             settingForm.ForeColor = Color.Black;
-            settingForm.Location = new Point(1730, 14);
+            settingForm.Location = new Point(1746, 14);
             settingForm.Name = "settingForm";
             settingForm.Size = new Size(130, 36);
             settingForm.TabIndex = 1;
@@ -204,7 +206,7 @@ namespace ProcessForge
             pnlProcessToolbar.Dock = DockStyle.Top;
             pnlProcessToolbar.Location = new Point(0, 65);
             pnlProcessToolbar.Name = "pnlProcessToolbar";
-            pnlProcessToolbar.Size = new Size(1884, 55);
+            pnlProcessToolbar.Size = new Size(1900, 55);
             pnlProcessToolbar.TabIndex = 101;
             // 
             // label11
@@ -229,7 +231,7 @@ namespace ProcessForge
             ProcessName.MaxLength = 100;
             ProcessName.Name = "ProcessName";
             ProcessName.PlaceholderText = "(e.g., kh2, chrome, notepad)";
-            ProcessName.Size = new Size(1660, 26);
+            ProcessName.Size = new Size(1676, 26);
             ProcessName.TabIndex = 0;
             ProcessName.Text = "kh2";
             // 
@@ -1207,6 +1209,8 @@ namespace ProcessForge
             pnlLoginBottom.BackColor = Color.WhiteSmoke;
             pnlLoginBottom.BorderStyle = BorderStyle.FixedSingle;
             pnlLoginBottom.Controls.Add(testLogin);
+            pnlLoginBottom.Controls.Add(lblAutoLoginMode);
+            pnlLoginBottom.Controls.Add(cmbAutoLoginMode);
             pnlLoginBottom.Controls.Add(label14);
             pnlLoginBottom.Controls.Add(panel8);
             pnlLoginBottom.Location = new Point(20, 628);
@@ -1224,22 +1228,41 @@ namespace ProcessForge
             testLogin.ForeColor = Color.Black;
             testLogin.Location = new Point(12, 8);
             testLogin.Name = "testLogin";
-            testLogin.Size = new Size(100, 30);
+            testLogin.Size = new Size(80, 30);
             testLogin.TabIndex = 32;
             testLogin.Text = "Test";
             testLogin.UseVisualStyleBackColor = false;
             testLogin.Click += testLogin_Click;
             // 
+            // lblAutoLoginMode
+            // 
+            lblAutoLoginMode.AutoSize = true;
+            lblAutoLoginMode.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblAutoLoginMode.ForeColor = Color.Black;
+            lblAutoLoginMode.Location = new Point(102, 14);
+            lblAutoLoginMode.Name = "lblAutoLoginMode";
+            lblAutoLoginMode.Size = new Size(71, 15);
+            lblAutoLoginMode.TabIndex = 33;
+            lblAutoLoginMode.Text = "Flow Mode:";
+            // 
+            // cmbAutoLoginMode
+            // 
+            cmbAutoLoginMode.BackColor = Color.White;
+            cmbAutoLoginMode.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbAutoLoginMode.Font = new Font("Segoe UI", 9F);
+            cmbAutoLoginMode.ForeColor = Color.Black;
+            cmbAutoLoginMode.FormattingEnabled = true;
+            cmbAutoLoginMode.Items.AddRange(new object[] {
+            "Standard Auto Login (Login Only)",
+            "Auto Login + Create Character"});
+            cmbAutoLoginMode.Location = new Point(178, 10);
+            cmbAutoLoginMode.Name = "cmbAutoLoginMode";
+            cmbAutoLoginMode.Size = new Size(425, 23);
+            cmbAutoLoginMode.TabIndex = 34;
+            // 
             // label14
             // 
-            label14.AutoSize = true;
-            label14.Font = new Font("Segoe UI", 8.5F);
-            label14.ForeColor = Color.FromArgb(70, 70, 70);
-            label14.Location = new Point(125, 13);
-            label14.Name = "label14";
-            label14.Size = new Size(125, 15);
-            label14.TabIndex = 1;
-            label14.Text = "Click \"Test\" to validate";
+            label14.Visible = false;
             // 
             // panel8
             // 
@@ -1329,7 +1352,7 @@ namespace ProcessForge
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(1884, 915);
+            ClientSize = new Size(1900, 919);
             Controls.Add(gbAutoLogin);
             Controls.Add(gbBulkApp);
             Controls.Add(gbHandlers);
@@ -1484,5 +1507,7 @@ namespace ProcessForge
         private Label lblColStatus;
         private Label lblColAction;
         private Panel pnlLoginBottom;
+        private Label lblAutoLoginMode;
+        private ComboBox cmbAutoLoginMode;
     }
 }

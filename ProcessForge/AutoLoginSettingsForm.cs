@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using ProcessForge.InputWindowLogic;
 using Point = System.Drawing.Point;
 using Size = System.Drawing.Size;
 
@@ -25,8 +26,11 @@ namespace ProcessForge
         private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
         private const uint MOUSEEVENTF_LEFTUP = 0x0004;
 
-        public const int MinMainSteps = 5;
-        public const int MaxTotalSteps = 20;
+        public const int MainStepsCount = 3;
+        public const int OrdinaryStepsCount = 2;
+        public const int CharStepsCount = 6;
+        public const int MinStandardSteps = 5; // 3 Main + 2 Ordinary
+        public const int MaxTotalSteps = 25;
 
         public static readonly string[] DefaultMainTitles = new[]
         {
@@ -35,6 +39,16 @@ namespace ProcessForge
             "Capture - Set Pin",
             "Capture - Input Pin",
             "Capture - Auction Icon"
+        };
+
+        public static readonly string[] DefaultCharBranchTitles = new[]
+        {
+            "Capture - Char Select",
+            "Capture - Char Create",
+            "Capture - Char Class",
+            "Capture - Char Customize",
+            "Capture - Char Name",
+            "Capture - Char Enter"
         };
 
         private int currentStepIndex = 0;
@@ -69,8 +83,8 @@ namespace ProcessForge
             Directory.CreateDirectory(storageDirectory);
             List<TargetStepModel> steps = new List<TargetStepModel>();
 
-            // Generate default 5 Main Steps
-            for (int i = 0; i < MinMainSteps; i++)
+            // 1. Generate 3 Main Steps (0 to 2)
+            for (int i = 0; i < MainStepsCount; i++)
             {
                 steps.Add(new TargetStepModel
                 {
@@ -78,12 +92,63 @@ namespace ProcessForge
                     StepTitle = $"Step_{i + 1}",
                     CaptureTitle = DefaultMainTitles[i],
                     IsSubStep = false,
+                    BranchType = "Main",
                     TemplateName = $"Target_Step_{i + 1}",
                     ImagePath = string.Empty,
                     Actions = new List<StepInputAction>()
                 });
             }
 
+            // 2. Generate 2 Ordinary Login Steps (3 to 4)
+            for (int i = 0; i < OrdinaryStepsCount; i++)
+            {
+                int ordIdx = MainStepsCount + i;
+                steps.Add(new TargetStepModel
+                {
+                    StepIndex = ordIdx,
+                    StepTitle = $"Step_{ordIdx + 1}",
+                    CaptureTitle = DefaultMainTitles[ordIdx],
+                    IsSubStep = false,
+                    BranchType = "Ordinary",
+                    TemplateName = $"Target_Step_{ordIdx + 1}",
+                    ImagePath = string.Empty,
+                    Actions = new List<StepInputAction>()
+                });
+            }
+
+            // 3. Generate 6 Create Character Branch Steps (5 to 10)
+            for (int i = 0; i < CharStepsCount; i++)
+            {
+                int charStepNumber = i + 4; // CharStep 4, 5, 6, 7, 8, 9
+                steps.Add(new TargetStepModel
+                {
+                    StepIndex = steps.Count,
+                    StepTitle = $"CharStep_{charStepNumber}",
+                    CaptureTitle = DefaultCharBranchTitles[i],
+                    IsSubStep = false,
+                    BranchType = "CreateCharacter",
+                    TemplateName = $"Target_CharStep_{charStepNumber}",
+                    ImagePath = string.Empty,
+                    Actions = new List<StepInputAction>()
+                });
+            }
+
+            // Seed default dynamic variable actions for Step 1 if actions list is empty
+            if (steps[0].Actions.Count == 0)
+            {
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{USERNAME}" });
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{TAB}" });
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{PASSWORD}" });
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{ENTER}" });
+            }
+
+            // Seed default dynamic variable action for Step 4 (Input Pin) if actions list is empty
+            if (steps[3].Actions.Count == 0)
+            {
+                steps[3].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{SECONDPASSWORD}" });
+            }
+
+            // 4. Load and overlay from config file if exists
             if (File.Exists(configFilePath))
             {
                 try
@@ -92,47 +157,14 @@ namespace ProcessForge
                     var loaded = JsonSerializer.Deserialize<List<TargetStepModel>>(json);
                     if (loaded != null && loaded.Count > 0)
                     {
-                        int totalToLoad = Math.Min(MaxTotalSteps, Math.Max(MinMainSteps, loaded.Count));
+                        var loadedCharSteps = new List<TargetStepModel>();
+                        var loadedSubSteps = new List<TargetStepModel>();
 
-                        // Pre-populate slots for loaded sub-steps
-                        while (steps.Count < totalToLoad)
-                        {
-                            int nextIdx = steps.Count;
-                            steps.Add(new TargetStepModel
-                            {
-                                StepIndex = nextIdx,
-                                StepTitle = $"SubStep_{nextIdx - 4}",
-                                CaptureTitle = "Capture - Custom Handling",
-                                IsSubStep = true,
-                                TemplateName = $"Target_SubStep_{nextIdx - 4}",
-                                ImagePath = string.Empty,
-                                Actions = new List<StepInputAction>()
-                            });
-                        }
-
-                        for (int i = 0; i < Math.Min(MaxTotalSteps, loaded.Count); i++)
+                        for (int i = 0; i < loaded.Count; i++)
                         {
                             var item = loaded[i];
-                            item.StepIndex = i;
-                            item.IsSubStep = (i >= MinMainSteps);
 
-                            // Apply default capture title if missing
-                            if (string.IsNullOrEmpty(item.CaptureTitle))
-                            {
-                                item.CaptureTitle = (i < MinMainSteps) ? DefaultMainTitles[i] : "Capture - Custom Handling";
-                            }
-
-                            if (string.IsNullOrEmpty(item.StepTitle))
-                            {
-                                item.StepTitle = item.IsSubStep ? $"SubStep_{i - 4}" : $"Step_{i + 1}";
-                            }
-
-                            if (string.IsNullOrEmpty(item.TemplateName))
-                            {
-                                item.TemplateName = item.IsSubStep ? $"Target_SubStep_{i - 4}" : $"Target_Step_{i + 1}";
-                            }
-
-                            // Migrate legacy TargetX/TargetY to Actions if needed
+                            // Migrate legacy TargetX/TargetY if present
                             if ((item.Actions == null || item.Actions.Count == 0) && item.TargetX.HasValue && item.TargetY.HasValue)
                             {
                                 item.Actions = new List<StepInputAction>();
@@ -148,39 +180,138 @@ namespace ProcessForge
                                     });
                                 }
                             }
+                            if (item.Actions == null) item.Actions = new List<StepInputAction>();
 
-                            if (item.Actions == null)
-                            {
-                                item.Actions = new List<StepInputAction>();
-                            }
-
-                            // Clear legacy properties so they are omitted in serialization
                             item.TargetX = null;
                             item.TargetY = null;
                             item.ClickTypeIndex = null;
                             item.UseRelativeOffset = null;
 
-                            steps[i] = item;
+                            bool isSub = item.IsSubStep || item.BranchType == "SubStep" || (item.StepTitle?.StartsWith("SubStep") ?? false);
+                            bool isChar = item.BranchType == "CreateCharacter" || (item.StepTitle?.StartsWith("CharStep") ?? false);
+
+                            if (isChar)
+                            {
+                                item.BranchType = "CreateCharacter";
+                                item.IsSubStep = false;
+                                loadedCharSteps.Add(item);
+                            }
+                            else if (isSub)
+                            {
+                                item.BranchType = "SubStep";
+                                item.IsSubStep = true;
+                                loadedSubSteps.Add(item);
+                            }
+                            else if (item.StepIndex < 3 || item.BranchType == "Main" || item.StepTitle == "Step_1" || item.StepTitle == "Step_2" || item.StepTitle == "Step_3")
+                            {
+                                int mainIdx = item.StepIndex < 3 ? item.StepIndex : (item.StepTitle == "Step_2" ? 1 : (item.StepTitle == "Step_3" ? 2 : 0));
+                                if (mainIdx >= 0 && mainIdx < 3)
+                                {
+                                    steps[mainIdx].CaptureTitle = !string.IsNullOrEmpty(item.CaptureTitle) ? item.CaptureTitle : DefaultMainTitles[mainIdx];
+                                    steps[mainIdx].TemplateName = !string.IsNullOrEmpty(item.TemplateName) ? item.TemplateName : $"Target_Step_{mainIdx + 1}";
+                                    steps[mainIdx].ImagePath = item.ImagePath ?? string.Empty;
+                                    steps[mainIdx].Actions = item.Actions;
+                                }
+                            }
+                            else if (item.StepIndex < 5 || item.BranchType == "Ordinary" || item.StepTitle == "Step_4" || item.StepTitle == "Step_5")
+                            {
+                                int ordIdx = (item.StepIndex == 3 || item.StepTitle == "Step_4") ? 3 : 4;
+                                steps[ordIdx].CaptureTitle = !string.IsNullOrEmpty(item.CaptureTitle) ? item.CaptureTitle : DefaultMainTitles[ordIdx];
+                                steps[ordIdx].TemplateName = !string.IsNullOrEmpty(item.TemplateName) ? item.TemplateName : $"Target_Step_{ordIdx + 1}";
+                                steps[ordIdx].ImagePath = item.ImagePath ?? string.Empty;
+                                steps[ordIdx].Actions = item.Actions;
+                            }
+                            else
+                            {
+                                item.BranchType = "SubStep";
+                                item.IsSubStep = true;
+                                loadedSubSteps.Add(item);
+                            }
+                        }
+
+                        // Apply loaded Char steps
+                        for (int i = 0; i < loadedCharSteps.Count && i < CharStepsCount; i++)
+                        {
+                            int targetSlot = 5 + i;
+                            var charItem = loadedCharSteps[i];
+                            steps[targetSlot].CaptureTitle = !string.IsNullOrEmpty(charItem.CaptureTitle) ? charItem.CaptureTitle : DefaultCharBranchTitles[i];
+                            steps[targetSlot].TemplateName = !string.IsNullOrEmpty(charItem.TemplateName) ? charItem.TemplateName : $"Target_CharStep_{i + 4}";
+                            steps[targetSlot].ImagePath = charItem.ImagePath ?? string.Empty;
+                            steps[targetSlot].Actions = charItem.Actions;
+                        }
+
+                        // Append loaded Sub steps
+                        for (int i = 0; i < loadedSubSteps.Count; i++)
+                        {
+                            if (steps.Count >= MaxTotalSteps) break;
+                            var subItem = loadedSubSteps[i];
+                            int subNum = steps.Count - 11 + 1;
+                            subItem.StepIndex = steps.Count;
+                            subItem.IsSubStep = true;
+                            subItem.BranchType = "SubStep";
+                            if (string.IsNullOrEmpty(subItem.CaptureTitle)) subItem.CaptureTitle = "Capture - Custom Handling";
+                            if (string.IsNullOrEmpty(subItem.StepTitle)) subItem.StepTitle = $"SubStep_{subNum}";
+                            if (string.IsNullOrEmpty(subItem.TemplateName)) subItem.TemplateName = $"Target_SubStep_{subNum}";
+                            steps.Add(subItem);
                         }
                     }
                 }
                 catch
                 {
-                    // Fall back to default on parse error
+                    // Fall back on parse error
                 }
             }
 
-            // Check for existing screenshots in storageDirectory
+            // Ensure Step 1 has actions even if loaded config had empty actions
+            if (steps[0].Actions.Count == 0)
+            {
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{USERNAME}" });
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{TAB}" });
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{PASSWORD}" });
+                steps[0].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{ENTER}" });
+            }
+
+            // Ensure Step 4 has pin action even if loaded config had empty actions
+            if (steps[3].Actions.Count == 0)
+            {
+                steps[3].Actions.Add(new StepInputAction { ActionType = "Keyboard", Word = "{SECONDPASSWORD}" });
+            }
+
+            // Check for existing screenshots in storageDirectory for any missing ImagePaths
             for (int i = 0; i < steps.Count; i++)
             {
-                string expectedFileName = $"template_step_{i + 1}.png";
-                string expectedPath = Path.Combine(storageDirectory, expectedFileName);
+                steps[i].StepIndex = i;
 
-                if (File.Exists(expectedPath))
+                if (string.IsNullOrEmpty(steps[i].ImagePath) || !File.Exists(steps[i].ImagePath))
                 {
-                    if (string.IsNullOrEmpty(steps[i].ImagePath) || !File.Exists(steps[i].ImagePath))
+                    string candidateName;
+                    if (steps[i].BranchType == "CreateCharacter")
                     {
-                        steps[i].ImagePath = expectedPath;
+                        candidateName = $"template_char_step_{i - 5 + 4}.png";
+                    }
+                    else if (steps[i].IsSubStep || steps[i].BranchType == "SubStep")
+                    {
+                        candidateName = $"template_substep_{i - 11 + 1}.png";
+                        string candidatePath = Path.Combine(storageDirectory, candidateName);
+                        if (!File.Exists(candidatePath))
+                        {
+                            string legacyName = $"template_step_{i + 1}.png";
+                            string legacyPath = Path.Combine(storageDirectory, legacyName);
+                            if (File.Exists(legacyPath))
+                            {
+                                candidateName = legacyName;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        candidateName = $"template_step_{i + 1}.png";
+                    }
+
+                    string fullCandidatePath = Path.Combine(storageDirectory, candidateName);
+                    if (File.Exists(fullCandidatePath))
+                    {
+                        steps[i].ImagePath = fullCandidatePath;
                     }
                 }
             }
@@ -194,11 +325,30 @@ namespace ProcessForge
             {
                 Directory.CreateDirectory(storageDirectory);
 
-                // Ensure legacy fields are null and indexes are clean
                 for (int i = 0; i < Steps.Count; i++)
                 {
                     Steps[i].StepIndex = i;
-                    Steps[i].IsSubStep = (i >= MinMainSteps);
+                    if (i < 3)
+                    {
+                        Steps[i].BranchType = "Main";
+                        Steps[i].IsSubStep = false;
+                    }
+                    else if (i < 5)
+                    {
+                        Steps[i].BranchType = "Ordinary";
+                        Steps[i].IsSubStep = false;
+                    }
+                    else if (i < 11)
+                    {
+                        Steps[i].BranchType = "CreateCharacter";
+                        Steps[i].IsSubStep = false;
+                    }
+                    else
+                    {
+                        Steps[i].BranchType = "SubStep";
+                        Steps[i].IsSubStep = true;
+                    }
+
                     Steps[i].TargetX = null;
                     Steps[i].TargetY = null;
                     Steps[i].ClickTypeIndex = null;
@@ -215,6 +365,33 @@ namespace ProcessForge
             }
         }
 
+        private Button CreatePageButton(string text, int targetIndex)
+        {
+            Button btnPage = new Button
+            {
+                Text = text,
+                Width = 32,
+                Height = 26,
+                Margin = new Padding(2, 2, 2, 2),
+                Tag = targetIndex,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Cursor = Cursors.Hand
+            };
+            btnPage.FlatAppearance.BorderSize = 1;
+
+            btnPage.Click += (s, e) =>
+            {
+                if (s is Button b && b.Tag is int idx)
+                {
+                    NavigateToStep(idx);
+                }
+            };
+
+            return btnPage;
+        }
+
         private void BuildPaginationUI()
         {
             flpPageButtons.Controls.Clear();
@@ -226,80 +403,66 @@ namespace ProcessForge
                 AutoSize = true,
                 Font = new Font("Segoe UI", 8.25F, FontStyle.Bold),
                 ForeColor = Color.Black,
-                Margin = new Padding(2, 8, 3, 0)
+                Margin = new Padding(2, 5, 2, 0)
             };
             flpPageButtons.Controls.Add(lblMain);
 
-            // 2. Main Step Buttons (1 to 5)
-            int mainCount = Math.Min(MinMainSteps, Steps.Count);
-            for (int i = 0; i < mainCount; i++)
+            // Main Steps (1 to 3)
+            for (int i = 0; i < 3 && i < Steps.Count; i++)
             {
-                int stepNum = i + 1;
-                Button btnPage = new Button
-                {
-                    Text = stepNum.ToString(),
-                    Width = 34,
-                    Height = 28,
-                    Margin = new Padding(2, 1, 2, 1),
-                    Tag = i,
-                    FlatStyle = FlatStyle.Flat,
-                    Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    Cursor = Cursors.Hand
-                };
-                btnPage.FlatAppearance.BorderSize = 1;
-
-                btnPage.Click += (s, e) =>
-                {
-                    if (s is Button b && b.Tag is int targetIndex)
-                    {
-                        NavigateToStep(targetIndex);
-                    }
-                };
-
-                flpPageButtons.Controls.Add(btnPage);
+                flpPageButtons.Controls.Add(CreatePageButton((i + 1).ToString(), i));
             }
 
-            // 3. " |  SUB:" Section Label
+            // 2. " | LOGIN:" Section Label (Ordinary steps 4 to 5)
+            Label lblLogin = new Label
+            {
+                Text = " |  LOGIN:",
+                AutoSize = true,
+                Font = new Font("Segoe UI", 8.25F, FontStyle.Bold),
+                ForeColor = Color.SteelBlue,
+                Margin = new Padding(3, 5, 2, 0)
+            };
+            flpPageButtons.Controls.Add(lblLogin);
+
+            for (int i = 3; i < 5 && i < Steps.Count; i++)
+            {
+                flpPageButtons.Controls.Add(CreatePageButton((i + 1).ToString(), i));
+            }
+
+            // 3. " | CHAR:" Section Label (Create Character steps 4 to 9)
+            Label lblChar = new Label
+            {
+                Text = " |  CHAR:",
+                AutoSize = true,
+                Font = new Font("Segoe UI", 8.25F, FontStyle.Bold),
+                ForeColor = Color.ForestGreen,
+                Margin = new Padding(3, 5, 2, 0)
+            };
+            flpPageButtons.Controls.Add(lblChar);
+
+            for (int i = 5; i < 11 && i < Steps.Count; i++)
+            {
+                int charNum = i - 5 + 4;
+                flpPageButtons.Controls.Add(CreatePageButton(charNum.ToString(), i));
+            }
+
+            // 4. " | SUB:" Section Label (Sub steps 1 to N)
             Label lblSub = new Label
             {
                 Text = " |  SUB:",
                 AutoSize = true,
                 Font = new Font("Segoe UI", 8.25F, FontStyle.Bold),
                 ForeColor = Color.DarkSlateBlue,
-                Margin = new Padding(5, 8, 3, 0)
+                Margin = new Padding(3, 5, 2, 0)
             };
             flpPageButtons.Controls.Add(lblSub);
 
-            // 4. Sub Step Buttons (6 to Steps.Count)
-            if (Steps.Count > MinMainSteps)
+            if (Steps.Count > 11)
             {
-                for (int i = MinMainSteps; i < Steps.Count; i++)
+                for (int i = 11; i < Steps.Count; i++)
                 {
-                    int stepNum = i + 1;
-                    Button btnPage = new Button
-                    {
-                        Text = stepNum.ToString(),
-                        Width = 34,
-                        Height = 28,
-                        Margin = new Padding(2, 1, 2, 1),
-                        Tag = i,
-                        FlatStyle = FlatStyle.Flat,
-                        Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Cursor = Cursors.Hand
-                    };
-                    btnPage.FlatAppearance.BorderSize = 1;
-
-                    btnPage.Click += (s, e) =>
-                    {
-                        if (s is Button b && b.Tag is int targetIndex)
-                        {
-                            NavigateToStep(targetIndex);
-                        }
-                    };
-
-                    flpPageButtons.Controls.Add(btnPage);
+                    int subNum = i - 11 + 1;
+                    flpPageButtons.Controls.Add(CreatePageButton(subNum.ToString(), i));
                 }
             }
             else
@@ -310,7 +473,7 @@ namespace ProcessForge
                     AutoSize = true,
                     Font = new Font("Segoe UI", 8F, FontStyle.Italic),
                     ForeColor = Color.Gray,
-                    Margin = new Padding(2, 8, 2, 0)
+                    Margin = new Padding(2, 5, 2, 0)
                 };
                 flpPageButtons.Controls.Add(lblNone);
             }
@@ -354,6 +517,14 @@ namespace ProcessForge
             btnAddKeyAction.Click += BtnAddKeyAction_Click;
             btnQuickTab.Click += (s, e) => AppendKeyText("{TAB}");
             btnQuickEnter.Click += (s, e) => AppendKeyText("{ENTER}");
+            btnVarUsername.Click += (s, e) => AppendKeyText("{USERNAME}");
+            btnVarPassword.Click += (s, e) => AppendKeyText("{PASSWORD}");
+            btnVarPin.Click += (s, e) => AppendKeyText("{SECONDPASSWORD}");
+            btnVarNickname.Click += (s, e) => AppendKeyText("{NICKNAME}");
+
+            // Delay & Input Box action events
+            btnAddDelayAction.Click += BtnAddDelayAction_Click;
+            btnAddInputBoxAction.Click += BtnAddInputBoxAction_Click;
 
             // Test execution
             btnTestExecution.Click += BtnTestExecution_Click;
@@ -416,17 +587,30 @@ namespace ProcessForge
             btnCaptureImage.Text = $"CAPTURE IMAGE — {displayTitle}";
 
             // Context-sensitive action list header
-            if (model.IsSubStep)
+            if (model.IsSubStep || model.BranchType == "SubStep")
             {
                 lblActionList.Text = $"Sub-Step Actions Sequence ({model.CaptureTitle}):";
             }
-            else if (index == 0)
+            else if (model.BranchType == "Main" && index == 0)
             {
                 lblActionList.Text = "Main Step 1 Actions (Hardcoded login; optional extra actions):";
             }
-            else
+            else if (model.BranchType == "Main")
             {
                 lblActionList.Text = $"Main Step {index + 1} Actions Sequence ({model.CaptureTitle}):";
+            }
+            else if (model.BranchType == "Ordinary")
+            {
+                lblActionList.Text = $"Ordinary Login Step {index + 1} Actions Sequence ({model.CaptureTitle}):";
+            }
+            else if (model.BranchType == "CreateCharacter")
+            {
+                int charNum = index - 5 + 4;
+                lblActionList.Text = $"Create Character Step {charNum} Actions Sequence ({model.CaptureTitle}):";
+            }
+            else
+            {
+                lblActionList.Text = $"Step {index + 1} Actions Sequence ({model.CaptureTitle}):";
             }
 
             // Load Preview Safely
@@ -522,6 +706,14 @@ namespace ProcessForge
                 {
                     txtKeyboardWord.Text = act.Word ?? string.Empty;
                 }
+                else if (act.ActionType == "Delay")
+                {
+                    numDelayMs.Value = Math.Max(numDelayMs.Minimum, Math.Min(numDelayMs.Maximum, act.DelayMs ?? 500));
+                }
+                else if (act.ActionType == "InputBox")
+                {
+                    txtInputBoxPrompt.Text = act.PromptMessage ?? "Enter character name:";
+                }
             }
 
             picPreview.Invalidate();
@@ -529,18 +721,35 @@ namespace ProcessForge
 
         private void UpdatePaginationButtonsStyle()
         {
+            if (currentStepIndex < 0 || currentStepIndex >= Steps.Count) return;
+
+            var step = Steps[currentStepIndex];
+
             // Indicator text
-            if (currentStepIndex < MinMainSteps)
+            if (step.BranchType == "Main" || currentStepIndex < 3)
             {
-                lblStepIndicator.Text = $"MAIN STEP {currentStepIndex + 1} OF {MinMainSteps}";
+                lblStepIndicator.Text = $"MAIN FLOW — STEP {currentStepIndex + 1} OF 3 ({step.CaptureTitle})";
                 lblStepIndicator.ForeColor = Color.Black;
+                btnDeleteSubStep.Enabled = false;
+            }
+            else if (step.BranchType == "Ordinary" || (currentStepIndex >= 3 && currentStepIndex < 5))
+            {
+                lblStepIndicator.Text = $"LOGIN FLOW — STEP {currentStepIndex + 1} OF 5 ({step.CaptureTitle})";
+                lblStepIndicator.ForeColor = Color.SteelBlue;
+                btnDeleteSubStep.Enabled = false;
+            }
+            else if (step.BranchType == "CreateCharacter" || (currentStepIndex >= 5 && currentStepIndex < 11))
+            {
+                int charNum = currentStepIndex - 5 + 4;
+                lblStepIndicator.Text = $"CHAR CREATE BRANCH — STEP {charNum} OF 9 ({step.CaptureTitle})";
+                lblStepIndicator.ForeColor = Color.ForestGreen;
                 btnDeleteSubStep.Enabled = false;
             }
             else
             {
-                int subNum = currentStepIndex - MinMainSteps + 1;
-                int totalSub = Steps.Count - MinMainSteps;
-                lblStepIndicator.Text = $"SUB-STEP {subNum} OF {totalSub} (TOTAL: {currentStepIndex + 1}/{Steps.Count})";
+                int subNum = currentStepIndex - 11 + 1;
+                int totalSub = Math.Max(0, Steps.Count - 11);
+                lblStepIndicator.Text = $"SUB-STEP {subNum} OF {totalSub} ({step.CaptureTitle})";
                 lblStepIndicator.ForeColor = Color.DarkSlateBlue;
                 btnDeleteSubStep.Enabled = true;
             }
@@ -552,20 +761,31 @@ namespace ProcessForge
             // Styling for step buttons
             foreach (Control ctrl in flpPageButtons.Controls)
             {
-                if (ctrl is Button btn && btn.Tag is int pageIdx)
+                if (ctrl is Button btn && btn.Tag is int pageIdx && pageIdx < Steps.Count)
                 {
-                    bool isSub = (pageIdx >= MinMainSteps);
+                    var btnStep = Steps[pageIdx];
+                    Color themeColor;
+
+                    if (btnStep.BranchType == "Main" || pageIdx < 3)
+                        themeColor = Color.Black;
+                    else if (btnStep.BranchType == "Ordinary" || (pageIdx >= 3 && pageIdx < 5))
+                        themeColor = Color.SteelBlue;
+                    else if (btnStep.BranchType == "CreateCharacter" || (pageIdx >= 5 && pageIdx < 11))
+                        themeColor = Color.ForestGreen;
+                    else
+                        themeColor = Color.DarkSlateBlue;
+
                     if (pageIdx == currentStepIndex)
                     {
-                        btn.BackColor = isSub ? Color.DarkSlateBlue : Color.Black;
+                        btn.BackColor = themeColor;
                         btn.ForeColor = Color.White;
-                        btn.FlatAppearance.BorderColor = isSub ? Color.DarkSlateBlue : Color.Black;
+                        btn.FlatAppearance.BorderColor = themeColor;
                     }
                     else
                     {
                         btn.BackColor = Color.White;
-                        btn.ForeColor = isSub ? Color.DarkSlateBlue : Color.Black;
-                        btn.FlatAppearance.BorderColor = isSub ? Color.MediumPurple : Color.Black;
+                        btn.ForeColor = themeColor;
+                        btn.FlatAppearance.BorderColor = themeColor;
                     }
                 }
             }
@@ -579,14 +799,14 @@ namespace ProcessForge
         {
             if (Steps.Count >= MaxTotalSteps)
             {
-                MessageBox.Show($"Maximum limit of {MaxTotalSteps} steps (5 Main Steps + 15 Sub-Steps) reached.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Maximum limit of {MaxTotalSteps} steps reached.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             SaveCurrentFormToModel();
 
             int newIndex = Steps.Count;
-            int subIndex = newIndex - MinMainSteps + 1;
+            int subIndex = Math.Max(1, newIndex - 11 + 1);
 
             var newStep = new TargetStepModel
             {
@@ -594,6 +814,7 @@ namespace ProcessForge
                 StepTitle = $"SubStep_{subIndex}",
                 CaptureTitle = "Capture - Custom Handling",
                 IsSubStep = true,
+                BranchType = "SubStep",
                 TemplateName = $"Target_SubStep_{subIndex}",
                 ImagePath = string.Empty,
                 Actions = new List<StepInputAction>()
@@ -607,15 +828,15 @@ namespace ProcessForge
 
         private void BtnDeleteSubStep_Click(object? sender, EventArgs e)
         {
-            if (currentStepIndex < MinMainSteps)
+            if (!Steps[currentStepIndex].IsSubStep && Steps[currentStepIndex].BranchType != "SubStep")
             {
-                MessageBox.Show("Main Steps (Steps 1 to 5) are fixed and cannot be deleted.", "Action Not Allowed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Fixed flow steps (Main, Ordinary Login, and Character Creation) cannot be deleted.\nOnly custom Sub-Steps can be deleted.", "Action Not Allowed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             var stepToDelete = Steps[currentStepIndex];
             DialogResult confirm = MessageBox.Show(
-                $"Are you sure you want to delete Sub-Step '{stepToDelete.CaptureTitle}' (Step {currentStepIndex + 1})?",
+                $"Are you sure you want to delete Sub-Step '{stepToDelete.CaptureTitle}'?",
                 "Confirm Delete",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
@@ -628,10 +849,9 @@ namespace ProcessForge
             for (int i = 0; i < Steps.Count; i++)
             {
                 Steps[i].StepIndex = i;
-                Steps[i].IsSubStep = (i >= MinMainSteps);
-                if (i >= MinMainSteps)
+                if (Steps[i].IsSubStep || Steps[i].BranchType == "SubStep")
                 {
-                    int subNum = i - MinMainSteps + 1;
+                    int subNum = i - 11 + 1;
                     if (Steps[i].StepTitle.StartsWith("SubStep_"))
                     {
                         Steps[i].StepTitle = $"SubStep_{subNum}";
@@ -693,6 +913,35 @@ namespace ProcessForge
             SaveStepsToConfig();
         }
 
+        private void BtnAddDelayAction_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "Delay",
+                DelayMs = (int)numDelayMs.Value
+            };
+
+            currentStep.Actions.Add(action);
+            RefreshActionsList(currentStep.Actions.Count - 1);
+            SaveStepsToConfig();
+        }
+
+        private void BtnAddInputBoxAction_Click(object? sender, EventArgs e)
+        {
+            string prompt = string.IsNullOrWhiteSpace(txtInputBoxPrompt.Text) ? "Enter required value:" : txtInputBoxPrompt.Text.Trim();
+            var currentStep = Steps[currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "InputBox",
+                PromptMessage = prompt
+            };
+
+            currentStep.Actions.Add(action);
+            RefreshActionsList(currentStep.Actions.Count - 1);
+            SaveStepsToConfig();
+        }
+
         private void AppendKeyText(string key)
         {
             txtKeyboardWord.Text += key;
@@ -724,6 +973,14 @@ namespace ProcessForge
                         return;
                     }
                     act.Word = txtKeyboardWord.Text;
+                }
+                else if (act.ActionType == "Delay")
+                {
+                    act.DelayMs = (int)numDelayMs.Value;
+                }
+                else if (act.ActionType == "InputBox")
+                {
+                    act.PromptMessage = string.IsNullOrWhiteSpace(txtInputBoxPrompt.Text) ? "Enter required value:" : txtInputBoxPrompt.Text.Trim();
                 }
 
                 RefreshActionsList(selIdx);
@@ -959,7 +1216,23 @@ namespace ProcessForge
 
                     using (Bitmap screenshot = CaptureScreenRegion(selectedArea))
                     {
-                        string fileName = $"template_step_{currentStepIndex + 1}.png";
+                        string fileName;
+                        var step = Steps[currentStepIndex];
+                        if (step.BranchType == "CreateCharacter")
+                        {
+                            int charNum = currentStepIndex - 5 + 4;
+                            fileName = $"template_char_step_{charNum}.png";
+                        }
+                        else if (step.IsSubStep || step.BranchType == "SubStep")
+                        {
+                            int subNum = currentStepIndex - 11 + 1;
+                            fileName = $"template_substep_{subNum}.png";
+                        }
+                        else
+                        {
+                            fileName = $"template_step_{currentStepIndex + 1}.png";
+                        }
+
                         string savePath = Path.Combine(storageDirectory, fileName);
 
                         screenshot.Save(savePath, System.Drawing.Imaging.ImageFormat.Png);
@@ -1196,10 +1469,36 @@ namespace ProcessForge
                             {
                                 if (!string.IsNullOrEmpty(action.Word))
                                 {
-                                    SendKeys.SendWait(action.Word);
+                                    var testAccount = new ApplicationLogic.DataLoginFormat
+                                    {
+                                        username = "TestUser",
+                                        password = "TestPassword",
+                                        secondPassword = "TestSecondPassword",
+                                        nickname = "TestNickname"
+                                    };
+                                    string resolvedWord = AutoLoginPatternLogic.Case.ResolveVariables(action.Word, testAccount);
+                                    SendKeys.SendWait(resolvedWord);
                                     executedCount++;
                                     await Task.Delay(250);
                                 }
+                            }
+                            else if (action.ActionType == "Delay")
+                            {
+                                int delay = action.DelayMs ?? 500;
+                                await Task.Delay(delay);
+                                executedCount++;
+                            }
+                            else if (action.ActionType == "InputBox")
+                            {
+                                string prompt = string.IsNullOrWhiteSpace(action.PromptMessage) ? "Enter custom input:" : action.PromptMessage;
+                                string inputVal = PromptDialog.Show(prompt);
+                                if (!string.IsNullOrEmpty(inputVal))
+                                {
+                                    await Task.Delay(200);
+                                    SendKeys.SendWait(inputVal);
+                                }
+                                executedCount++;
+                                await Task.Delay(250);
                             }
                         }
 
@@ -1286,7 +1585,7 @@ namespace ProcessForge
 
     public class StepInputAction
     {
-        public string ActionType { get; set; } = "Mouse"; // "Mouse" or "Keyboard"
+        public string ActionType { get; set; } = "Mouse"; // "Mouse", "Keyboard", "Delay", "InputBox"
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? X { get; set; }
@@ -1303,11 +1602,26 @@ namespace ProcessForge
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Word { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? DelayMs { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? PromptMessage { get; set; }
+
         public override string ToString()
         {
             if (ActionType == "Keyboard")
             {
                 return $"⌨ [Keyboard] SendKeys: \"{Word}\"";
+            }
+            else if (ActionType == "Delay")
+            {
+                return $"⏳ [Delay] Wait {DelayMs ?? 500} ms";
+            }
+            else if (ActionType == "InputBox")
+            {
+                string prompt = string.IsNullOrWhiteSpace(PromptMessage) ? "Prompt user for text" : PromptMessage;
+                return $"💬 [Input Box] Prompt: \"{prompt}\" -> SendKeys";
             }
             else
             {
@@ -1333,6 +1647,9 @@ namespace ProcessForge
         public bool IsSubStep { get; set; } = false;
         public string TemplateName { get; set; } = string.Empty;
         public string ImagePath { get; set; } = string.Empty;
+
+        // Flow categorization: "Main" (1-3), "Ordinary" (4-5), "CreateCharacter" (4-7), "SubStep"
+        public string BranchType { get; set; } = "Main";
 
         // Linear input action macro sequence
         public List<StepInputAction> Actions { get; set; } = new List<StepInputAction>();

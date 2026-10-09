@@ -18,6 +18,7 @@ namespace ProcessForge.Config
         public string RenameTextbox { get; set; } = string.Empty;
         public string NotepadPathTextbox { get; set; } = string.Empty;
         public string FilePathNameLogin { get; set; } = string.Empty;
+        public string AutoLoginMode { get; set; } = "Standard Auto Login";
     }
 
     public class BulkWindowConfig

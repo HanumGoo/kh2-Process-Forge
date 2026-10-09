@@ -37,7 +37,7 @@ namespace ProcessForge.ApplicationLogic
             }
         }
 
-        public async static Task RunAutoLogin(string processName, string accountDataFilePath, Action? onProcessCompleted = null, CancellationToken externalToken = default)
+        public async static Task RunAutoLogin(string processName, string accountDataFilePath, string autoLoginMode = "Standard Auto Login", Action? onProcessCompleted = null, CancellationToken externalToken = default)
         {
             if (IsRunning)
             {
@@ -55,7 +55,7 @@ namespace ProcessForge.ApplicationLogic
             {
                 await Task.Run(() =>
                 {
-                    ExecuteAutoLogin(processName, accountDataFilePath, onProcessCompleted, token);
+                    ExecuteAutoLogin(processName, accountDataFilePath, autoLoginMode, onProcessCompleted, token);
                 }, token);
             }
             catch (OperationCanceledException)
@@ -68,7 +68,12 @@ namespace ProcessForge.ApplicationLogic
             }
         }
 
-        private static void ExecuteAutoLogin(string processName, string accountDataFilePath, Action? onProcessCompleted, CancellationToken cancellationToken)
+        public async static Task RunAutoLogin(string processName, string accountDataFilePath, Action? onProcessCompleted, CancellationToken externalToken = default)
+        {
+            await RunAutoLogin(processName, accountDataFilePath, "Standard Auto Login", onProcessCompleted, externalToken);
+        }
+
+        private static void ExecuteAutoLogin(string processName, string accountDataFilePath, string autoLoginMode, Action? onProcessCompleted, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -172,8 +177,8 @@ namespace ProcessForge.ApplicationLogic
             string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
             string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
 
-            string json = File.ReadAllText(configFilePath);
-            var loaded = JsonSerializer.Deserialize<List<TargetStepModel>>(json);
+            List<TargetStepModel> loaded = AutoLoginSettingsForm.LoadSteps();
+            bool isCreateCharacterMode = string.Equals(autoLoginMode, "Auto Login + Create Character", StringComparison.OrdinalIgnoreCase);
 
             #endregion
 
@@ -198,38 +203,50 @@ namespace ProcessForge.ApplicationLogic
 
                 Case AllCase = new Case(storageDirectory, configFilePath, item, cancellationToken);
 
+                // 1. Shared Main Steps: 1, 2, 3
+                var mainSteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "Main").ToList();
+                if (mainSteps.Count == 0)
+                {
+                    mainSteps = loaded.Where(s => !s.IsSubStep && s.StepIndex < 3).ToList();
+                }
 
-                for (int i = 0; i < loaded?.Count; i++)
+                for (int i = 0; i < mainSteps.Count; i++)
                 {
                     if (cancellationToken.IsCancellationRequested) break;
+                    var step = mainSteps[i];
+                    AllCase.ExecuteCase(windowSize, step, loaded);
+                }
 
-                    TargetStepModel step = loaded[i];
+                if (cancellationToken.IsCancellationRequested) break;
 
-                    if (step.IsSubStep)
+                // 2. Branch Flow: Character Creation (CharSteps 4-9) vs Ordinary Auto Login (Steps 4-5)
+                if (isCreateCharacterMode)
+                {
+                    var charSteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "CreateCharacter").ToList();
+                    if (charSteps.Count == 0)
                     {
-                        continue; // Skip sub-steps in the main loop
+                        charSteps = loaded.Where(s => s.StepTitle.StartsWith("CharStep")).ToList();
                     }
 
-                    switch (step.StepIndex)
+                    foreach (var charStep in charSteps)
                     {
-                        case 0:
-                            AllCase.Case_1(windowSize, step, loaded);
-                            break;
-                        case 1:
-                            AllCase.Case_2(windowSize, step, loaded);
-                            break;
-                        case 2:
-                            AllCase.Case_3(windowSize, step, loaded);
-                            break;
-                        case 3:
-                            AllCase.Case_4(windowSize, step, loaded);
-                            break;
-                        case 4:
-                            AllCase.Case_5(windowSize, step, loaded);
-                            break;
-                        default:
-                            MessageBox.Show("There is no case", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
+                        if (cancellationToken.IsCancellationRequested) break;
+                        AllCase.ExecuteCase(windowSize, charStep, loaded);
+                    }
+                }
+                else
+                {
+                    var ordinarySteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "Ordinary").ToList();
+                    if (ordinarySteps.Count == 0)
+                    {
+                        ordinarySteps = loaded.Where(s => !s.IsSubStep && (s.StepIndex == 3 || s.StepIndex == 4)).ToList();
+                    }
+
+                    for (int i = 0; i < ordinarySteps.Count; i++)
+                    {
+                        if (cancellationToken.IsCancellationRequested) break;
+                        var ordStep = ordinarySteps[i];
+                        AllCase.ExecuteCase(windowSize, ordStep, loaded);
                     }
                 }
 

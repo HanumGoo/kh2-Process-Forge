@@ -76,6 +76,22 @@ namespace ProcessForge
                         NotepadPathTextbox.Text = config.MainForm.NotepadPathTextbox;
                     if (!string.IsNullOrEmpty(config.MainForm.FilePathNameLogin))
                         FilePathNameLogin.Text = config.MainForm.FilePathNameLogin;
+                    if (!string.IsNullOrEmpty(config.MainForm.AutoLoginMode))
+                    {
+                        int modeIdx = config.MainForm.AutoLoginMode.Contains("Create Character", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+                        if (modeIdx >= 0 && modeIdx < cmbAutoLoginMode.Items.Count)
+                        {
+                            cmbAutoLoginMode.SelectedIndex = modeIdx;
+                        }
+                    }
+                    else
+                    {
+                        cmbAutoLoginMode.SelectedIndex = 0;
+                    }
+                }
+                else
+                {
+                    cmbAutoLoginMode.SelectedIndex = 0;
                 }
             }
             catch { }
@@ -85,6 +101,7 @@ namespace ProcessForge
             RenameTextbox.TextChanged += (s, e) => SaveMainFormConfig();
             NotepadPathTextbox.TextChanged += (s, e) => SaveMainFormConfig();
             FilePathNameLogin.TextChanged += (s, e) => SaveMainFormConfig();
+            cmbAutoLoginMode.SelectedIndexChanged += (s, e) => SaveMainFormConfig();
         }
 
         private void SaveMainFormConfig()
@@ -97,7 +114,8 @@ namespace ProcessForge
                     FilePathName = FilePathName.Text,
                     RenameTextbox = RenameTextbox.Text,
                     NotepadPathTextbox = NotepadPathTextbox.Text,
-                    FilePathNameLogin = FilePathNameLogin.Text
+                    FilePathNameLogin = FilePathNameLogin.Text,
+                    AutoLoginMode = cmbAutoLoginMode.SelectedItem?.ToString() ?? "Standard Auto Login"
                 };
                 ProcessForge.Config.AppConfigManager.SaveMainFormConfig(cfg);
             }
@@ -621,7 +639,11 @@ namespace ProcessForge
 
             try
             {
-                await AutoLoginLogic.RunAutoLogin(ProcessName.Text, FilePathNameLogin.Text, onProcessCompleted);
+                string selectedMode = cmbAutoLoginMode.SelectedIndex == 1
+                    ? "Auto Login + Create Character"
+                    : "Standard Auto Login";
+
+                await AutoLoginLogic.RunAutoLogin(ProcessName.Text, FilePathNameLogin.Text, selectedMode, onProcessCompleted);
             }
             catch (Exception ex)
             {
