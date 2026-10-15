@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using ProcessForge.Config;
 using ProcessForge.FindWindowLogic;
 using ProcessForge.RefreshLogic;
+using ProcessForge.BulkMacroLogic;
 
 namespace ProcessForge
 {
@@ -21,6 +22,7 @@ namespace ProcessForge
         private List<ProcessData> DetectedProcesses = new List<ProcessData>();
         private BulkWindowConfig BulkConfig = new BulkWindowConfig();
         private int SelectedGroupIndex = 0; // 0 = All Detected, 1 = Ungrouped, 2+ = Custom Groups
+        private BulkWorkflowConfig _bulkWorkflowConfig = new BulkWorkflowConfig();
 
         // Legacy / Import state
         private bool isUsingImport = false;
@@ -79,6 +81,13 @@ namespace ProcessForge
             btnGroupTerminateAll.Click += BtnGroupTerminateAll_Click;
             btnRenameGroup.Click += BtnRenameGroup_Click;
             btnDeleteGroup.Click += BtnDeleteGroup_Click;
+
+            // Wire Macro Workflow Events
+            LoadWorkflowList();
+            cmbGroupWorkflow.SelectedIndexChanged += (s, e) => SaveSelectedWorkflowChoice();
+            btnConfigureMacro.Click += BtnConfigureMacro_Click;
+            btnRunGroupMacro.Click += BtnRunGroupMacro_Click;
+            btnStopGroupMacro.Click += BtnStopGroupMacro_Click;
 
             flowGroupProcesses.Resize += (s, e) => ResizeProcessCards();
 
@@ -1239,6 +1248,164 @@ namespace ProcessForge
             {
                 ImportTextbox.Text = ofd.FileName;
             }
+        }
+
+        #endregion
+
+        #region Bulk Macro Workflow Execution
+
+        private void LoadWorkflowList(string? selectId = null)
+        {
+            try
+            {
+                _bulkWorkflowConfig = BulkWorkflowManager.LoadConfig();
+                cmbGroupWorkflow.Items.Clear();
+
+                if (_bulkWorkflowConfig.Workflows == null || _bulkWorkflowConfig.Workflows.Count == 0)
+                {
+                    var def = BulkWorkflowManager.CreateDefaultWorkflow("Default Macro");
+                    _bulkWorkflowConfig.Workflows = new List<BulkWorkflowModel> { def };
+                    _bulkWorkflowConfig.SelectedWorkflowId = def.Id;
+                    BulkWorkflowManager.SaveConfig(_bulkWorkflowConfig);
+                }
+
+                foreach (var wf in _bulkWorkflowConfig.Workflows)
+                {
+                    cmbGroupWorkflow.Items.Add(wf.Name);
+                }
+
+                int selectIdx = 0;
+                string targetId = !string.IsNullOrEmpty(selectId) ? selectId : _bulkWorkflowConfig.SelectedWorkflowId;
+                if (!string.IsNullOrEmpty(targetId))
+                {
+                    int found = _bulkWorkflowConfig.Workflows.FindIndex(w => w.Id == targetId);
+                    if (found >= 0) selectIdx = found;
+                }
+
+                if (cmbGroupWorkflow.Items.Count > 0)
+                {
+                    cmbGroupWorkflow.SelectedIndex = Math.Min(selectIdx, cmbGroupWorkflow.Items.Count - 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading workflows in BulkWindowForm: {ex.Message}");
+            }
+        }
+
+        private BulkWorkflowModel? GetSelectedWorkflow()
+        {
+            int idx = cmbGroupWorkflow.SelectedIndex;
+            if (_bulkWorkflowConfig.Workflows != null && idx >= 0 && idx < _bulkWorkflowConfig.Workflows.Count)
+            {
+                return _bulkWorkflowConfig.Workflows[idx];
+            }
+            return null;
+        }
+
+        private void SaveSelectedWorkflowChoice()
+        {
+            var wf = GetSelectedWorkflow();
+            if (wf != null && _bulkWorkflowConfig.SelectedWorkflowId != wf.Id)
+            {
+                _bulkWorkflowConfig.SelectedWorkflowId = wf.Id;
+                BulkWorkflowManager.SaveConfig(_bulkWorkflowConfig);
+            }
+        }
+
+        private void BtnConfigureMacro_Click(object? sender, EventArgs e)
+        {
+            var selWf = GetSelectedWorkflow();
+            using var settingsForm = new BulkMacroSettingsForm(selWf?.Id);
+            if (settingsForm.ShowDialog() == DialogResult.OK)
+            {
+                LoadWorkflowList();
+            }
+        }
+
+        private async void BtnRunGroupMacro_Click(object? sender, EventArgs e)
+        {
+            var workflow = GetSelectedWorkflow();
+            if (workflow == null)
+            {
+                MessageBox.Show("Please select or configure a workflow macro first.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Get active processes for the selected group
+            var allInGroup = GetCurrentViewProcesses();
+            var activeProcesses = allInGroup.Where(p => p.ProcessId > 0).ToList();
+
+            if (activeProcesses.Count == 0)
+            {
+                MessageBox.Show("No active (online) processes in the currently selected group to run this macro on.", "No Active Windows", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string groupName = SelectedGroupIndex switch
+            {
+                0 => "All Detected",
+                1 => "Ungrouped",
+                _ => (SelectedGroupIndex - 2 < BulkConfig.Groups.Count) ? BulkConfig.Groups[SelectedGroupIndex - 2].GroupName : "Selected Group"
+            };
+
+            var confirm = MessageBox.Show(
+                $"Run macro '{workflow.Name}' ({workflow.Steps.Count} steps) across {activeProcesses.Count} window(s) in group '{groupName}'?\n\nEach window will be restored, processed sequentially, and minimized upon completion.",
+                "Confirm Macro Execution",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (confirm != DialogResult.Yes) return;
+
+            btnRunGroupMacro.Enabled = false;
+            btnStopGroupMacro.Enabled = true;
+            lblMacroStatus.Text = $"Starting macro '{workflow.Name}' on {activeProcesses.Count} windows...";
+
+            try
+            {
+                await BulkMacroRunner.RunGroupMacro(
+                    activeProcesses,
+                    workflow,
+                    accountDataFilePath: string.Empty, // auto-detect from config
+                    onProgress: (cur, tot, status) =>
+                    {
+                        if (this.IsDisposed) return;
+                        this.BeginInvoke(new Action(() =>
+                        {
+                            lblMacroStatus.Text = $"[{cur}/{tot}] {status}";
+                        }));
+                    },
+                    onCompleted: () =>
+                    {
+                        if (this.IsDisposed) return;
+                        this.BeginInvoke(new Action(() =>
+                        {
+                            lblMacroStatus.Text = $"Status: Macro completed ({activeProcesses.Count} windows).";
+                        }));
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                lblMacroStatus.Text = $"Status: Error - {ex.Message}";
+                MessageBox.Show($"Macro execution error: {ex.Message}", "Macro Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (!this.IsDisposed)
+                {
+                    btnRunGroupMacro.Enabled = true;
+                    btnStopGroupMacro.Enabled = false;
+                }
+            }
+        }
+
+        private void BtnStopGroupMacro_Click(object? sender, EventArgs e)
+        {
+            BulkMacroRunner.Stop();
+            lblMacroStatus.Text = "Status: Stopping macro execution...";
+            btnStopGroupMacro.Enabled = false;
         }
 
         #endregion

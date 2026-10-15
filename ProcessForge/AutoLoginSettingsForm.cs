@@ -1109,14 +1109,13 @@ namespace ProcessForge
         private void PicPreview_MouseClick(object? sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || picPreview.Image == null) return;
-            if (!chkUseRelativeOffset.Checked) return;
 
             Point? imgPt = TranslatePreviewToImage(e.Location);
             if (imgPt.HasValue)
             {
+                chkUseRelativeOffset.Checked = true;
                 numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, imgPt.Value.X));
                 numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, imgPt.Value.Y));
-                chkUseRelativeOffset.Checked = true;
 
                 // If a mouse action is selected in the list, update it directly
                 var currentStep = Steps[currentStepIndex];
@@ -1310,22 +1309,31 @@ namespace ProcessForge
                             {
                                 try
                                 {
-                                    Rectangle screenSize = Screen.PrimaryScreen?.Bounds ?? Screen.GetBounds(clickedPoint);
-                                    using (Bitmap fullScreenBitmap = CaptureScreenRegion(screenSize))
+                                    Rectangle virtScreen = SystemInformation.VirtualScreen;
+                                    using (Bitmap fullScreenBitmap = CaptureScreenRegion(virtScreen))
                                     using (Mat screenMat = BitmapConverter.ToMat(fullScreenBitmap))
                                     using (Mat templateMat = Cv2.ImRead(step.ImagePath, ImreadModes.Color))
                                     using (Mat resultMat = new Mat())
                                     {
-                                        Cv2.CvtColor(screenMat, screenMat, ColorConversionCodes.BGRA2BGR);
-                                        Cv2.MatchTemplate(screenMat, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
-                                        Cv2.MinMaxLoc(resultMat, out double minVal, out double maxVal, out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc);
-
-                                        if (maxVal >= 0.70)
+                                        using (Mat screenBGR = new Mat())
                                         {
-                                            finalX = clickedPoint.X - maxLoc.X;
-                                            finalY = clickedPoint.Y - maxLoc.Y;
-                                            finalRelative = true;
-                                            matched = true;
+                                            if (screenMat.Channels() == 4)
+                                                Cv2.CvtColor(screenMat, screenBGR, ColorConversionCodes.BGRA2BGR);
+                                            else
+                                                screenMat.CopyTo(screenBGR);
+
+                                            Cv2.MatchTemplate(screenBGR, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
+                                            Cv2.MinMaxLoc(resultMat, out double minVal, out double maxVal, out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc);
+
+                                            if (maxVal >= 0.70)
+                                            {
+                                                int templateScreenX = virtScreen.X + maxLoc.X;
+                                                int templateScreenY = virtScreen.Y + maxLoc.Y;
+                                                finalX = clickedPoint.X - templateScreenX;
+                                                finalY = clickedPoint.Y - templateScreenY;
+                                                finalRelative = true;
+                                                matched = true;
+                                            }
                                         }
                                     }
                                 }
@@ -1346,6 +1354,12 @@ namespace ProcessForge
                                     finalX = clickedPoint.X;
                                     finalY = clickedPoint.Y;
                                     finalRelative = false;
+                                    MessageBox.Show(
+                                        "Could not detect the template image on screen to calculate relative offset.\n" +
+                                        "Coordinate was recorded as absolute. You can also click directly on the preview image to set a relative coordinate.",
+                                        "Relative Offset Notice",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Information);
                                 }
                             }
                         }
@@ -1427,39 +1441,42 @@ namespace ProcessForge
             try
             {
                 // 1. Capture full active screen
-                Rectangle screenSize = Screen.PrimaryScreen?.Bounds ?? Screen.GetBounds(Point.Empty);
+                Rectangle screenSize = SystemInformation.VirtualScreen;
                 using (Bitmap fullScreenBitmap = CaptureScreenRegion(screenSize))
                 using (Mat screenMat = BitmapConverter.ToMat(fullScreenBitmap))
                 using (Mat templateMat = Cv2.ImRead(step.ImagePath, ImreadModes.Color))
                 using (Mat resultMat = new Mat())
+                using (Mat screenBGR = new Mat())
                 {
-                    // Convert screen color format
-                    Cv2.CvtColor(screenMat, screenMat, ColorConversionCodes.BGRA2BGR);
+                    if (screenMat.Channels() == 4)
+                        Cv2.CvtColor(screenMat, screenBGR, ColorConversionCodes.BGRA2BGR);
+                    else
+                        screenMat.CopyTo(screenBGR);
 
                     // 2. Perform Template Matching via OpenCV
-                    Cv2.MatchTemplate(screenMat, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
+                    Cv2.MatchTemplate(screenBGR, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
                     Cv2.MinMaxLoc(resultMat, out double minVal, out double maxVal, out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc);
 
-                    if (maxVal >= 0.85) // Confidence threshold
-                    {
-                        int executedCount = 0;
-
-                        // Execute linear action sequence in order
-                        foreach (var action in step.Actions)
+                        if (maxVal >= 0.85) // Confidence threshold
                         {
-                            if (action.ActionType == "Mouse")
+                            int executedCount = 0;
+
+                            // Execute linear action sequence in order
+                            foreach (var action in step.Actions)
                             {
-                                int targetX, targetY;
-                                if (action.UseRelativeOffset ?? false)
+                                if (action.ActionType == "Mouse")
                                 {
-                                    targetX = maxLoc.X + (action.X ?? 0);
-                                    targetY = maxLoc.Y + (action.Y ?? 0);
-                                }
-                                else
-                                {
-                                    targetX = action.X ?? 0;
-                                    targetY = action.Y ?? 0;
-                                }
+                                    int targetX, targetY;
+                                    if (action.UseRelativeOffset ?? true)
+                                    {
+                                        targetX = screenSize.X + maxLoc.X + (action.X ?? 0);
+                                        targetY = screenSize.Y + maxLoc.Y + (action.Y ?? 0);
+                                    }
+                                    else
+                                    {
+                                        targetX = action.X ?? 0;
+                                        targetY = action.Y ?? 0;
+                                    }
 
                                 PerformClick(targetX, targetY, action.ClickTypeIndex ?? 0);
                                 executedCount++;
@@ -1555,29 +1572,7 @@ namespace ProcessForge
 
         private void PerformClick(int x, int y, int clickType)
         {
-            SetCursorPos(x, y);
-
-            switch (clickType)
-            {
-                case 0: // Single Left Click
-                    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, UIntPtr.Zero);
-                    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, UIntPtr.Zero);
-                    break;
-                case 1: // Double Left Click
-                    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, UIntPtr.Zero);
-                    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, UIntPtr.Zero);
-                    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, UIntPtr.Zero);
-                    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, UIntPtr.Zero);
-                    break;
-                case 2: // Single Right Click
-                    const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
-                    const uint MOUSEEVENTF_RIGHTUP = 0x0010;
-                    mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, UIntPtr.Zero);
-                    mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, UIntPtr.Zero);
-                    break;
-                case 3: // Hover Only
-                    break;
-            }
+            InputWindow.ClickAt(x, y, clickType);
         }
 
         #endregion

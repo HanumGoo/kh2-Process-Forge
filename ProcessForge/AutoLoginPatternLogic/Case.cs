@@ -56,9 +56,12 @@ namespace ProcessForge.AutoLoginPatternLogic
                 .Replace("{NICKNAME}", account.nickname ?? string.Empty, StringComparison.OrdinalIgnoreCase);
         }
 
-        public void ExecuteStepActions(TargetStepModel step, OpenCvSharp.Point matchLocation)
+        public void ExecuteStepActions(TargetStepModel step, OpenCvSharp.Point matchLocation, Rectangle windowSize = default)
         {
             if (step.Actions == null || step.Actions.Count == 0) return;
+
+            int originX = windowSize.IsEmpty ? 0 : windowSize.X;
+            int originY = windowSize.IsEmpty ? 0 : windowSize.Y;
 
             foreach (var action in step.Actions)
             {
@@ -67,11 +70,11 @@ namespace ProcessForge.AutoLoginPatternLogic
                 if (action.ActionType == "Mouse")
                 {
                     int clickType = action.ClickTypeIndex ?? 0;
-                    if (action.UseRelativeOffset == true)
+                    if (action.UseRelativeOffset ?? true)
                     {
                         if (action.X.HasValue && action.Y.HasValue)
                         {
-                            InputWindowLogic.InputWindow.ClickAt(matchLocation.X + (action.X ?? 0), matchLocation.Y + (action.Y ?? 0), clickType);
+                            InputWindowLogic.InputWindow.ClickAt(originX + matchLocation.X + (action.X ?? 0), originY + matchLocation.Y + (action.Y ?? 0), clickType);
                         }
                     }
                     else
@@ -141,7 +144,7 @@ namespace ProcessForge.AutoLoginPatternLogic
                     }
                 }
 
-                ExecuteStepActions(step, matchLocation);
+                ExecuteStepActions(step, matchLocation, windowSize);
             }
             SleepOrCancel(500);
         }
@@ -163,7 +166,7 @@ namespace ProcessForge.AutoLoginPatternLogic
                     DetectImageSub(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
                     if (matchScore >= 0.9)
                     {
-                        ExecuteStepActions(step, matchLocation);
+                        ExecuteStepActions(step, matchLocation, windowSize);
                         break;
                     }
                 }

@@ -45,6 +45,12 @@ namespace ProcessForge
             btnGroupTerminateAll = new Button();
             btnRenameGroup = new Button();
             btnDeleteGroup = new Button();
+            lblMacroWorkflowHeader = new Label();
+            cmbGroupWorkflow = new ComboBox();
+            btnConfigureMacro = new Button();
+            btnRunGroupMacro = new Button();
+            btnStopGroupMacro = new Button();
+            lblMacroStatus = new Label();
             pnlLeftHeader = new Panel();
             lblGroupsHeader = new Label();
             btnAddGroup = new Button();
@@ -327,10 +333,16 @@ namespace ProcessForge
             pnlGroupActions.Controls.Add(btnGroupTerminateAll);
             pnlGroupActions.Controls.Add(btnRenameGroup);
             pnlGroupActions.Controls.Add(btnDeleteGroup);
+            pnlGroupActions.Controls.Add(lblMacroWorkflowHeader);
+            pnlGroupActions.Controls.Add(cmbGroupWorkflow);
+            pnlGroupActions.Controls.Add(btnConfigureMacro);
+            pnlGroupActions.Controls.Add(btnRunGroupMacro);
+            pnlGroupActions.Controls.Add(btnStopGroupMacro);
+            pnlGroupActions.Controls.Add(lblMacroStatus);
             pnlGroupActions.Dock = DockStyle.Bottom;
             pnlGroupActions.Location = new Point(0, 395);
             pnlGroupActions.Name = "pnlGroupActions";
-            pnlGroupActions.Size = new Size(278, 224);
+            pnlGroupActions.Size = new Size(278, 344);
             pnlGroupActions.TabIndex = 2;
             // 
             // lblGroupActionsTitle
@@ -440,6 +452,79 @@ namespace ProcessForge
             btnDeleteGroup.TabIndex = 7;
             btnDeleteGroup.Text = "Delete Group";
             btnDeleteGroup.UseVisualStyleBackColor = false;
+            // 
+            // lblMacroWorkflowHeader
+            // 
+            lblMacroWorkflowHeader.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblMacroWorkflowHeader.ForeColor = Color.SlateGray;
+            lblMacroWorkflowHeader.Location = new Point(8, 192);
+            lblMacroWorkflowHeader.Name = "lblMacroWorkflowHeader";
+            lblMacroWorkflowHeader.Size = new Size(260, 16);
+            lblMacroWorkflowHeader.TabIndex = 8;
+            lblMacroWorkflowHeader.Text = "─── Macro Workflow ───";
+            lblMacroWorkflowHeader.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // cmbGroupWorkflow
+            // 
+            cmbGroupWorkflow.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbGroupWorkflow.Font = new Font("Segoe UI", 8.5F);
+            cmbGroupWorkflow.FormattingEnabled = true;
+            cmbGroupWorkflow.Location = new Point(8, 214);
+            cmbGroupWorkflow.Name = "cmbGroupWorkflow";
+            cmbGroupWorkflow.Size = new Size(220, 23);
+            cmbGroupWorkflow.TabIndex = 9;
+            // 
+            // btnConfigureMacro
+            // 
+            btnConfigureMacro.BackColor = Color.White;
+            btnConfigureMacro.Cursor = Cursors.Hand;
+            btnConfigureMacro.FlatStyle = FlatStyle.Flat;
+            btnConfigureMacro.Font = new Font("Segoe UI", 9F);
+            btnConfigureMacro.Location = new Point(232, 213);
+            btnConfigureMacro.Name = "btnConfigureMacro";
+            btnConfigureMacro.Size = new Size(36, 25);
+            btnConfigureMacro.TabIndex = 10;
+            btnConfigureMacro.Text = "⚙";
+            btnConfigureMacro.UseVisualStyleBackColor = false;
+            // 
+            // btnRunGroupMacro
+            // 
+            btnRunGroupMacro.BackColor = Color.Black;
+            btnRunGroupMacro.Cursor = Cursors.Hand;
+            btnRunGroupMacro.FlatStyle = FlatStyle.Flat;
+            btnRunGroupMacro.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
+            btnRunGroupMacro.ForeColor = Color.White;
+            btnRunGroupMacro.Location = new Point(8, 244);
+            btnRunGroupMacro.Name = "btnRunGroupMacro";
+            btnRunGroupMacro.Size = new Size(188, 28);
+            btnRunGroupMacro.TabIndex = 11;
+            btnRunGroupMacro.Text = "▶ Run Macro on Group";
+            btnRunGroupMacro.UseVisualStyleBackColor = false;
+            // 
+            // btnStopGroupMacro
+            // 
+            btnStopGroupMacro.BackColor = Color.White;
+            btnStopGroupMacro.Cursor = Cursors.Hand;
+            btnStopGroupMacro.Enabled = false;
+            btnStopGroupMacro.FlatStyle = FlatStyle.Flat;
+            btnStopGroupMacro.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
+            btnStopGroupMacro.ForeColor = Color.DarkRed;
+            btnStopGroupMacro.Location = new Point(200, 244);
+            btnStopGroupMacro.Name = "btnStopGroupMacro";
+            btnStopGroupMacro.Size = new Size(68, 28);
+            btnStopGroupMacro.TabIndex = 12;
+            btnStopGroupMacro.Text = "■ Stop";
+            btnStopGroupMacro.UseVisualStyleBackColor = false;
+            // 
+            // lblMacroStatus
+            // 
+            lblMacroStatus.Font = new Font("Segoe UI", 8F);
+            lblMacroStatus.ForeColor = Color.DimGray;
+            lblMacroStatus.Location = new Point(8, 277);
+            lblMacroStatus.Name = "lblMacroStatus";
+            lblMacroStatus.Size = new Size(260, 58);
+            lblMacroStatus.TabIndex = 13;
+            lblMacroStatus.Text = "Macro Status: Idle\r\nSelect workflow and group to run.";
             // 
             // pnlLeftHeader
             // 
@@ -832,6 +917,12 @@ namespace ProcessForge
         private Button btnGroupTerminateAll;
         private Button btnRenameGroup;
         private Button btnDeleteGroup;
+        private Label lblMacroWorkflowHeader;
+        private ComboBox cmbGroupWorkflow;
+        private Button btnConfigureMacro;
+        private Button btnRunGroupMacro;
+        private Button btnStopGroupMacro;
+        private Label lblMacroStatus;
         private Panel pnlLeftHeader;
         private Label lblGroupsHeader;
         private Button btnAddGroup;
