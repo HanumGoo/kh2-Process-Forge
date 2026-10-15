@@ -56,18 +56,26 @@ namespace ProcessForge.AutoLoginPatternLogic
                 .Replace("{NICKNAME}", account.nickname ?? string.Empty, StringComparison.OrdinalIgnoreCase);
         }
 
-        public void ExecuteStepActions(TargetStepModel step, OpenCvSharp.Point matchLocation, Rectangle windowSize = default)
+        public StepExecutionResult ExecuteStepActions(TargetStepModel step, OpenCvSharp.Point matchLocation, Rectangle windowSize = default)
         {
-            if (step.Actions == null || step.Actions.Count == 0) return;
+            if (step.Actions == null || step.Actions.Count == 0) return StepExecutionResult.Continue();
 
             int originX = windowSize.IsEmpty ? 0 : windowSize.X;
             int originY = windowSize.IsEmpty ? 0 : windowSize.Y;
 
             foreach (var action in step.Actions)
             {
-                if (cancellationToken.IsCancellationRequested) return;
+                if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
 
-                if (action.ActionType == "Mouse")
+                if (action.ActionType == "Break")
+                {
+                    return StepExecutionResult.Break();
+                }
+                else if (action.ActionType == "Goto")
+                {
+                    return StepExecutionResult.Goto(action.GotoStepTarget ?? string.Empty);
+                }
+                else if (action.ActionType == "Mouse")
                 {
                     int clickType = action.ClickTypeIndex ?? 0;
                     if (action.UseRelativeOffset ?? true)
@@ -96,42 +104,46 @@ namespace ProcessForge.AutoLoginPatternLogic
                 else if (action.ActionType == "Delay")
                 {
                     int delay = action.DelayMs ?? 500;
-                    if (SleepOrCancel(delay)) return;
+                    if (SleepOrCancel(delay)) return StepExecutionResult.Break();
                     continue;
                 }
                 else if (action.ActionType == "InputBox")
                 {
                     string prompt = string.IsNullOrWhiteSpace(action.PromptMessage) ? "Enter custom input:" : action.PromptMessage;
                     string userInput = PromptDialog.Show(prompt);
-                    if (cancellationToken.IsCancellationRequested) return;
+                    if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
 
                     if (!string.IsNullOrEmpty(userInput))
                     {
-                        if (SleepOrCancel(200)) return;
+                        if (SleepOrCancel(200)) return StepExecutionResult.Break();
                         SendKeys.SendWait(userInput);
                     }
                 }
 
-                if (SleepOrCancel(500)) return;
+                if (SleepOrCancel(500)) return StepExecutionResult.Break();
             }
+
+            return StepExecutionResult.Continue();
         }
 
-        public void ExecuteCase(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps)
+        public StepExecutionResult ExecuteCase(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps)
         {
-            if (cancellationToken.IsCancellationRequested) return;
-            DetectImageMain(windowSize, step, allSteps, out OpenCvSharp.Point matchLocation, out double matchScore);
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
+            var detectRes = DetectImageMain(windowSize, step, allSteps, out OpenCvSharp.Point matchLocation, out double matchScore);
+            if (detectRes.Status != StepActionResult.Continue) return detectRes;
+            if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
+
             if (matchScore >= 0.9)
             {
                 // Fallback for Step 1 if actions list is empty: default to credentials input
                 if (step.StepIndex == 0 && (step.Actions == null || step.Actions.Count == 0))
                 {
                     SendKeys.SendWait(accountData.username ?? string.Empty);
-                    if (cancellationToken.IsCancellationRequested) return;
+                    if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
                     SendKeys.SendWait("{TAB}");
-                    if (cancellationToken.IsCancellationRequested) return;
+                    if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
                     SendKeys.SendWait(accountData.password ?? string.Empty);
-                    if (cancellationToken.IsCancellationRequested) return;
+                    if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
                     SendKeys.SendWait("{ENTER}");
                 }
                 // Fallback for Step 4 (Input Pin) if actions list is empty: input second password
@@ -144,36 +156,43 @@ namespace ProcessForge.AutoLoginPatternLogic
                     }
                 }
 
-                ExecuteStepActions(step, matchLocation, windowSize);
+                var actionRes = ExecuteStepActions(step, matchLocation, windowSize);
+                if (actionRes.Status != StepActionResult.Continue) return actionRes;
             }
             SleepOrCancel(500);
+            return StepExecutionResult.Continue();
         }
 
-        public void Case_1(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
-        public void Case_2(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
-        public void Case_3(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
-        public void Case_4(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
-        public void Case_5(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
-        public void Case_Generic(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
+        public StepExecutionResult Case_1(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
+        public StepExecutionResult Case_2(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
+        public StepExecutionResult Case_3(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
+        public StepExecutionResult Case_4(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
+        public StepExecutionResult Case_5(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
+        public StepExecutionResult Case_Generic(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps) => ExecuteCase(windowSize, step, allSteps);
 
-        public void SubCase(Rectangle windowSize, List<TargetStepModel> allSteps)
+        public StepExecutionResult SubCase(Rectangle windowSize, List<TargetStepModel> allSteps)
         {
             foreach (var step in allSteps)
             {
-                if (cancellationToken.IsCancellationRequested) return;
+                if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
                 if (step.IsSubStep)
                 {
                     DetectImageSub(windowSize, step, out OpenCvSharp.Point matchLocation, out double matchScore);
                     if (matchScore >= 0.9)
                     {
-                        ExecuteStepActions(step, matchLocation, windowSize);
+                        var res = ExecuteStepActions(step, matchLocation, windowSize);
+                        if (res.Status != StepActionResult.Continue)
+                        {
+                            return res;
+                        }
                         break;
                     }
                 }
             }
+            return StepExecutionResult.Continue();
         }
 
-        public void DetectImageMain(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps, out OpenCvSharp.Point matchLocation, out double matchScore)
+        public StepExecutionResult DetectImageMain(Rectangle windowSize, TargetStepModel step, List<TargetStepModel> allSteps, out OpenCvSharp.Point matchLocation, out double matchScore)
         {
             matchLocation = new OpenCvSharp.Point();
             matchScore = 0;
@@ -183,7 +202,7 @@ namespace ProcessForge.AutoLoginPatternLogic
             if (!File.Exists(templatePath))
             {
                 MessageBox.Show("Template image not found: " + templatePath);
-                return;
+                return StepExecutionResult.Break();
             }
 
             using Bitmap captureWindow = new Bitmap(windowSize.Width, windowSize.Height);
@@ -224,11 +243,11 @@ namespace ProcessForge.AutoLoginPatternLogic
                     {
                         matchLocation = maxLocation;
                         matchScore = maxValue;
-                        break;
+                        return StepExecutionResult.Continue();
                     }
                     else
                     {
-                        if (cancellationToken.IsCancellationRequested) return;
+                        if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
 
                         if (step.StepIndex == 0)
                         {
@@ -236,8 +255,12 @@ namespace ProcessForge.AutoLoginPatternLogic
                             InputWindowLogic.InputWindow.ClickAt(windowSize.X + 50, windowSize.Y + 50);
                         }
 
-                        SubCase(windowSize, allSteps);
-                        if (SleepOrCancel(1000)) return;
+                        var subResult = SubCase(windowSize, allSteps);
+                        if (subResult.Status != StepActionResult.Continue)
+                        {
+                            return subResult;
+                        }
+                        if (SleepOrCancel(1000)) return StepExecutionResult.Break();
                     }
                 }
             }
@@ -246,7 +269,10 @@ namespace ProcessForge.AutoLoginPatternLogic
             {
                 matchLocation = new OpenCvSharp.Point();
                 matchScore = 0;
+                return StepExecutionResult.Break();
             }
+
+            return StepExecutionResult.Continue();
         }
 
         public void DetectImageSub(Rectangle windowSize, TargetStepModel step, out OpenCvSharp.Point matchLocation, out double matchScore)

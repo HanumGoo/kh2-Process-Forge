@@ -74,6 +74,8 @@ namespace ProcessForge
             btnAddKeyAction.Click += BtnAddKeyAction_Click;
             btnAddDelayAction.Click += BtnAddDelayAction_Click;
             btnAddInputBoxAction.Click += BtnAddInputBoxAction_Click;
+            btnAddBreakAction.Click += BtnAddBreakAction_Click;
+            btnAddGotoAction.Click += BtnAddGotoAction_Click;
             btnMoveUp.Click += BtnMoveUp_Click;
             btnMoveDown.Click += BtnMoveDown_Click;
             btnRemoveAction.Click += BtnRemoveAction_Click;
@@ -279,6 +281,7 @@ namespace ProcessForge
             }
 
             UpdatePaginationButtonsStyle();
+            PopulateGotoStepsDropdown();
         }
 
         private Button CreatePageButton(string text, int targetIndex, bool isSub)
@@ -316,6 +319,7 @@ namespace ProcessForge
             _currentStepIndex = targetIndex;
             LoadStepToForm(_currentStepIndex);
             UpdatePaginationButtonsStyle();
+            PopulateGotoStepsDropdown();
         }
 
         private void UpdatePaginationButtonsStyle()
@@ -463,6 +467,7 @@ namespace ProcessForge
             RefreshActionsList();
             UpdateActionButtonsState();
             UpdatePaginationButtonsStyle();
+            PopulateGotoStepsDropdown();
         }
 
         private void LoadPreviewImage(string path)
@@ -562,6 +567,22 @@ namespace ProcessForge
                 else if (act.ActionType == "InputBox")
                 {
                     txtInputBoxPrompt.Text = act.PromptMessage ?? "Enter value:";
+                }
+                else if (act.ActionType == "Goto")
+                {
+                    if (!string.IsNullOrEmpty(act.GotoStepTarget))
+                    {
+                        for (int i = 0; i < cmbGotoStep.Items.Count; i++)
+                        {
+                            string itemStr = cmbGotoStep.Items[i]?.ToString() ?? string.Empty;
+                            if (itemStr.StartsWith(act.GotoStepTarget + ":", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(itemStr, act.GotoStepTarget, StringComparison.OrdinalIgnoreCase))
+                            {
+                                cmbGotoStep.SelectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -672,6 +693,14 @@ namespace ProcessForge
             {
                 existing.PromptMessage = string.IsNullOrWhiteSpace(txtInputBoxPrompt.Text) ? "Enter required value:" : txtInputBoxPrompt.Text.Trim();
             }
+            else if (existing.ActionType == "Goto")
+            {
+                if (cmbGotoStep.SelectedItem != null)
+                {
+                    string rawSelected = cmbGotoStep.SelectedItem.ToString() ?? string.Empty;
+                    existing.GotoStepTarget = rawSelected.Contains(":") ? rawSelected.Split(':')[0].Trim() : rawSelected.Trim();
+                }
+            }
 
             RefreshActionsList(selIdx);
             picPreview.Invalidate();
@@ -745,6 +774,79 @@ namespace ProcessForge
         #endregion
 
         #region Preview & Image Coordinate Translation
+
+        private void BtnAddBreakAction_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null) return;
+            var step = _currentWorkflow.Steps[_currentStepIndex];
+
+            var action = new StepInputAction
+            {
+                ActionType = "Break"
+            };
+
+            step.Actions.Add(action);
+            RefreshActionsList(step.Actions.Count - 1);
+        }
+
+        private void BtnAddGotoAction_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null || cmbGotoStep.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a target step to jump to.", "Target Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string rawSelected = cmbGotoStep.SelectedItem.ToString() ?? string.Empty;
+            string targetTitle = rawSelected.Contains(":") ? rawSelected.Split(':')[0].Trim() : rawSelected.Trim();
+
+            var step = _currentWorkflow.Steps[_currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "Goto",
+                GotoStepTarget = targetTitle
+            };
+
+            step.Actions.Add(action);
+            RefreshActionsList(step.Actions.Count - 1);
+        }
+
+        private void PopulateGotoStepsDropdown()
+        {
+            if (_currentWorkflow == null) return;
+            string? currentSelection = cmbGotoStep.SelectedItem?.ToString();
+            cmbGotoStep.BeginUpdate();
+            cmbGotoStep.Items.Clear();
+
+            for (int i = 0; i < _currentWorkflow.Steps.Count; i++)
+            {
+                var s = _currentWorkflow.Steps[i];
+                string title = !string.IsNullOrEmpty(s.CaptureTitle) ? s.CaptureTitle : s.StepTitle;
+                string typeDesc = s.IsSubStep ? "SUB" : "MAIN";
+                cmbGotoStep.Items.Add($"{s.StepTitle}: {title} [{typeDesc}]");
+            }
+
+            if (!string.IsNullOrEmpty(currentSelection))
+            {
+                int found = -1;
+                for (int i = 0; i < cmbGotoStep.Items.Count; i++)
+                {
+                    if (string.Equals(cmbGotoStep.Items[i]?.ToString(), currentSelection, StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = i;
+                        break;
+                    }
+                }
+                if (found >= 0) cmbGotoStep.SelectedIndex = found;
+                else if (cmbGotoStep.Items.Count > 0) cmbGotoStep.SelectedIndex = 0;
+            }
+            else if (cmbGotoStep.Items.Count > 0)
+            {
+                cmbGotoStep.SelectedIndex = 0;
+            }
+
+            cmbGotoStep.EndUpdate();
+        }
 
         private Point? TranslatePreviewToImage(Point clickPos)
         {
@@ -898,12 +1000,30 @@ namespace ProcessForge
 
         #region Image Capture & Coordinate Picker
 
+        private async Task HideForCaptureAsync()
+        {
+            this.Opacity = 0;
+            this.WindowState = FormWindowState.Minimized;
+            await Task.Delay(250);
+        }
+
+        private void RestoreAfterCapture()
+        {
+            if (!this.IsDisposed)
+            {
+                this.Opacity = 1.0;
+                this.WindowState = FormWindowState.Normal;
+                this.BringToFront();
+                this.Activate();
+                picPreview?.Invalidate();
+            }
+        }
+
         private async void BtnCaptureImage_Click(object? sender, EventArgs e)
         {
             if (_currentWorkflow == null) return;
 
-            this.Hide();
-            await Task.Delay(200);
+            await HideForCaptureAsync();
 
             try
             {
@@ -928,16 +1048,28 @@ namespace ProcessForge
                         numCoordY.Value = selectedArea.Height / 2;
                         chkUseRelativeOffset.Checked = true;
                     }
+
+                    if (_currentWorkflow.Steps[_currentStepIndex].Actions.Count == 0)
+                    {
+                        _currentWorkflow.Steps[_currentStepIndex].Actions.Add(new StepInputAction
+                        {
+                            ActionType = "Mouse",
+                            X = selectedArea.Width / 2,
+                            Y = selectedArea.Height / 2,
+                            ClickTypeIndex = 0,
+                            UseRelativeOffset = true
+                        });
+                        RefreshActionsList(0);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error capturing image: {ex.Message}", "Capture Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, $"Error capturing image: {ex.Message}", "Capture Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                this.Show();
-                picPreview.Invalidate();
+                RestoreAfterCapture();
             }
         }
 
@@ -954,18 +1086,32 @@ namespace ProcessForge
 
         private async void BtnCaptureCoords_Click(object? sender, EventArgs e)
         {
-            this.Hide();
-            await Task.Delay(200);
+            await HideForCaptureAsync();
 
             try
             {
                 Point clickedPoint = Point.Empty;
-                using (ScreenCaptureForm form = new ScreenCaptureForm(ScreenCaptureMode.Point))
+                Bitmap? screenBitmap = null;
+                Rectangle fullScreenBounds = SystemInformation.VirtualScreen;
+
+                try
                 {
-                    if (form.ShowDialog() == DialogResult.OK)
+                    using (ScreenCaptureForm form = new ScreenCaptureForm(ScreenCaptureMode.Point))
                     {
-                        clickedPoint = form.SelectedPoint;
+                        if (form.ShowDialog() == DialogResult.OK)
+                        {
+                            clickedPoint = form.SelectedPoint;
+                            // Capture screen bitmap immediately while form is still hidden
+                            if (chkUseRelativeOffset.Checked && !string.IsNullOrEmpty(txtImagePath.Text) && File.Exists(txtImagePath.Text))
+                            {
+                                screenBitmap = CaptureScreenRegion(fullScreenBounds);
+                            }
+                        }
                     }
+                }
+                finally
+                {
+                    RestoreAfterCapture();
                 }
 
                 if (!clickedPoint.IsEmpty)
@@ -974,68 +1120,92 @@ namespace ProcessForge
                     int finalY = clickedPoint.Y;
 
                     // If relative offset is checked and template exists, calculate offset from template on screen
-                    if (chkUseRelativeOffset.Checked && !string.IsNullOrEmpty(txtImagePath.Text) && File.Exists(txtImagePath.Text))
+                    if (screenBitmap != null && !string.IsNullOrEmpty(txtImagePath.Text) && File.Exists(txtImagePath.Text))
                     {
-                        Rectangle fullScreenBounds = SystemInformation.VirtualScreen;
-                        using Bitmap screenBitmap = CaptureScreenRegion(fullScreenBounds);
-                        using Mat screenMat = BitmapConverter.ToMat(screenBitmap);
-                        using Mat templateMat = Cv2.ImRead(txtImagePath.Text, ImreadModes.Color);
-                        using Mat resultMat = new Mat();
-                        using Mat screenBGR = new Mat();
-
-                        if (screenMat.Channels() == 4)
-                            Cv2.CvtColor(screenMat, screenBGR, ColorConversionCodes.BGRA2BGR);
-                        else
-                            screenMat.CopyTo(screenBGR);
-
-                        Cv2.MatchTemplate(screenBGR, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
-                        Cv2.MinMaxLoc(resultMat, out _, out double maxVal, out _, out OpenCvSharp.Point maxLoc);
-
-                        if (maxVal >= 0.70)
+                        using (screenBitmap)
+                        using (Mat screenMat = BitmapConverter.ToMat(screenBitmap))
+                        using (Mat templateMat = Cv2.ImRead(txtImagePath.Text, ImreadModes.Color))
+                        using (Mat resultMat = new Mat())
+                        using (Mat screenBGR = new Mat())
                         {
-                            int templateScreenX = fullScreenBounds.X + maxLoc.X;
-                            int templateScreenY = fullScreenBounds.Y + maxLoc.Y;
+                            if (screenMat.Channels() == 4)
+                                Cv2.CvtColor(screenMat, screenBGR, ColorConversionCodes.BGRA2BGR);
+                            else
+                                screenMat.CopyTo(screenBGR);
 
-                            finalX = clickedPoint.X - templateScreenX;
-                            finalY = clickedPoint.Y - templateScreenY;
-                        }
-                        else
-                        {
-                            MessageBox.Show($"Template was not detected on screen (match: {maxVal:F2}). Coordinates recorded as absolute.", "Coordinate Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            chkUseRelativeOffset.Checked = false;
+                            Cv2.MatchTemplate(screenBGR, templateMat, resultMat, TemplateMatchModes.CCoeffNormed);
+                            Cv2.MinMaxLoc(resultMat, out _, out double maxVal, out _, out OpenCvSharp.Point maxLoc);
+
+                            if (maxVal >= 0.70)
+                            {
+                                int templateScreenX = fullScreenBounds.X + maxLoc.X;
+                                int templateScreenY = fullScreenBounds.Y + maxLoc.Y;
+
+                                finalX = clickedPoint.X - templateScreenX;
+                                finalY = clickedPoint.Y - templateScreenY;
+                            }
+                            else
+                            {
+                                MessageBox.Show(this, $"Template was not detected on screen (match: {maxVal:F2}). Coordinates recorded as absolute.", "Coordinate Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                chkUseRelativeOffset.Checked = false;
+                            }
                         }
                     }
 
                     numCoordX.Value = Math.Max(numCoordX.Minimum, Math.Min(numCoordX.Maximum, finalX));
                     numCoordY.Value = Math.Max(numCoordY.Minimum, Math.Min(numCoordY.Maximum, finalY));
 
-                    // If a mouse action is selected, update it directly
+                    // Add mouse action to the workflow sequence (just like AutoLoginSettingsForm)
                     if (_currentWorkflow != null && _currentStepIndex >= 0 && _currentStepIndex < _currentWorkflow.Steps.Count)
                     {
                         var step = _currentWorkflow.Steps[_currentStepIndex];
-                        int selIdx = lstActions.SelectedIndex;
-                        if (selIdx >= 0 && selIdx < step.Actions.Count)
+                        int clickType = cmbClickType.SelectedIndex >= 0 ? cmbClickType.SelectedIndex : 0;
+
+                        if (step.Actions.Count == 0)
                         {
-                            var selAction = step.Actions[selIdx];
-                            if (selAction.ActionType == "Mouse")
+                            step.Actions.Add(new StepInputAction
                             {
-                                selAction.X = (int)numCoordX.Value;
-                                selAction.Y = (int)numCoordY.Value;
-                                selAction.UseRelativeOffset = chkUseRelativeOffset.Checked;
-                                RefreshActionsList(selIdx);
+                                ActionType = "Mouse",
+                                X = (int)numCoordX.Value,
+                                Y = (int)numCoordY.Value,
+                                ClickTypeIndex = clickType,
+                                UseRelativeOffset = chkUseRelativeOffset.Checked
+                            });
+                            RefreshActionsList(0);
+                        }
+                        else
+                        {
+                            DialogResult result = MessageBox.Show(this,
+                                $"Captured coordinate: X = {numCoordX.Value}, Y = {numCoordY.Value} ({(chkUseRelativeOffset.Checked ? "Relative" : "Absolute")}).\n\nAdd this as a new mouse action to the sequence?",
+                                "Coordinate Captured",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question);
+
+                            if (result == DialogResult.Yes)
+                            {
+                                step.Actions.Add(new StepInputAction
+                                {
+                                    ActionType = "Mouse",
+                                    X = (int)numCoordX.Value,
+                                    Y = (int)numCoordY.Value,
+                                    ClickTypeIndex = clickType,
+                                    UseRelativeOffset = chkUseRelativeOffset.Checked
+                                });
+                                RefreshActionsList(step.Actions.Count - 1);
                             }
                         }
+
+                        picPreview.Invalidate();
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error capturing coordinate: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, $"Error capturing coordinate: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                this.Show();
-                picPreview.Invalidate();
+                RestoreAfterCapture();
             }
         }
 
@@ -1055,8 +1225,7 @@ namespace ProcessForge
                 return;
             }
 
-            this.Hide();
-            await Task.Delay(300);
+            await HideForCaptureAsync();
 
             try
             {
@@ -1081,7 +1250,7 @@ namespace ProcessForge
 
                     if (maxVal < 0.80)
                     {
-                        MessageBox.Show($"Target image not found on screen.\nMatch Score: {maxVal:F2} (Threshold >= 0.80 required)", "Match Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show(this, $"Target image not found on screen.\nMatch Score: {maxVal:F2} (Threshold >= 0.80 required)", "Match Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return;
                     }
                 }
@@ -1143,17 +1312,29 @@ namespace ProcessForge
                         executedCount++;
                         await Task.Delay(250);
                     }
+                    else if (action.ActionType == "Break")
+                    {
+                        executedCount++;
+                        MessageBox.Show(this, "🛑 [Break Action]\nWorkflow would stop for this window and advance to the next process.", "Break Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                    }
+                    else if (action.ActionType == "Goto")
+                    {
+                        executedCount++;
+                        MessageBox.Show(this, $"↪ [Goto Action]\nWorkflow would jump to target: \"{action.GotoStepTarget}\".", "Goto Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        break;
+                    }
                 }
 
-                MessageBox.Show($"Executed {executedCount} action(s) successfully.", "Test Completed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, $"Executed {executedCount} action(s) successfully.", "Test Completed", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error running test execution: {ex.Message}", "Test Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, $"Error running test execution: {ex.Message}", "Test Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                this.Show();
+                RestoreAfterCapture();
             }
         }
 

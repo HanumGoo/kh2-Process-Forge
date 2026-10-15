@@ -76,6 +76,13 @@ namespace ProcessForge
         private System.Windows.Forms.TextBox txtInputBoxPrompt;
         private System.Windows.Forms.Button btnAddInputBoxAction;
 
+        // Control Flow Action Section
+        private System.Windows.Forms.Label lblControlFlowHeader;
+        private System.Windows.Forms.Button btnAddBreakAction;
+        private System.Windows.Forms.Label lblGotoTarget;
+        private System.Windows.Forms.ComboBox cmbGotoStep;
+        private System.Windows.Forms.Button btnAddGotoAction;
+
         // Footer Controls
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.Button btnSave;
@@ -116,6 +123,11 @@ namespace ProcessForge
             btnCaptureImage = new Button();
             picPreview = new PictureBox();
             gbActionConfig = new GroupBox();
+            lblControlFlowHeader = new Label();
+            btnAddBreakAction = new Button();
+            lblGotoTarget = new Label();
+            cmbGotoStep = new ComboBox();
+            btnAddGotoAction = new Button();
             btnAddInputBoxAction = new Button();
             txtInputBoxPrompt = new TextBox();
             lblInputBoxHeader = new Label();
@@ -174,7 +186,7 @@ namespace ProcessForge
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(1000, 55);
+            pnlHeader.Size = new Size(1160, 55);
             pnlHeader.TabIndex = 0;
             // 
             // lblHeaderSubtitle
@@ -211,7 +223,7 @@ namespace ProcessForge
             pnlPagination.Dock = DockStyle.Top;
             pnlPagination.Location = new Point(0, 55);
             pnlPagination.Name = "pnlPagination";
-            pnlPagination.Size = new Size(1000, 75);
+            pnlPagination.Size = new Size(1160, 75);
             pnlPagination.TabIndex = 1;
             // 
             // lblStepIndicator
@@ -233,9 +245,9 @@ namespace ProcessForge
             btnPrevStep.FlatStyle = FlatStyle.Flat;
             btnPrevStep.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             btnPrevStep.ForeColor = Color.Black;
-            btnPrevStep.Location = new Point(660, 5);
+            btnPrevStep.Location = new Point(780, 5);
             btnPrevStep.Name = "btnPrevStep";
-            btnPrevStep.Size = new Size(65, 26);
+            btnPrevStep.Size = new Size(75, 26);
             btnPrevStep.TabIndex = 1;
             btnPrevStep.Text = "< PREV";
             btnPrevStep.UseVisualStyleBackColor = false;
@@ -248,9 +260,9 @@ namespace ProcessForge
             btnNextStep.FlatStyle = FlatStyle.Flat;
             btnNextStep.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             btnNextStep.ForeColor = Color.White;
-            btnNextStep.Location = new Point(730, 5);
+            btnNextStep.Location = new Point(865, 5);
             btnNextStep.Name = "btnNextStep";
-            btnNextStep.Size = new Size(65, 26);
+            btnNextStep.Size = new Size(75, 26);
             btnNextStep.TabIndex = 2;
             btnNextStep.Text = "NEXT >";
             btnNextStep.UseVisualStyleBackColor = false;
@@ -263,9 +275,9 @@ namespace ProcessForge
             btnAddSubStep.FlatStyle = FlatStyle.Flat;
             btnAddSubStep.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnAddSubStep.ForeColor = Color.White;
-            btnAddSubStep.Location = new Point(805, 5);
+            btnAddSubStep.Location = new Point(950, 5);
             btnAddSubStep.Name = "btnAddSubStep";
-            btnAddSubStep.Size = new Size(92, 26);
+            btnAddSubStep.Size = new Size(95, 26);
             btnAddSubStep.TabIndex = 3;
             btnAddSubStep.Text = "+ ADD SUB";
             btnAddSubStep.UseVisualStyleBackColor = false;
@@ -278,9 +290,9 @@ namespace ProcessForge
             btnDeleteSubStep.FlatStyle = FlatStyle.Flat;
             btnDeleteSubStep.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnDeleteSubStep.ForeColor = Color.Crimson;
-            btnDeleteSubStep.Location = new Point(903, 5);
+            btnDeleteSubStep.Location = new Point(1055, 5);
             btnDeleteSubStep.Name = "btnDeleteSubStep";
-            btnDeleteSubStep.Size = new Size(87, 26);
+            btnDeleteSubStep.Size = new Size(95, 26);
             btnDeleteSubStep.TabIndex = 4;
             btnDeleteSubStep.Text = "✕ DEL SUB";
             btnDeleteSubStep.UseVisualStyleBackColor = false;
@@ -291,15 +303,15 @@ namespace ProcessForge
             flpPageButtons.AutoScroll = true;
             flpPageButtons.Location = new Point(10, 36);
             flpPageButtons.Name = "flpPageButtons";
-            flpPageButtons.Size = new Size(980, 34);
+            flpPageButtons.Size = new Size(1140, 34);
             flpPageButtons.TabIndex = 5;
             flpPageButtons.WrapContents = false;
             // 
             // tlpMainLayout
             // 
             tlpMainLayout.ColumnCount = 2;
-            tlpMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42F));
-            tlpMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58F));
+            tlpMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38F));
+            tlpMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62F));
             tlpMainLayout.Controls.Add(gbImageConfig, 0, 0);
             tlpMainLayout.Controls.Add(gbActionConfig, 1, 0);
             tlpMainLayout.Dock = DockStyle.Fill;
@@ -308,7 +320,7 @@ namespace ProcessForge
             tlpMainLayout.Padding = new Padding(10);
             tlpMainLayout.RowCount = 1;
             tlpMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpMainLayout.Size = new Size(1000, 440);
+            tlpMainLayout.Size = new Size(1160, 520);
             tlpMainLayout.TabIndex = 2;
             // 
             // gbImageConfig
@@ -336,17 +348,17 @@ namespace ProcessForge
             txtImagePath.BackColor = Color.WhiteSmoke;
             txtImagePath.BorderStyle = BorderStyle.FixedSingle;
             txtImagePath.Font = new Font("Segoe UI", 8.25F);
-            txtImagePath.Location = new Point(15, 329);
+            txtImagePath.Location = new Point(15, 356);
             txtImagePath.Name = "txtImagePath";
             txtImagePath.ReadOnly = true;
-            txtImagePath.Size = new Size(365, 22);
+            txtImagePath.Size = new Size(400, 22);
             txtImagePath.TabIndex = 4;
             // 
             // lblImagePathTitle
             // 
             lblImagePathTitle.AutoSize = true;
             lblImagePathTitle.Font = new Font("Segoe UI", 8.25F);
-            lblImagePathTitle.Location = new Point(15, 312);
+            lblImagePathTitle.Location = new Point(15, 339);
             lblImagePathTitle.Name = "lblImagePathTitle";
             lblImagePathTitle.Size = new Size(88, 13);
             lblImagePathTitle.TabIndex = 5;
@@ -356,16 +368,16 @@ namespace ProcessForge
             // 
             txtTemplateName.BorderStyle = BorderStyle.FixedSingle;
             txtTemplateName.Font = new Font("Segoe UI", 8.25F);
-            txtTemplateName.Location = new Point(15, 284);
+            txtTemplateName.Location = new Point(15, 309);
             txtTemplateName.Name = "txtTemplateName";
-            txtTemplateName.Size = new Size(365, 22);
+            txtTemplateName.Size = new Size(400, 22);
             txtTemplateName.TabIndex = 3;
             // 
             // lblTemplateName
             // 
             lblTemplateName.AutoSize = true;
             lblTemplateName.Font = new Font("Segoe UI", 8.25F);
-            lblTemplateName.Location = new Point(15, 267);
+            lblTemplateName.Location = new Point(15, 292);
             lblTemplateName.Name = "lblTemplateName";
             lblTemplateName.Size = new Size(83, 13);
             lblTemplateName.TabIndex = 6;
@@ -375,16 +387,16 @@ namespace ProcessForge
             // 
             txtCaptureTitle.BorderStyle = BorderStyle.FixedSingle;
             txtCaptureTitle.Font = new Font("Segoe UI", 8.25F);
-            txtCaptureTitle.Location = new Point(15, 239);
+            txtCaptureTitle.Location = new Point(15, 262);
             txtCaptureTitle.Name = "txtCaptureTitle";
-            txtCaptureTitle.Size = new Size(365, 22);
+            txtCaptureTitle.Size = new Size(400, 22);
             txtCaptureTitle.TabIndex = 2;
             // 
             // lblCaptureTitle
             // 
             lblCaptureTitle.AutoSize = true;
             lblCaptureTitle.Font = new Font("Segoe UI", 8.25F);
-            lblCaptureTitle.Location = new Point(15, 222);
+            lblCaptureTitle.Location = new Point(15, 245);
             lblCaptureTitle.Name = "lblCaptureTitle";
             lblCaptureTitle.Size = new Size(167, 13);
             lblCaptureTitle.TabIndex = 7;
@@ -397,9 +409,9 @@ namespace ProcessForge
             btnCaptureImage.FlatStyle = FlatStyle.Flat;
             btnCaptureImage.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             btnCaptureImage.ForeColor = Color.White;
-            btnCaptureImage.Location = new Point(15, 185);
+            btnCaptureImage.Location = new Point(15, 205);
             btnCaptureImage.Name = "btnCaptureImage";
-            btnCaptureImage.Size = new Size(365, 30);
+            btnCaptureImage.Size = new Size(400, 32);
             btnCaptureImage.TabIndex = 1;
             btnCaptureImage.Text = "CAPTURE IMAGE FOR THIS STEP";
             btnCaptureImage.UseVisualStyleBackColor = false;
@@ -411,13 +423,18 @@ namespace ProcessForge
             picPreview.Cursor = Cursors.Cross;
             picPreview.Location = new Point(15, 22);
             picPreview.Name = "picPreview";
-            picPreview.Size = new Size(365, 155);
+            picPreview.Size = new Size(400, 175);
             picPreview.SizeMode = PictureBoxSizeMode.Zoom;
             picPreview.TabIndex = 0;
             picPreview.TabStop = false;
             // 
             // gbActionConfig
             // 
+            gbActionConfig.Controls.Add(lblControlFlowHeader);
+            gbActionConfig.Controls.Add(btnAddBreakAction);
+            gbActionConfig.Controls.Add(lblGotoTarget);
+            gbActionConfig.Controls.Add(cmbGotoStep);
+            gbActionConfig.Controls.Add(btnAddGotoAction);
             gbActionConfig.Controls.Add(btnAddInputBoxAction);
             gbActionConfig.Controls.Add(txtInputBoxPrompt);
             gbActionConfig.Controls.Add(lblInputBoxHeader);
@@ -461,17 +478,77 @@ namespace ProcessForge
             gbActionConfig.TabIndex = 1;
             gbActionConfig.TabStop = false;
             gbActionConfig.Text = " LINEAR INPUT ACTIONS (MACRO SEQUENCE) ";
+                        // 
+            // lblControlFlowHeader
+            // 
+            lblControlFlowHeader.AutoSize = true;
+            lblControlFlowHeader.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
+            lblControlFlowHeader.ForeColor = Color.Black;
+            lblControlFlowHeader.Location = new Point(15, 405);
+            lblControlFlowHeader.Name = "lblControlFlowHeader";
+            lblControlFlowHeader.Size = new Size(198, 13);
+            lblControlFlowHeader.TabIndex = 30;
+            lblControlFlowHeader.Text = "Control Flow Actions (Break / Goto):";
+            // 
+            // btnAddBreakAction
+            // 
+            btnAddBreakAction.BackColor = Color.Crimson;
+            btnAddBreakAction.Cursor = Cursors.Hand;
+            btnAddBreakAction.FlatStyle = FlatStyle.Flat;
+            btnAddBreakAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            btnAddBreakAction.ForeColor = Color.White;
+            btnAddBreakAction.Location = new Point(15, 425);
+            btnAddBreakAction.Name = "btnAddBreakAction";
+            btnAddBreakAction.Size = new Size(160, 30);
+            btnAddBreakAction.TabIndex = 31;
+            btnAddBreakAction.Text = "🛑 + ADD BREAK";
+            btnAddBreakAction.UseVisualStyleBackColor = false;
+            // 
+            // lblGotoTarget
+            // 
+            lblGotoTarget.AutoSize = true;
+            lblGotoTarget.Font = new Font("Segoe UI", 8.25F);
+            lblGotoTarget.Location = new Point(190, 431);
+            lblGotoTarget.Name = "lblGotoTarget";
+            lblGotoTarget.Size = new Size(68, 13);
+            lblGotoTarget.TabIndex = 32;
+            lblGotoTarget.Text = "Goto Target:";
+            // 
+            // cmbGotoStep
+            // 
+            cmbGotoStep.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbGotoStep.FlatStyle = FlatStyle.Flat;
+            cmbGotoStep.Font = new Font("Segoe UI", 8.25F);
+            cmbGotoStep.FormattingEnabled = true;
+            cmbGotoStep.Location = new Point(265, 428);
+            cmbGotoStep.Name = "cmbGotoStep";
+            cmbGotoStep.Size = new Size(235, 23);
+            cmbGotoStep.TabIndex = 33;
+            // 
+            // btnAddGotoAction
+            // 
+            btnAddGotoAction.BackColor = Color.Black;
+            btnAddGotoAction.Cursor = Cursors.Hand;
+            btnAddGotoAction.FlatStyle = FlatStyle.Flat;
+            btnAddGotoAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            btnAddGotoAction.ForeColor = Color.White;
+            btnAddGotoAction.Location = new Point(510, 425);
+            btnAddGotoAction.Name = "btnAddGotoAction";
+            btnAddGotoAction.Size = new Size(165, 30);
+            btnAddGotoAction.TabIndex = 34;
+            btnAddGotoAction.Text = "↪ + ADD GOTO";
+            btnAddGotoAction.UseVisualStyleBackColor = false;
             // 
             // btnAddInputBoxAction
-            // 
+            //  
             btnAddInputBoxAction.BackColor = Color.Black;
             btnAddInputBoxAction.Cursor = Cursors.Hand;
             btnAddInputBoxAction.FlatStyle = FlatStyle.Flat;
             btnAddInputBoxAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnAddInputBoxAction.ForeColor = Color.White;
-            btnAddInputBoxAction.Location = new Point(445, 346);
+            btnAddInputBoxAction.Location = new Point(510, 363);
             btnAddInputBoxAction.Name = "btnAddInputBoxAction";
-            btnAddInputBoxAction.Size = new Size(110, 26);
+            btnAddInputBoxAction.Size = new Size(165, 28);
             btnAddInputBoxAction.TabIndex = 19;
             btnAddInputBoxAction.Text = "+ ADD PROMPT";
             btnAddInputBoxAction.UseVisualStyleBackColor = false;
@@ -480,9 +557,9 @@ namespace ProcessForge
             // 
             txtInputBoxPrompt.BorderStyle = BorderStyle.FixedSingle;
             txtInputBoxPrompt.Font = new Font("Segoe UI", 8.25F);
-            txtInputBoxPrompt.Location = new Point(245, 348);
+            txtInputBoxPrompt.Location = new Point(270, 365);
             txtInputBoxPrompt.Name = "txtInputBoxPrompt";
-            txtInputBoxPrompt.Size = new Size(195, 22);
+            txtInputBoxPrompt.Size = new Size(230, 22);
             txtInputBoxPrompt.TabIndex = 18;
             txtInputBoxPrompt.Text = "Enter character name:";
             // 
@@ -491,7 +568,7 @@ namespace ProcessForge
             lblInputBoxHeader.AutoSize = true;
             lblInputBoxHeader.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             lblInputBoxHeader.ForeColor = Color.Black;
-            lblInputBoxHeader.Location = new Point(245, 328);
+            lblInputBoxHeader.Location = new Point(270, 345);
             lblInputBoxHeader.Name = "lblInputBoxHeader";
             lblInputBoxHeader.Size = new Size(189, 13);
             lblInputBoxHeader.TabIndex = 20;
@@ -504,9 +581,9 @@ namespace ProcessForge
             btnAddDelayAction.FlatStyle = FlatStyle.Flat;
             btnAddDelayAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnAddDelayAction.ForeColor = Color.White;
-            btnAddDelayAction.Location = new Point(118, 346);
+            btnAddDelayAction.Location = new Point(128, 363);
             btnAddDelayAction.Name = "btnAddDelayAction";
-            btnAddDelayAction.Size = new Size(118, 26);
+            btnAddDelayAction.Size = new Size(130, 28);
             btnAddDelayAction.TabIndex = 17;
             btnAddDelayAction.Text = "+ ADD DELAY";
             btnAddDelayAction.UseVisualStyleBackColor = false;
@@ -515,7 +592,7 @@ namespace ProcessForge
             // 
             lblMsUnit.AutoSize = true;
             lblMsUnit.Font = new Font("Segoe UI", 8.25F);
-            lblMsUnit.Location = new Point(93, 351);
+            lblMsUnit.Location = new Point(100, 369);
             lblMsUnit.Name = "lblMsUnit";
             lblMsUnit.Size = new Size(21, 13);
             lblMsUnit.TabIndex = 21;
@@ -526,11 +603,11 @@ namespace ProcessForge
             numDelayMs.BorderStyle = BorderStyle.FixedSingle;
             numDelayMs.Font = new Font("Segoe UI", 8.25F);
             numDelayMs.Increment = new decimal(new int[] { 250, 0, 0, 0 });
-            numDelayMs.Location = new Point(15, 348);
+            numDelayMs.Location = new Point(15, 365);
             numDelayMs.Maximum = new decimal(new int[] { 60000, 0, 0, 0 });
             numDelayMs.Minimum = new decimal(new int[] { 50, 0, 0, 0 });
             numDelayMs.Name = "numDelayMs";
-            numDelayMs.Size = new Size(75, 22);
+            numDelayMs.Size = new Size(80, 22);
             numDelayMs.TabIndex = 16;
             numDelayMs.Value = new decimal(new int[] { 500, 0, 0, 0 });
             // 
@@ -539,7 +616,7 @@ namespace ProcessForge
             lblDelayHeader.AutoSize = true;
             lblDelayHeader.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             lblDelayHeader.ForeColor = Color.Black;
-            lblDelayHeader.Location = new Point(15, 328);
+            lblDelayHeader.Location = new Point(15, 345);
             lblDelayHeader.Name = "lblDelayHeader";
             lblDelayHeader.Size = new Size(81, 13);
             lblDelayHeader.TabIndex = 22;
@@ -552,9 +629,9 @@ namespace ProcessForge
             btnAddKeyAction.FlatStyle = FlatStyle.Flat;
             btnAddKeyAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnAddKeyAction.ForeColor = Color.White;
-            btnAddKeyAction.Location = new Point(416, 293);
+            btnAddKeyAction.Location = new Point(485, 307);
             btnAddKeyAction.Name = "btnAddKeyAction";
-            btnAddKeyAction.Size = new Size(139, 26);
+            btnAddKeyAction.Size = new Size(190, 28);
             btnAddKeyAction.TabIndex = 15;
             btnAddKeyAction.Text = "+ ADD KEY ACTION";
             btnAddKeyAction.UseVisualStyleBackColor = false;
@@ -565,9 +642,9 @@ namespace ProcessForge
             btnQuickEnter.Cursor = Cursors.Hand;
             btnQuickEnter.FlatStyle = FlatStyle.Flat;
             btnQuickEnter.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            btnQuickEnter.Location = new Point(335, 293);
+            btnQuickEnter.Location = new Point(390, 307);
             btnQuickEnter.Name = "btnQuickEnter";
-            btnQuickEnter.Size = new Size(75, 26);
+            btnQuickEnter.Size = new Size(85, 28);
             btnQuickEnter.TabIndex = 14;
             btnQuickEnter.Text = "+ {ENTER}";
             btnQuickEnter.UseVisualStyleBackColor = false;
@@ -578,9 +655,9 @@ namespace ProcessForge
             btnQuickTab.Cursor = Cursors.Hand;
             btnQuickTab.FlatStyle = FlatStyle.Flat;
             btnQuickTab.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            btnQuickTab.Location = new Point(264, 293);
+            btnQuickTab.Location = new Point(310, 307);
             btnQuickTab.Name = "btnQuickTab";
-            btnQuickTab.Size = new Size(65, 26);
+            btnQuickTab.Size = new Size(75, 28);
             btnQuickTab.TabIndex = 13;
             btnQuickTab.Text = "+ {TAB}";
             btnQuickTab.UseVisualStyleBackColor = false;
@@ -592,9 +669,9 @@ namespace ProcessForge
             btnVarNickname.FlatStyle = FlatStyle.Flat;
             btnVarNickname.Font = new Font("Segoe UI", 7F, FontStyle.Bold);
             btnVarNickname.ForeColor = Color.Black;
-            btnVarNickname.Location = new Point(457, 270);
+            btnVarNickname.Location = new Point(545, 279);
             btnVarNickname.Name = "btnVarNickname";
-            btnVarNickname.Size = new Size(98, 22);
+            btnVarNickname.Size = new Size(130, 24);
             btnVarNickname.TabIndex = 28;
             btnVarNickname.Text = "+ {NICKNAME}";
             btnVarNickname.UseVisualStyleBackColor = false;
@@ -606,9 +683,9 @@ namespace ProcessForge
             btnVarPin.FlatStyle = FlatStyle.Flat;
             btnVarPin.Font = new Font("Segoe UI", 7F, FontStyle.Bold);
             btnVarPin.ForeColor = Color.Black;
-            btnVarPin.Location = new Point(359, 270);
+            btnVarPin.Location = new Point(420, 279);
             btnVarPin.Name = "btnVarPin";
-            btnVarPin.Size = new Size(97, 22);
+            btnVarPin.Size = new Size(120, 24);
             btnVarPin.TabIndex = 27;
             btnVarPin.Text = "+ {SECONDPASS}";
             btnVarPin.UseVisualStyleBackColor = false;
@@ -620,9 +697,9 @@ namespace ProcessForge
             btnVarPassword.FlatStyle = FlatStyle.Flat;
             btnVarPassword.Font = new Font("Segoe UI", 7F, FontStyle.Bold);
             btnVarPassword.ForeColor = Color.Black;
-            btnVarPassword.Location = new Point(265, 270);
+            btnVarPassword.Location = new Point(305, 279);
             btnVarPassword.Name = "btnVarPassword";
-            btnVarPassword.Size = new Size(90, 22);
+            btnVarPassword.Size = new Size(110, 24);
             btnVarPassword.TabIndex = 26;
             btnVarPassword.Text = "+ {PASSWORD}";
             btnVarPassword.UseVisualStyleBackColor = false;
@@ -634,9 +711,9 @@ namespace ProcessForge
             btnVarUsername.FlatStyle = FlatStyle.Flat;
             btnVarUsername.Font = new Font("Segoe UI", 7F, FontStyle.Bold);
             btnVarUsername.ForeColor = Color.Black;
-            btnVarUsername.Location = new Point(175, 270);
+            btnVarUsername.Location = new Point(190, 279);
             btnVarUsername.Name = "btnVarUsername";
-            btnVarUsername.Size = new Size(88, 22);
+            btnVarUsername.Size = new Size(110, 24);
             btnVarUsername.TabIndex = 25;
             btnVarUsername.Text = "+ {USERNAME}";
             btnVarUsername.UseVisualStyleBackColor = false;
@@ -645,16 +722,16 @@ namespace ProcessForge
             // 
             txtKeyboardWord.BorderStyle = BorderStyle.FixedSingle;
             txtKeyboardWord.Font = new Font("Segoe UI", 8.25F);
-            txtKeyboardWord.Location = new Point(52, 295);
+            txtKeyboardWord.Location = new Point(55, 309);
             txtKeyboardWord.Name = "txtKeyboardWord";
-            txtKeyboardWord.Size = new Size(205, 22);
+            txtKeyboardWord.Size = new Size(245, 22);
             txtKeyboardWord.TabIndex = 12;
             // 
             // lblKeyboardWord
             // 
             lblKeyboardWord.AutoSize = true;
             lblKeyboardWord.Font = new Font("Segoe UI", 8.25F);
-            lblKeyboardWord.Location = new Point(15, 298);
+            lblKeyboardWord.Location = new Point(15, 312);
             lblKeyboardWord.Name = "lblKeyboardWord";
             lblKeyboardWord.Size = new Size(32, 13);
             lblKeyboardWord.TabIndex = 23;
@@ -665,7 +742,7 @@ namespace ProcessForge
             lblKeyboardHeader.AutoSize = true;
             lblKeyboardHeader.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             lblKeyboardHeader.ForeColor = Color.Black;
-            lblKeyboardHeader.Location = new Point(15, 275);
+            lblKeyboardHeader.Location = new Point(15, 282);
             lblKeyboardHeader.Name = "lblKeyboardHeader";
             lblKeyboardHeader.Size = new Size(152, 13);
             lblKeyboardHeader.TabIndex = 24;
@@ -678,9 +755,9 @@ namespace ProcessForge
             btnAddMouseAction.FlatStyle = FlatStyle.Flat;
             btnAddMouseAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnAddMouseAction.ForeColor = Color.White;
-            btnAddMouseAction.Location = new Point(380, 236);
+            btnAddMouseAction.Location = new Point(410, 245);
             btnAddMouseAction.Name = "btnAddMouseAction";
-            btnAddMouseAction.Size = new Size(175, 26);
+            btnAddMouseAction.Size = new Size(265, 28);
             btnAddMouseAction.TabIndex = 11;
             btnAddMouseAction.Text = "+ ADD MOUSE ACTION";
             btnAddMouseAction.UseVisualStyleBackColor = false;
@@ -692,16 +769,16 @@ namespace ProcessForge
             cmbClickType.Font = new Font("Segoe UI", 8.25F);
             cmbClickType.FormattingEnabled = true;
             cmbClickType.Items.AddRange(new object[] { "Single Left Click", "Double Left Click", "Single Right Click", "Hover Only" });
-            cmbClickType.Location = new Point(232, 238);
+            cmbClickType.Location = new Point(245, 247);
             cmbClickType.Name = "cmbClickType";
-            cmbClickType.Size = new Size(140, 21);
+            cmbClickType.Size = new Size(150, 22);
             cmbClickType.TabIndex = 10;
             // 
             // lblClickType
             // 
             lblClickType.AutoSize = true;
             lblClickType.Font = new Font("Segoe UI", 8.25F);
-            lblClickType.Location = new Point(195, 241);
+            lblClickType.Location = new Point(205, 250);
             lblClickType.Name = "lblClickType";
             lblClickType.Size = new Size(32, 13);
             lblClickType.TabIndex = 25;
@@ -711,7 +788,7 @@ namespace ProcessForge
             // 
             numCoordY.BorderStyle = BorderStyle.FixedSingle;
             numCoordY.Font = new Font("Segoe UI", 8.25F);
-            numCoordY.Location = new Point(123, 238);
+            numCoordY.Location = new Point(130, 247);
             numCoordY.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             numCoordY.Minimum = new decimal(new int[] { 9999, 0, 0, int.MinValue });
             numCoordY.Name = "numCoordY";
@@ -722,7 +799,7 @@ namespace ProcessForge
             // 
             lblYCoord.AutoSize = true;
             lblYCoord.Font = new Font("Segoe UI", 8.25F);
-            lblYCoord.Location = new Point(105, 241);
+            lblYCoord.Location = new Point(110, 250);
             lblYCoord.Name = "lblYCoord";
             lblYCoord.Size = new Size(15, 13);
             lblYCoord.TabIndex = 26;
@@ -732,7 +809,7 @@ namespace ProcessForge
             // 
             numCoordX.BorderStyle = BorderStyle.FixedSingle;
             numCoordX.Font = new Font("Segoe UI", 8.25F);
-            numCoordX.Location = new Point(34, 238);
+            numCoordX.Location = new Point(35, 247);
             numCoordX.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             numCoordX.Minimum = new decimal(new int[] { 9999, 0, 0, int.MinValue });
             numCoordX.Name = "numCoordX";
@@ -743,7 +820,7 @@ namespace ProcessForge
             // 
             lblXCoord.AutoSize = true;
             lblXCoord.Font = new Font("Segoe UI", 8.25F);
-            lblXCoord.Location = new Point(15, 241);
+            lblXCoord.Location = new Point(15, 250);
             lblXCoord.Name = "lblXCoord";
             lblXCoord.Size = new Size(16, 13);
             lblXCoord.TabIndex = 27;
@@ -755,7 +832,7 @@ namespace ProcessForge
             chkUseRelativeOffset.Checked = true;
             chkUseRelativeOffset.CheckState = CheckState.Checked;
             chkUseRelativeOffset.Font = new Font("Segoe UI", 8.25F);
-            chkUseRelativeOffset.Location = new Point(250, 211);
+            chkUseRelativeOffset.Location = new Point(255, 217);
             chkUseRelativeOffset.Name = "chkUseRelativeOffset";
             chkUseRelativeOffset.Size = new Size(244, 17);
             chkUseRelativeOffset.TabIndex = 7;
@@ -769,9 +846,9 @@ namespace ProcessForge
             btnCaptureCoords.FlatStyle = FlatStyle.Flat;
             btnCaptureCoords.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnCaptureCoords.ForeColor = Color.White;
-            btnCaptureCoords.Location = new Point(15, 206);
+            btnCaptureCoords.Location = new Point(15, 212);
             btnCaptureCoords.Name = "btnCaptureCoords";
-            btnCaptureCoords.Size = new Size(225, 26);
+            btnCaptureCoords.Size = new Size(230, 28);
             btnCaptureCoords.TabIndex = 6;
             btnCaptureCoords.Text = "CAPTURE SCREEN COORD";
             btnCaptureCoords.UseVisualStyleBackColor = false;
@@ -781,7 +858,7 @@ namespace ProcessForge
             lblMouseHeader.AutoSize = true;
             lblMouseHeader.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             lblMouseHeader.ForeColor = Color.Black;
-            lblMouseHeader.Location = new Point(15, 188);
+            lblMouseHeader.Location = new Point(15, 192);
             lblMouseHeader.Name = "lblMouseHeader";
             lblMouseHeader.Size = new Size(128, 13);
             lblMouseHeader.TabIndex = 28;
@@ -794,9 +871,9 @@ namespace ProcessForge
             btnUpdateSelected.FlatStyle = FlatStyle.Flat;
             btnUpdateSelected.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnUpdateSelected.ForeColor = Color.DarkSlateGray;
-            btnUpdateSelected.Location = new Point(395, 153);
+            btnUpdateSelected.Location = new Point(485, 156);
             btnUpdateSelected.Name = "btnUpdateSelected";
-            btnUpdateSelected.Size = new Size(160, 26);
+            btnUpdateSelected.Size = new Size(190, 28);
             btnUpdateSelected.TabIndex = 5;
             btnUpdateSelected.Text = "✎ Update Selected";
             btnUpdateSelected.UseVisualStyleBackColor = false;
@@ -807,9 +884,9 @@ namespace ProcessForge
             btnClearActions.Cursor = Cursors.Hand;
             btnClearActions.FlatStyle = FlatStyle.Flat;
             btnClearActions.Font = new Font("Segoe UI", 8F);
-            btnClearActions.Location = new Point(265, 153);
+            btnClearActions.Location = new Point(290, 156);
             btnClearActions.Name = "btnClearActions";
-            btnClearActions.Size = new Size(75, 26);
+            btnClearActions.Size = new Size(85, 28);
             btnClearActions.TabIndex = 4;
             btnClearActions.Text = "Clear All";
             btnClearActions.UseVisualStyleBackColor = false;
@@ -821,9 +898,9 @@ namespace ProcessForge
             btnRemoveAction.FlatStyle = FlatStyle.Flat;
             btnRemoveAction.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnRemoveAction.ForeColor = Color.Crimson;
-            btnRemoveAction.Location = new Point(175, 153);
+            btnRemoveAction.Location = new Point(190, 156);
             btnRemoveAction.Name = "btnRemoveAction";
-            btnRemoveAction.Size = new Size(85, 26);
+            btnRemoveAction.Size = new Size(95, 28);
             btnRemoveAction.TabIndex = 3;
             btnRemoveAction.Text = "✕ Remove";
             btnRemoveAction.UseVisualStyleBackColor = false;
@@ -834,9 +911,9 @@ namespace ProcessForge
             btnMoveDown.Cursor = Cursors.Hand;
             btnMoveDown.FlatStyle = FlatStyle.Flat;
             btnMoveDown.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
-            btnMoveDown.Location = new Point(95, 153);
+            btnMoveDown.Location = new Point(100, 156);
             btnMoveDown.Name = "btnMoveDown";
-            btnMoveDown.Size = new Size(75, 26);
+            btnMoveDown.Size = new Size(85, 28);
             btnMoveDown.TabIndex = 2;
             btnMoveDown.Text = "▼ Down";
             btnMoveDown.UseVisualStyleBackColor = false;
@@ -849,7 +926,7 @@ namespace ProcessForge
             btnMoveUp.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             btnMoveUp.Location = new Point(15, 153);
             btnMoveUp.Name = "btnMoveUp";
-            btnMoveUp.Size = new Size(75, 26);
+            btnMoveUp.Size = new Size(80, 28);
             btnMoveUp.TabIndex = 1;
             btnMoveUp.Text = "▲ Up";
             btnMoveUp.UseVisualStyleBackColor = false;
@@ -862,7 +939,7 @@ namespace ProcessForge
             lstActions.IntegralHeight = false;
             lstActions.Location = new Point(15, 37);
             lstActions.Name = "lstActions";
-            lstActions.Size = new Size(540, 110);
+            lstActions.Size = new Size(660, 115);
             lstActions.TabIndex = 0;
             // 
             // lblActionList
@@ -882,9 +959,9 @@ namespace ProcessForge
             pnlFooter.Controls.Add(btnCancel);
             pnlFooter.Controls.Add(btnSave);
             pnlFooter.Dock = DockStyle.Bottom;
-            pnlFooter.Location = new Point(0, 570);
+            pnlFooter.Location = new Point(0, 650);
             pnlFooter.Name = "pnlFooter";
-            pnlFooter.Size = new Size(1000, 50);
+            pnlFooter.Size = new Size(1160, 50);
             pnlFooter.TabIndex = 3;
             // 
             // btnTestExecution
@@ -896,7 +973,7 @@ namespace ProcessForge
             btnTestExecution.ForeColor = Color.Black;
             btnTestExecution.Location = new Point(12, 10);
             btnTestExecution.Name = "btnTestExecution";
-            btnTestExecution.Size = new Size(170, 30);
+            btnTestExecution.Size = new Size(180, 30);
             btnTestExecution.TabIndex = 2;
             btnTestExecution.Text = "TEST CURRENT STEP";
             btnTestExecution.UseVisualStyleBackColor = false;
@@ -908,9 +985,9 @@ namespace ProcessForge
             btnCancel.FlatStyle = FlatStyle.Flat;
             btnCancel.Font = new Font("Segoe UI", 8.25F);
             btnCancel.ForeColor = Color.Black;
-            btnCancel.Location = new Point(795, 10);
+            btnCancel.Location = new Point(940, 10);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(85, 30);
+            btnCancel.Size = new Size(95, 30);
             btnCancel.TabIndex = 1;
             btnCancel.Text = "CANCEL";
             btnCancel.UseVisualStyleBackColor = false;
@@ -922,9 +999,9 @@ namespace ProcessForge
             btnSave.FlatStyle = FlatStyle.Flat;
             btnSave.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             btnSave.ForeColor = Color.White;
-            btnSave.Location = new Point(890, 10);
+            btnSave.Location = new Point(1045, 10);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(95, 30);
+            btnSave.Size = new Size(100, 30);
             btnSave.TabIndex = 0;
             btnSave.Text = "SAVE ALL";
             btnSave.UseVisualStyleBackColor = false;
@@ -934,7 +1011,7 @@ namespace ProcessForge
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(1000, 620);
+            ClientSize = new Size(1160, 700);
             Controls.Add(tlpMainLayout);
             Controls.Add(pnlFooter);
             Controls.Add(pnlPagination);

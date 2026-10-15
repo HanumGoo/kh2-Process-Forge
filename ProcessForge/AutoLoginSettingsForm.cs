@@ -479,6 +479,7 @@ namespace ProcessForge
             }
 
             UpdatePaginationButtonsStyle();
+            PopulateGotoStepsDropdown();
         }
 
         private void WireFormEvents()
@@ -525,6 +526,10 @@ namespace ProcessForge
             // Delay & Input Box action events
             btnAddDelayAction.Click += BtnAddDelayAction_Click;
             btnAddInputBoxAction.Click += BtnAddInputBoxAction_Click;
+
+            // Control Flow action events
+            btnAddBreakAction.Click += BtnAddBreakAction_Click;
+            btnAddGotoAction.Click += BtnAddGotoAction_Click;
 
             // Test execution
             btnTestExecution.Click += BtnTestExecution_Click;
@@ -713,6 +718,22 @@ namespace ProcessForge
                 else if (act.ActionType == "InputBox")
                 {
                     txtInputBoxPrompt.Text = act.PromptMessage ?? "Enter character name:";
+                }
+                else if (act.ActionType == "Goto")
+                {
+                    if (!string.IsNullOrEmpty(act.GotoStepTarget))
+                    {
+                        for (int i = 0; i < cmbGotoStep.Items.Count; i++)
+                        {
+                            string itemStr = cmbGotoStep.Items[i]?.ToString() ?? string.Empty;
+                            if (itemStr.StartsWith(act.GotoStepTarget + ":", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(itemStr, act.GotoStepTarget, StringComparison.OrdinalIgnoreCase))
+                            {
+                                cmbGotoStep.SelectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -982,6 +1003,14 @@ namespace ProcessForge
                 {
                     act.PromptMessage = string.IsNullOrWhiteSpace(txtInputBoxPrompt.Text) ? "Enter required value:" : txtInputBoxPrompt.Text.Trim();
                 }
+                else if (act.ActionType == "Goto")
+                {
+                    if (cmbGotoStep.SelectedItem != null)
+                    {
+                        string rawSelected = cmbGotoStep.SelectedItem.ToString() ?? string.Empty;
+                        act.GotoStepTarget = rawSelected.Contains(":") ? rawSelected.Split(':')[0].Trim() : rawSelected.Trim();
+                    }
+                }
 
                 RefreshActionsList(selIdx);
                 SaveStepsToConfig();
@@ -1045,6 +1074,77 @@ namespace ProcessForge
         #endregion
 
         #region Preview Coordinate Translation & Crosshair
+
+        private void BtnAddBreakAction_Click(object? sender, EventArgs e)
+        {
+            var currentStep = Steps[currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "Break"
+            };
+
+            currentStep.Actions.Add(action);
+            RefreshActionsList(currentStep.Actions.Count - 1);
+            SaveStepsToConfig();
+        }
+
+        private void BtnAddGotoAction_Click(object? sender, EventArgs e)
+        {
+            if (cmbGotoStep.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a target step to jump to.", "Target Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string rawSelected = cmbGotoStep.SelectedItem.ToString() ?? string.Empty;
+            string targetTitle = rawSelected.Contains(":") ? rawSelected.Split(':')[0].Trim() : rawSelected.Trim();
+
+            var currentStep = Steps[currentStepIndex];
+            var action = new StepInputAction
+            {
+                ActionType = "Goto",
+                GotoStepTarget = targetTitle
+            };
+
+            currentStep.Actions.Add(action);
+            RefreshActionsList(currentStep.Actions.Count - 1);
+            SaveStepsToConfig();
+        }
+
+        private void PopulateGotoStepsDropdown()
+        {
+            string? currentSelection = cmbGotoStep.SelectedItem?.ToString();
+            cmbGotoStep.BeginUpdate();
+            cmbGotoStep.Items.Clear();
+
+            for (int i = 0; i < Steps.Count; i++)
+            {
+                var s = Steps[i];
+                string title = !string.IsNullOrEmpty(s.CaptureTitle) ? s.CaptureTitle : s.StepTitle;
+                cmbGotoStep.Items.Add($"{s.StepTitle}: {title}");
+            }
+
+            if (!string.IsNullOrEmpty(currentSelection))
+            {
+                int found = -1;
+                for (int i = 0; i < cmbGotoStep.Items.Count; i++)
+                {
+                    if (string.Equals(cmbGotoStep.Items[i]?.ToString(), currentSelection, StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = i;
+                        break;
+                    }
+                }
+                if (found >= 0) cmbGotoStep.SelectedIndex = found;
+                else if (cmbGotoStep.Items.Count > 0) cmbGotoStep.SelectedIndex = 0;
+            }
+            else if (cmbGotoStep.Items.Count > 0)
+            {
+                cmbGotoStep.SelectedIndex = 0;
+            }
+
+            cmbGotoStep.EndUpdate();
+        }
 
         private Point? TranslatePreviewToImage(Point clickPos)
         {
@@ -1271,8 +1371,11 @@ namespace ProcessForge
             }
             finally
             {
-                this.Show();
-                LoadStepToForm(currentStepIndex);
+                if (!this.IsDisposed)
+                {
+                    this.Show();
+                    LoadStepToForm(currentStepIndex);
+                }
             }
         }
 
@@ -1413,8 +1516,11 @@ namespace ProcessForge
             }
             finally
             {
-                this.Show();
-                picPreview.Invalidate();
+                if (!this.IsDisposed)
+                {
+                    this.Show();
+                    picPreview.Invalidate();
+                }
             }
         }
 
@@ -1517,6 +1623,18 @@ namespace ProcessForge
                                 executedCount++;
                                 await Task.Delay(250);
                             }
+                            else if (action.ActionType == "Break")
+                            {
+                                executedCount++;
+                                MessageBox.Show("🛑 [Break Action]\nWorkflow would stop for this window and advance to the next item.", "Break Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                break;
+                            }
+                            else if (action.ActionType == "Goto")
+                            {
+                                executedCount++;
+                                MessageBox.Show($"↪ [Goto Action]\nWorkflow would jump to target: \"{action.GotoStepTarget}\".", "Goto Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                break;
+                            }
                         }
 
                         if (executedCount > 0)
@@ -1540,7 +1658,10 @@ namespace ProcessForge
             }
             finally
             {
-                this.Show();
+                if (!this.IsDisposed)
+                {
+                    this.Show();
+                }
             }
         }
 
@@ -1603,9 +1724,20 @@ namespace ProcessForge
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? PromptMessage { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? GotoStepTarget { get; set; }
+
         public override string ToString()
         {
-            if (ActionType == "Keyboard")
+            if (ActionType == "Break")
+            {
+                return "🛑 [Break] Stop workflow and advance to next item";
+            }
+            else if (ActionType == "Goto")
+            {
+                return $"↪ [Goto] Jump to Step: \"{GotoStepTarget}\"";
+            }
+            else if (ActionType == "Keyboard")
             {
                 return $"⌨ [Keyboard] SendKeys: \"{Word}\"";
             }

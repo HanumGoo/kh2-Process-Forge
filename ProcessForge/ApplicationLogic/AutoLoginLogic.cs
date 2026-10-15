@@ -2,6 +2,7 @@ using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using ProcessForge.AutoLoginPatternLogic;
 using ProcessForge.FindWindowLogic;
+using ProcessForge.InputWindowLogic;
 using ProcessForge.RefreshLogic;
 using System;
 using System.Collections.Generic;
@@ -210,16 +211,8 @@ namespace ProcessForge.ApplicationLogic
                     mainSteps = loaded.Where(s => !s.IsSubStep && s.StepIndex < 3).ToList();
                 }
 
-                for (int i = 0; i < mainSteps.Count; i++)
-                {
-                    if (cancellationToken.IsCancellationRequested) break;
-                    var step = mainSteps[i];
-                    AllCase.ExecuteCase(windowSize, step, loaded);
-                }
-
-                if (cancellationToken.IsCancellationRequested) break;
-
                 // 2. Branch Flow: Character Creation (CharSteps 4-9) vs Ordinary Auto Login (Steps 4-5)
+                List<TargetStepModel> activeSteps;
                 if (isCreateCharacterMode)
                 {
                     var charSteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "CreateCharacter").ToList();
@@ -227,12 +220,7 @@ namespace ProcessForge.ApplicationLogic
                     {
                         charSteps = loaded.Where(s => s.StepTitle.StartsWith("CharStep")).ToList();
                     }
-
-                    foreach (var charStep in charSteps)
-                    {
-                        if (cancellationToken.IsCancellationRequested) break;
-                        AllCase.ExecuteCase(windowSize, charStep, loaded);
-                    }
+                    activeSteps = mainSteps.Concat(charSteps).ToList();
                 }
                 else
                 {
@@ -241,17 +229,72 @@ namespace ProcessForge.ApplicationLogic
                     {
                         ordinarySteps = loaded.Where(s => !s.IsSubStep && (s.StepIndex == 3 || s.StepIndex == 4)).ToList();
                     }
+                    activeSteps = mainSteps.Concat(ordinarySteps).ToList();
+                }
 
-                    for (int i = 0; i < ordinarySteps.Count; i++)
+                int stepPointer = 0;
+                int maxJumpCount = 500;
+                int jumpCount = 0;
+                bool wasBroken = false;
+
+                while (stepPointer >= 0 && stepPointer < activeSteps.Count)
+                {
+                    if (cancellationToken.IsCancellationRequested) break;
+                    var currentStep = activeSteps[stepPointer];
+                    var stepResult = AllCase.ExecuteCase(windowSize, currentStep, loaded);
+
+                    if (stepResult.Status == StepActionResult.Break)
                     {
-                        if (cancellationToken.IsCancellationRequested) break;
-                        var ordStep = ordinarySteps[i];
-                        AllCase.ExecuteCase(windowSize, ordStep, loaded);
+                        wasBroken = true;
+                        break;
+                    }
+                    else if (stepResult.Status == StepActionResult.Goto && !string.IsNullOrWhiteSpace(stepResult.GotoTarget))
+                    {
+                        jumpCount++;
+                        if (jumpCount > maxJumpCount)
+                        {
+                            MessageBox.Show($"Exceeded maximum goto loop count ({maxJumpCount}). Stopping workflow for safety.", "Workflow Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            break;
+                        }
+
+                        // Try finding target in activeSteps first
+                        int targetIdx = activeSteps.FindIndex(s =>
+                            string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals($"Step_{s.StepIndex + 1}", stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                        if (targetIdx != -1)
+                        {
+                            stepPointer = targetIdx;
+                            continue;
+                        }
+                        else
+                        {
+                            // If target is in all loaded steps (e.g. sub-step or other step)
+                            var targetInLoaded = loaded.FirstOrDefault(s =>
+                                string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                            if (targetInLoaded != null && targetInLoaded.IsSubStep)
+                            {
+                                AllCase.ExecuteCase(windowSize, targetInLoaded, loaded);
+                            }
+                            stepPointer++;
+                        }
+                    }
+                    else
+                    {
+                        stepPointer++;
                     }
                 }
 
                 if (cancellationToken.IsCancellationRequested) break;
                 GetAndFindWindow.WindowMinimize(item.ProcessId); // Minimize the window after processing
+
+                if (wasBroken)
+                {
+                    continue; // Advance to next account without marking as logged in
+                }
 
                 // Mark item as logged in
                 item.isLogin = true;

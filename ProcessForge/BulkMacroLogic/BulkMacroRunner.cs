@@ -123,17 +123,63 @@ namespace ProcessForge.BulkMacroLogic
                 DataLoginFormat? matchedAccount = accounts.FirstOrDefault(a =>
                     string.Equals(a.nickname, procData.TitleName, StringComparison.OrdinalIgnoreCase));
 
-                // 4. Execute workflow steps in linear order
+                // 4. Execute workflow steps in linear order with Break and Goto support
                 var allSteps = workflow.Steps ?? new List<TargetStepModel>();
                 var mainSteps = allSteps.Where(s => !s.IsSubStep).ToList();
                 var subSteps = allSteps.Where(s => s.IsSubStep).ToList();
 
-                for (int sIdx = 0; sIdx < mainSteps.Count; sIdx++)
+                int stepPointer = 0;
+                int maxJumpCount = 500;
+                int jumpCount = 0;
+
+                while (stepPointer >= 0 && stepPointer < mainSteps.Count)
                 {
                     if (cancellationToken.IsCancellationRequested) break;
-                    var step = mainSteps[sIdx];
+                    var step = mainSteps[stepPointer];
 
-                    ExecuteStep(step, allSteps, subSteps, windowSize, matchedAccount, cancellationToken);
+                    var stepResult = ExecuteStep(step, allSteps, subSteps, windowSize, matchedAccount, cancellationToken);
+                    if (stepResult.Status == StepActionResult.Break)
+                    {
+                        break; // Stop workflow on this window, advance to next window
+                    }
+                    else if (stepResult.Status == StepActionResult.Goto && !string.IsNullOrWhiteSpace(stepResult.GotoTarget))
+                    {
+                        jumpCount++;
+                        if (jumpCount > maxJumpCount)
+                        {
+                            MessageBox.Show($"Exceeded maximum goto loop count ({maxJumpCount}). Stopping workflow for safety.", "Workflow Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            break;
+                        }
+
+                        // Try finding target in mainSteps first
+                        int targetIdx = mainSteps.FindIndex(s =>
+                            string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals($"Step_{s.StepIndex + 1}", stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                        if (targetIdx != -1)
+                        {
+                            stepPointer = targetIdx;
+                            continue;
+                        }
+                        else
+                        {
+                            // If target is a sub-step
+                            var subTarget = subSteps.FirstOrDefault(s =>
+                                string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                            if (subTarget != null)
+                            {
+                                ExecuteLinearActions(subTarget, new OpenCvSharp.Point(0, 0), windowSize, matchedAccount, cancellationToken);
+                            }
+                            stepPointer++;
+                        }
+                    }
+                    else
+                    {
+                        stepPointer++;
+                    }
                 }
 
                 if (cancellationToken.IsCancellationRequested) break;
@@ -150,7 +196,7 @@ namespace ProcessForge.BulkMacroLogic
             }
         }
 
-        private static void ExecuteStep(
+        private static StepExecutionResult ExecuteStep(
             TargetStepModel step,
             List<TargetStepModel> allSteps,
             List<TargetStepModel> subSteps,
@@ -158,32 +204,36 @@ namespace ProcessForge.BulkMacroLogic
             DataLoginFormat? account,
             CancellationToken token)
         {
-            if (token.IsCancellationRequested) return;
+            if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
             // Case A: Step has image template anchor
             if (!string.IsNullOrEmpty(step.ImagePath) && File.Exists(step.ImagePath))
             {
                 OpenCvSharp.Point matchLoc;
                 double matchScore;
-                DetectImageWithSubSteps(windowSize, step, subSteps, account, out matchLoc, out matchScore, token);
+                var detectResult = DetectImageWithSubSteps(windowSize, step, subSteps, account, out matchLoc, out matchScore, token);
+                if (detectResult.Status != StepActionResult.Continue) return detectResult;
 
-                if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
                 if (matchScore >= 0.85)
                 {
-                    ExecuteLinearActions(step, matchLoc, windowSize, account, token);
+                    var actionRes = ExecuteLinearActions(step, matchLoc, windowSize, account, token);
+                    if (actionRes.Status != StepActionResult.Continue) return actionRes;
                 }
             }
             // Case B: Step has no image template (action-only macro step)
             else
             {
-                ExecuteLinearActions(step, new OpenCvSharp.Point(0, 0), windowSize, account, token);
+                var actionRes = ExecuteLinearActions(step, new OpenCvSharp.Point(0, 0), windowSize, account, token);
+                if (actionRes.Status != StepActionResult.Continue) return actionRes;
             }
 
             SleepOrCancel(350, token);
+            return StepExecutionResult.Continue();
         }
 
-        private static void DetectImageWithSubSteps(
+        private static StepExecutionResult DetectImageWithSubSteps(
             Rectangle windowSize,
             TargetStepModel step,
             List<TargetStepModel> subSteps,
@@ -196,7 +246,7 @@ namespace ProcessForge.BulkMacroLogic
             matchScore = 0;
 
             string templatePath = step.ImagePath;
-            if (!File.Exists(templatePath)) return;
+            if (!File.Exists(templatePath)) return StepExecutionResult.Continue();
 
             int maxAttempts = 60; // Up to ~30 seconds timeout
             int attempts = 0;
@@ -229,7 +279,7 @@ namespace ProcessForge.BulkMacroLogic
                         {
                             matchLocation = maxLoc;
                             matchScore = maxVal;
-                            return;
+                            return StepExecutionResult.Continue();
                         }
 
                         // Check sub-steps while waiting
@@ -237,7 +287,7 @@ namespace ProcessForge.BulkMacroLogic
                         {
                             foreach (var sub in subSteps)
                             {
-                                if (token.IsCancellationRequested) return;
+                                if (token.IsCancellationRequested) return StepExecutionResult.Break();
                                 if (!string.IsNullOrEmpty(sub.ImagePath) && File.Exists(sub.ImagePath))
                                 {
                                     using Mat subTemplate = Cv2.ImRead(sub.ImagePath, ImreadModes.Color);
@@ -246,7 +296,11 @@ namespace ProcessForge.BulkMacroLogic
                                     Cv2.MinMaxLoc(subResult, out _, out double subMax, out _, out OpenCvSharp.Point subLoc);
                                     if (subMax >= 0.85)
                                     {
-                                        ExecuteLinearActions(sub, subLoc, windowSize, account, token);
+                                        var subRes = ExecuteLinearActions(sub, subLoc, windowSize, account, token);
+                                        if (subRes.Status != StepActionResult.Continue)
+                                        {
+                                            return subRes;
+                                        }
                                         break;
                                     }
                                 }
@@ -256,27 +310,37 @@ namespace ProcessForge.BulkMacroLogic
                 }
                 catch { }
 
-                if (SleepOrCancel(500, token)) return;
+                if (SleepOrCancel(500, token)) return StepExecutionResult.Break();
             }
+
+            return StepExecutionResult.Continue();
         }
 
-        private static void ExecuteLinearActions(
+        private static StepExecutionResult ExecuteLinearActions(
             TargetStepModel step,
             OpenCvSharp.Point matchLoc,
             Rectangle windowSize,
             DataLoginFormat? account,
             CancellationToken token)
         {
-            if (step.Actions == null || step.Actions.Count == 0) return;
+            if (step.Actions == null || step.Actions.Count == 0) return StepExecutionResult.Continue();
 
             int originX = windowSize.X;
             int originY = windowSize.Y;
 
             foreach (var action in step.Actions)
             {
-                if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
-                if (action.ActionType == "Mouse")
+                if (action.ActionType == "Break")
+                {
+                    return StepExecutionResult.Break();
+                }
+                else if (action.ActionType == "Goto")
+                {
+                    return StepExecutionResult.Goto(action.GotoStepTarget ?? string.Empty);
+                }
+                else if (action.ActionType == "Mouse")
                 {
                     int clickType = action.ClickTypeIndex ?? 0;
                     if (action.UseRelativeOffset ?? true)
@@ -301,24 +365,26 @@ namespace ProcessForge.BulkMacroLogic
                 else if (action.ActionType == "Delay")
                 {
                     int delay = action.DelayMs ?? 500;
-                    if (SleepOrCancel(delay, token)) return;
+                    if (SleepOrCancel(delay, token)) return StepExecutionResult.Break();
                     continue;
                 }
                 else if (action.ActionType == "InputBox")
                 {
                     string prompt = string.IsNullOrWhiteSpace(action.PromptMessage) ? "Enter required input:" : action.PromptMessage;
                     string userInput = PromptDialog.Show(prompt);
-                    if (token.IsCancellationRequested) return;
+                    if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
                     if (!string.IsNullOrEmpty(userInput))
                     {
-                        if (SleepOrCancel(200, token)) return;
+                        if (SleepOrCancel(200, token)) return StepExecutionResult.Break();
                         SendKeys.SendWait(userInput);
                     }
                 }
 
-                if (SleepOrCancel(300, token)) return;
+                if (SleepOrCancel(300, token)) return StepExecutionResult.Break();
             }
+
+            return StepExecutionResult.Continue();
         }
 
         private static List<DataLoginFormat> LoadAccounts(string accountDataFilePath)
