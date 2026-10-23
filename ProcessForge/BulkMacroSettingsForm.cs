@@ -81,6 +81,7 @@ namespace ProcessForge
             btnAddGotoAction.Click += BtnAddGotoAction_Click;
             btnAddAutoLoginAction.Click += BtnAddAutoLoginAction_Click;
             btnAddClearMemoryAction.Click += BtnAddClearMemoryAction_Click;
+            btnAddWorkflowAction.Click += BtnAddWorkflowAction_Click;
             btnMoveUp.Click += BtnMoveUp_Click;
             btnMoveDown.Click += BtnMoveDown_Click;
             btnRemoveAction.Click += BtnRemoveAction_Click;
@@ -259,7 +260,27 @@ namespace ProcessForge
             string newName = PromptDialog.Show("Enter new name for workflow:", "Rename Workflow", _currentWorkflow.Name);
             if (string.IsNullOrWhiteSpace(newName) || newName.Trim() == _currentWorkflow.Name) return;
 
+            string oldId = _currentWorkflow.Id;
             _currentWorkflow.Name = newName.Trim();
+
+            // Update any workflow action referencing this workflow
+            foreach (var wf in _config.Workflows)
+            {
+                if (wf.Steps == null) continue;
+                foreach (var stp in wf.Steps)
+                {
+                    if (stp.Actions == null) continue;
+                    foreach (var act in stp.Actions)
+                    {
+                        if ((act.ActionType == "Workflow" || act.ActionType == "RunWorkflow") && act.TargetWorkflowId == oldId)
+                        {
+                            act.TargetWorkflowName = newName.Trim();
+                            act.Word = newName.Trim();
+                        }
+                    }
+                }
+            }
+
             BulkWorkflowManager.SaveConfig(_config);
             PopulateWorkflows(_currentWorkflow.Id);
         }
@@ -545,6 +566,7 @@ namespace ProcessForge
             UpdateActionButtonsState();
             UpdatePaginationButtonsStyle();
             PopulateGotoStepsDropdown();
+            PopulateTargetWorkflowsDropdown();
         }
 
         private void LoadPreviewImage(string path)
@@ -667,6 +689,31 @@ namespace ProcessForge
                         }
                     }
                 }
+                else if (act.ActionType == "Workflow" || act.ActionType == "RunWorkflow")
+                {
+                    if (!string.IsNullOrEmpty(act.TargetWorkflowId))
+                    {
+                        for (int i = 0; i < cmbTargetWorkflow.Items.Count; i++)
+                        {
+                            if (cmbTargetWorkflow.Items[i] is WorkflowComboItem item && item.Workflow.Id == act.TargetWorkflowId)
+                            {
+                                cmbTargetWorkflow.SelectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(act.TargetWorkflowName))
+                    {
+                        for (int i = 0; i < cmbTargetWorkflow.Items.Count; i++)
+                        {
+                            if (cmbTargetWorkflow.Items[i] is WorkflowComboItem item && string.Equals(item.Workflow.Name, act.TargetWorkflowName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                cmbTargetWorkflow.SelectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             picPreview.Invalidate();
@@ -697,6 +744,39 @@ namespace ProcessForge
             var action = new StepInputAction
             {
                 ActionType = "ClearMemory"
+            };
+
+            step.Actions.Add(action);
+            RefreshActionsList(step.Actions.Count - 1);
+        }
+
+        private void BtnAddWorkflowAction_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null) return;
+            var step = _currentWorkflow.Steps[_currentStepIndex];
+
+            var selectedItem = cmbTargetWorkflow.SelectedItem as WorkflowComboItem;
+            if (selectedItem == null || selectedItem.Workflow == null)
+            {
+                MessageBox.Show("Please select a valid macro workflow to run as a sub-workflow action.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var targetWf = selectedItem.Workflow;
+
+            // Validate cycle & dependency inheritance exception
+            if (!BulkWorkflowManager.CanWorkflowReference(_currentWorkflow, targetWf, _config.Workflows, out string reason))
+            {
+                MessageBox.Show(reason, "Invalid Workflow Reference", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var action = new StepInputAction
+            {
+                ActionType = "Workflow",
+                TargetWorkflowId = targetWf.Id,
+                TargetWorkflowName = targetWf.Name,
+                Word = targetWf.Name
             };
 
             step.Actions.Add(action);
@@ -820,6 +900,26 @@ namespace ProcessForge
                     string rawSelected = cmbGotoStep.SelectedItem.ToString() ?? string.Empty;
                     existing.GotoStepTarget = rawSelected.Contains(":") ? rawSelected.Split(':')[0].Trim() : rawSelected.Trim();
                 }
+            }
+            else if (existing.ActionType == "Workflow" || existing.ActionType == "RunWorkflow")
+            {
+                var selectedItem = cmbTargetWorkflow.SelectedItem as WorkflowComboItem;
+                if (selectedItem == null || selectedItem.Workflow == null)
+                {
+                    MessageBox.Show("Please select a valid macro workflow to update.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var targetWf = selectedItem.Workflow;
+                if (!BulkWorkflowManager.CanWorkflowReference(_currentWorkflow, targetWf, _config.Workflows, out string reason))
+                {
+                    MessageBox.Show(reason, "Invalid Workflow Reference", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                existing.TargetWorkflowId = targetWf.Id;
+                existing.TargetWorkflowName = targetWf.Name;
+                existing.Word = targetWf.Name;
             }
 
             RefreshActionsList(selIdx);
@@ -966,6 +1066,46 @@ namespace ProcessForge
             }
 
             cmbGotoStep.EndUpdate();
+        }
+
+        private void PopulateTargetWorkflowsDropdown(string? selectWorkflowId = null)
+        {
+            if (_currentWorkflow == null || _config.Workflows == null) return;
+            string? currentSelectedId = (cmbTargetWorkflow.SelectedItem as WorkflowComboItem)?.Workflow?.Id ?? selectWorkflowId;
+
+            cmbTargetWorkflow.BeginUpdate();
+            cmbTargetWorkflow.Items.Clear();
+
+            var validTargets = BulkWorkflowManager.GetValidTargetWorkflows(_currentWorkflow, _config.Workflows);
+            int selectedIndex = -1;
+
+            for (int i = 0; i < validTargets.Count; i++)
+            {
+                var wf = validTargets[i];
+                cmbTargetWorkflow.Items.Add(new WorkflowComboItem(wf));
+                if (!string.IsNullOrEmpty(currentSelectedId) && wf.Id == currentSelectedId)
+                {
+                    selectedIndex = i;
+                }
+            }
+
+            if (selectedIndex >= 0)
+            {
+                cmbTargetWorkflow.SelectedIndex = selectedIndex;
+            }
+            else if (cmbTargetWorkflow.Items.Count > 0)
+            {
+                cmbTargetWorkflow.SelectedIndex = 0;
+            }
+
+            cmbTargetWorkflow.EndUpdate();
+        }
+
+        private class WorkflowComboItem
+        {
+            public BulkWorkflowModel Workflow { get; }
+            public WorkflowComboItem(BulkWorkflowModel wf) => Workflow = wf;
+            public override string ToString() => Workflow.Name;
         }
 
         private Point? TranslatePreviewToImage(Point clickPos)
@@ -1454,6 +1594,12 @@ namespace ProcessForge
                     {
                         executedCount++;
                         MessageBox.Show(this, "🧹 [Clear Memory Action]\nWorkflow would silently clear working set memory for the current process.", "Clear Memory Action Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else if (action.ActionType == "Workflow" || action.ActionType == "RunWorkflow")
+                    {
+                        executedCount++;
+                        string wfName = !string.IsNullOrWhiteSpace(action.TargetWorkflowName) ? action.TargetWorkflowName : (!string.IsNullOrWhiteSpace(action.Word) ? action.Word : "Sub-Workflow");
+                        MessageBox.Show(this, $"📋 [Workflow Action]\nWorkflow would execute sub-workflow: \"{wfName}\" for the current window.", "Workflow Action Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
 

@@ -123,64 +123,11 @@ namespace ProcessForge.BulkMacroLogic
                 DataLoginFormat? matchedAccount = accounts.FirstOrDefault(a =>
                     string.Equals(a.nickname, procData.TitleName, StringComparison.OrdinalIgnoreCase));
 
-                // 4. Execute workflow steps in linear order with Break and Goto support
-                var allSteps = workflow.Steps ?? new List<TargetStepModel>();
-                var mainSteps = allSteps.Where(s => !s.IsSubStep).ToList();
-                var subSteps = allSteps.Where(s => s.IsSubStep).ToList();
+                // 4. Load all workflows and execute workflow steps with recursion/cycle prevention
+                var allWorkflows = BulkWorkflowManager.LoadConfig().Workflows ?? new List<BulkWorkflowModel>();
+                var activeWorkflowIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { workflow.Id };
 
-                int stepPointer = 0;
-                int maxJumpCount = 500;
-                int jumpCount = 0;
-
-                while (stepPointer >= 0 && stepPointer < mainSteps.Count)
-                {
-                    if (cancellationToken.IsCancellationRequested) break;
-                    var step = mainSteps[stepPointer];
-
-                    var stepResult = ExecuteStep(step, allSteps, subSteps, windowSize, matchedAccount, procData.ProcessId, cancellationToken);
-                    if (stepResult.Status == StepActionResult.Break)
-                    {
-                        break; // Stop workflow on this window, advance to next window
-                    }
-                    else if (stepResult.Status == StepActionResult.Goto && !string.IsNullOrWhiteSpace(stepResult.GotoTarget))
-                    {
-                        jumpCount++;
-                        if (jumpCount > maxJumpCount)
-                        {
-                            MessageBox.Show($"Exceeded maximum goto loop count ({maxJumpCount}). Stopping workflow for safety.", "Workflow Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            break;
-                        }
-
-                        // Try finding target in mainSteps first
-                        int targetIdx = mainSteps.FindIndex(s =>
-                            string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals($"Step_{s.StepIndex + 1}", stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
-
-                        if (targetIdx != -1)
-                        {
-                            stepPointer = targetIdx;
-                            continue;
-                        }
-                        else
-                        {
-                            // If target is a sub-step
-                            var subTarget = subSteps.FirstOrDefault(s =>
-                                string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
-
-                            if (subTarget != null)
-                            {
-                                ExecuteLinearActions(subTarget, new OpenCvSharp.Point(0, 0), windowSize, matchedAccount, procData.ProcessId, cancellationToken);
-                            }
-                            stepPointer++;
-                        }
-                    }
-                    else
-                    {
-                        stepPointer++;
-                    }
-                }
+                var wfResult = ExecuteWorkflowForWindow(workflow, allWorkflows, windowSize, matchedAccount, procData.ProcessId, cancellationToken, activeWorkflowIds, 0);
 
                 if (cancellationToken.IsCancellationRequested) break;
 
@@ -196,14 +143,101 @@ namespace ProcessForge.BulkMacroLogic
             }
         }
 
+        private static StepExecutionResult ExecuteWorkflowForWindow(
+            BulkWorkflowModel currentWf,
+            List<BulkWorkflowModel> allWorkflows,
+            Rectangle windowSize,
+            DataLoginFormat? matchedAccount,
+            int processId,
+            CancellationToken cancellationToken,
+            HashSet<string> activeWorkflowIds,
+            int callDepth = 0)
+        {
+            if (currentWf == null || cancellationToken.IsCancellationRequested)
+                return StepExecutionResult.Break();
+
+            if (callDepth > 20)
+            {
+                Debug.WriteLine($"Max workflow call depth (20) exceeded for '{currentWf.Name}'. Skipping to prevent infinite recursion.");
+                return StepExecutionResult.Continue();
+            }
+
+            var allSteps = currentWf.Steps ?? new List<TargetStepModel>();
+            var mainSteps = allSteps.Where(s => !s.IsSubStep).ToList();
+            var subSteps = allSteps.Where(s => s.IsSubStep).ToList();
+
+            int stepPointer = 0;
+            int maxJumpCount = 500;
+            int jumpCount = 0;
+
+            while (stepPointer >= 0 && stepPointer < mainSteps.Count)
+            {
+                if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
+                var step = mainSteps[stepPointer];
+
+                var stepResult = ExecuteStep(step, allSteps, subSteps, allWorkflows, windowSize, matchedAccount, processId, cancellationToken, activeWorkflowIds, callDepth);
+                if (stepResult.Status == StepActionResult.Break)
+                {
+                    return StepExecutionResult.Break(); // Stop workflow on this window
+                }
+                else if (stepResult.Status == StepActionResult.Goto && !string.IsNullOrWhiteSpace(stepResult.GotoTarget))
+                {
+                    jumpCount++;
+                    if (jumpCount > maxJumpCount)
+                    {
+                        MessageBox.Show($"Exceeded maximum goto loop count ({maxJumpCount}). Stopping workflow for safety.", "Workflow Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return StepExecutionResult.Break();
+                    }
+
+                    // Try finding target in mainSteps first
+                    int targetIdx = mainSteps.FindIndex(s =>
+                        string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals($"Step_{s.StepIndex + 1}", stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                    if (targetIdx != -1)
+                    {
+                        stepPointer = targetIdx;
+                        continue;
+                    }
+                    else
+                    {
+                        // If target is a sub-step
+                        var subTarget = subSteps.FirstOrDefault(s =>
+                            string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                        if (subTarget != null)
+                        {
+                            var subActResult = ExecuteLinearActions(subTarget, new OpenCvSharp.Point(0, 0), allWorkflows, windowSize, matchedAccount, processId, cancellationToken, activeWorkflowIds, callDepth);
+                            if (subActResult.Status == StepActionResult.Break)
+                            {
+                                return StepExecutionResult.Break();
+                            }
+                        }
+                        stepPointer++;
+                    }
+                }
+                else
+                {
+                    stepPointer++;
+                }
+            }
+
+            return StepExecutionResult.Continue();
+        }
+
         private static StepExecutionResult ExecuteStep(
             TargetStepModel step,
             List<TargetStepModel> allSteps,
             List<TargetStepModel> subSteps,
+            List<BulkWorkflowModel> allWorkflows,
             Rectangle windowSize,
             DataLoginFormat? account,
             int processId,
-            CancellationToken token)
+            CancellationToken token,
+            HashSet<string> activeWorkflowIds,
+            int callDepth)
         {
             if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
@@ -212,21 +246,21 @@ namespace ProcessForge.BulkMacroLogic
             {
                 OpenCvSharp.Point matchLoc;
                 double matchScore;
-                var detectResult = DetectImageWithSubSteps(windowSize, step, subSteps, account, processId, out matchLoc, out matchScore, token);
+                var detectResult = DetectImageWithSubSteps(windowSize, step, subSteps, allWorkflows, account, processId, out matchLoc, out matchScore, token, activeWorkflowIds, callDepth);
                 if (detectResult.Status != StepActionResult.Continue) return detectResult;
 
                 if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
                 if (matchScore >= 0.85)
                 {
-                    var actionRes = ExecuteLinearActions(step, matchLoc, windowSize, account, processId, token);
+                    var actionRes = ExecuteLinearActions(step, matchLoc, allWorkflows, windowSize, account, processId, token, activeWorkflowIds, callDepth);
                     if (actionRes.Status != StepActionResult.Continue) return actionRes;
                 }
             }
             // Case B: Step has no image template (action-only macro step)
             else
             {
-                var actionRes = ExecuteLinearActions(step, new OpenCvSharp.Point(0, 0), windowSize, account, processId, token);
+                var actionRes = ExecuteLinearActions(step, new OpenCvSharp.Point(0, 0), allWorkflows, windowSize, account, processId, token, activeWorkflowIds, callDepth);
                 if (actionRes.Status != StepActionResult.Continue) return actionRes;
             }
 
@@ -238,11 +272,14 @@ namespace ProcessForge.BulkMacroLogic
             Rectangle windowSize,
             TargetStepModel step,
             List<TargetStepModel> subSteps,
+            List<BulkWorkflowModel> allWorkflows,
             DataLoginFormat? account,
             int processId,
             out OpenCvSharp.Point matchLocation,
             out double matchScore,
-            CancellationToken token)
+            CancellationToken token,
+            HashSet<string> activeWorkflowIds,
+            int callDepth)
         {
             matchLocation = new OpenCvSharp.Point();
             matchScore = 0;
@@ -298,7 +335,7 @@ namespace ProcessForge.BulkMacroLogic
                                     Cv2.MinMaxLoc(subResult, out _, out double subMax, out _, out OpenCvSharp.Point subLoc);
                                     if (subMax >= 0.85)
                                     {
-                                        var subRes = ExecuteLinearActions(sub, subLoc, windowSize, account, processId, token);
+                                        var subRes = ExecuteLinearActions(sub, subLoc, allWorkflows, windowSize, account, processId, token, activeWorkflowIds, callDepth);
                                         if (subRes.Status != StepActionResult.Continue)
                                         {
                                             return subRes;
@@ -321,10 +358,13 @@ namespace ProcessForge.BulkMacroLogic
         private static StepExecutionResult ExecuteLinearActions(
             TargetStepModel step,
             OpenCvSharp.Point matchLoc,
+            List<BulkWorkflowModel> allWorkflows,
             Rectangle windowSize,
             DataLoginFormat? account,
             int processId,
-            CancellationToken token)
+            CancellationToken token,
+            HashSet<string> activeWorkflowIds,
+            int callDepth)
         {
             if (step.Actions == null || step.Actions.Count == 0) return StepExecutionResult.Continue();
 
@@ -394,6 +434,47 @@ namespace ProcessForge.BulkMacroLogic
                     {
                         if (SleepOrCancel(200, token)) return StepExecutionResult.Break();
                         SendKeys.SendWait(userInput);
+                    }
+                }
+                else if (action.ActionType == "Workflow" || action.ActionType == "RunWorkflow")
+                {
+                    BulkWorkflowModel? targetWf = null;
+                    if (!string.IsNullOrEmpty(action.TargetWorkflowId))
+                    {
+                        targetWf = allWorkflows.FirstOrDefault(w => string.Equals(w.Id, action.TargetWorkflowId, StringComparison.OrdinalIgnoreCase));
+                    }
+                    if (targetWf == null && !string.IsNullOrEmpty(action.TargetWorkflowName))
+                    {
+                        targetWf = allWorkflows.FirstOrDefault(w => string.Equals(w.Name, action.TargetWorkflowName, StringComparison.OrdinalIgnoreCase));
+                    }
+                    if (targetWf == null && !string.IsNullOrEmpty(action.Word))
+                    {
+                        targetWf = allWorkflows.FirstOrDefault(w => string.Equals(w.Name, action.Word, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    if (targetWf != null)
+                    {
+                        // Cycle & depth guard at runtime
+                        if (activeWorkflowIds.Contains(targetWf.Id))
+                        {
+                            Debug.WriteLine($"Cycle prevented at runtime: workflow '{targetWf.Name}' is already active on the call stack.");
+                        }
+                        else
+                        {
+                            activeWorkflowIds.Add(targetWf.Id);
+                            try
+                            {
+                                var subResult = ExecuteWorkflowForWindow(targetWf, allWorkflows, windowSize, account, processId, token, activeWorkflowIds, callDepth + 1);
+                                if (subResult.Status == StepActionResult.Break)
+                                {
+                                    return StepExecutionResult.Break();
+                                }
+                            }
+                            finally
+                            {
+                                activeWorkflowIds.Remove(targetWf.Id);
+                            }
+                        }
                     }
                 }
 

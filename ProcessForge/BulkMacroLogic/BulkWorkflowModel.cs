@@ -127,5 +127,109 @@ namespace ProcessForge.BulkMacroLogic
             wf.Steps.Add(step1);
             return wf;
         }
+
+        /// <summary>
+        /// Validates whether sourceWf can safely add candidateTargetWf as a sub-workflow without causing a recursive loop/cycle.
+        /// If candidateTargetWf already calls sourceWf (directly or indirectly), it returns false and provides the reason.
+        /// </summary>
+        public static bool CanWorkflowReference(
+            BulkWorkflowModel sourceWf,
+            BulkWorkflowModel candidateTargetWf,
+            IEnumerable<BulkWorkflowModel> allWorkflows,
+            out string reason)
+        {
+            reason = string.Empty;
+
+            if (sourceWf == null || candidateTargetWf == null)
+            {
+                reason = "Invalid workflow selection.";
+                return false;
+            }
+
+            // 1. Cannot reference itself
+            if (string.Equals(sourceWf.Id, candidateTargetWf.Id, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(sourceWf.Name, candidateTargetWf.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                reason = $"Workflow '{sourceWf.Name}' cannot run itself as a sub-workflow.";
+                return false;
+            }
+
+            // 2. Candidate target cannot reach sourceWf directly or transitively
+            var workflowList = allWorkflows?.ToList() ?? new List<BulkWorkflowModel>();
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var queue = new Queue<string>();
+
+            queue.Enqueue(candidateTargetWf.Id);
+            visited.Add(candidateTargetWf.Id);
+
+            while (queue.Count > 0)
+            {
+                string currentId = queue.Dequeue();
+
+                var wf = workflowList.FirstOrDefault(w => string.Equals(w.Id, currentId, StringComparison.OrdinalIgnoreCase))
+                         ?? workflowList.FirstOrDefault(w => string.Equals(w.Name, currentId, StringComparison.OrdinalIgnoreCase));
+
+                if (wf?.Steps == null) continue;
+
+                foreach (var step in wf.Steps)
+                {
+                    if (step.Actions == null) continue;
+                    foreach (var action in step.Actions)
+                    {
+                        if (action.ActionType == "Workflow" || action.ActionType == "RunWorkflow")
+                        {
+                            string? childId = action.TargetWorkflowId;
+                            string? childName = action.TargetWorkflowName;
+
+                            // Check if this action points back to sourceWf
+                            bool matchesSource = (!string.IsNullOrEmpty(childId) && string.Equals(childId, sourceWf.Id, StringComparison.OrdinalIgnoreCase)) ||
+                                                 (!string.IsNullOrEmpty(childName) && string.Equals(childName, sourceWf.Name, StringComparison.OrdinalIgnoreCase));
+
+                            if (matchesSource)
+                            {
+                                reason = $"Circular dependency detected: '{candidateTargetWf.Name}' already uses '{sourceWf.Name}' (directly or through a sub-workflow). To avoid recursive confusion, '{sourceWf.Name}' cannot call '{candidateTargetWf.Name}'.";
+                                return false;
+                            }
+
+                            // Continue BFS traversal
+                            if (!string.IsNullOrEmpty(childId) && !visited.Contains(childId))
+                            {
+                                visited.Add(childId);
+                                queue.Enqueue(childId);
+                            }
+                            else if (!string.IsNullOrEmpty(childName))
+                            {
+                                var childWf = workflowList.FirstOrDefault(w => string.Equals(w.Name, childName, StringComparison.OrdinalIgnoreCase));
+                                if (childWf != null && !visited.Contains(childWf.Id))
+                                {
+                                    visited.Add(childWf.Id);
+                                    queue.Enqueue(childWf.Id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static List<BulkWorkflowModel> GetValidTargetWorkflows(
+            BulkWorkflowModel currentWf,
+            IEnumerable<BulkWorkflowModel> allWorkflows)
+        {
+            var result = new List<BulkWorkflowModel>();
+            if (currentWf == null || allWorkflows == null) return result;
+
+            var allList = allWorkflows.ToList();
+            foreach (var candidate in allList)
+            {
+                if (CanWorkflowReference(currentWf, candidate, allList, out _))
+                {
+                    result.Add(candidate);
+                }
+            }
+            return result;
+        }
     }
 }

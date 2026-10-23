@@ -1730,6 +1730,12 @@ namespace ProcessForge
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? AutoLoginMode { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? TargetWorkflowId { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? TargetWorkflowName { get; set; }
+
         public override string ToString()
         {
             if (ActionType == "Break")
@@ -1756,6 +1762,11 @@ namespace ProcessForge
             else if (ActionType == "ClearMemory")
             {
                 return "🧹 [Clear Memory] Free unused working set memory for current window";
+            }
+            else if (ActionType == "Workflow" || ActionType == "RunWorkflow")
+            {
+                string wfName = !string.IsNullOrWhiteSpace(TargetWorkflowName) ? TargetWorkflowName : (!string.IsNullOrWhiteSpace(Word) ? Word : "Workflow");
+                return $"📋 [Workflow] Run sub-workflow: \"{wfName}\"";
             }
             else if (ActionType == "InputBox")
             {
