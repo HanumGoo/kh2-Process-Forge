@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -70,6 +70,20 @@ namespace ProcessForge.ApplicationLogic
             else
             {
 
+            }
+        }
+
+        public static bool ClearMemoryForProcess(int processId)
+        {
+            if (processId <= 0) return false;
+            try
+            {
+                using Process process = Process.GetProcessById(processId);
+                return EmptyWorkingSet(process.Handle);
+            }
+            catch
+            {
+                return false;
             }
         }
     }

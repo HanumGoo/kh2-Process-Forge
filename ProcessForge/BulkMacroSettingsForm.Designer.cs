@@ -13,6 +13,10 @@ namespace ProcessForge
         private System.Windows.Forms.Panel pnlWorkflowBar;
         private System.Windows.Forms.Label lblWorkflowLabel;
         private System.Windows.Forms.ComboBox cmbWorkflows;
+        private System.Windows.Forms.Button btnMoveWorkflowUp;
+        private System.Windows.Forms.Button btnMoveWorkflowDown;
+        private System.Windows.Forms.Label lblWorkflowSearch;
+        private System.Windows.Forms.TextBox txtWorkflowSearch;
         private System.Windows.Forms.Button btnNewWorkflow;
         private System.Windows.Forms.Button btnRenameWorkflow;
         private System.Windows.Forms.Button btnDuplicateWorkflow;
@@ -95,6 +99,13 @@ namespace ProcessForge
         private System.Windows.Forms.ComboBox cmbGotoStep;
         private System.Windows.Forms.Button btnAddGotoAction;
 
+        // Special Actions Section (Auto-Login & Memory Management)
+        private System.Windows.Forms.Label lblSpecialActionsHeader;
+        private System.Windows.Forms.Label lblAutoLoginMode;
+        private System.Windows.Forms.ComboBox cmbAutoLoginMode;
+        private System.Windows.Forms.Button btnAddAutoLoginAction;
+        private System.Windows.Forms.Button btnAddClearMemoryAction;
+
         // Footer Controls
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.Button btnSave;
@@ -122,6 +133,10 @@ namespace ProcessForge
             btnDuplicateWorkflow = new System.Windows.Forms.Button();
             btnRenameWorkflow = new System.Windows.Forms.Button();
             btnNewWorkflow = new System.Windows.Forms.Button();
+            btnMoveWorkflowUp = new System.Windows.Forms.Button();
+            btnMoveWorkflowDown = new System.Windows.Forms.Button();
+            lblWorkflowSearch = new System.Windows.Forms.Label();
+            txtWorkflowSearch = new System.Windows.Forms.TextBox();
             cmbWorkflows = new System.Windows.Forms.ComboBox();
             lblWorkflowLabel = new System.Windows.Forms.Label();
             pnlPagination = new System.Windows.Forms.Panel();
@@ -145,6 +160,12 @@ namespace ProcessForge
             btnCaptureImage = new System.Windows.Forms.Button();
             picPreview = new System.Windows.Forms.PictureBox();
             gbActionConfig = new System.Windows.Forms.GroupBox();
+
+            lblSpecialActionsHeader = new System.Windows.Forms.Label();
+            lblAutoLoginMode = new System.Windows.Forms.Label();
+            cmbAutoLoginMode = new System.Windows.Forms.ComboBox();
+            btnAddAutoLoginAction = new System.Windows.Forms.Button();
+            btnAddClearMemoryAction = new System.Windows.Forms.Button();
 
             lblControlFlowHeader = new System.Windows.Forms.Label();
 
@@ -246,12 +267,16 @@ namespace ProcessForge
             pnlWorkflowBar.Controls.Add(btnDuplicateWorkflow);
             pnlWorkflowBar.Controls.Add(btnRenameWorkflow);
             pnlWorkflowBar.Controls.Add(btnNewWorkflow);
+            pnlWorkflowBar.Controls.Add(txtWorkflowSearch);
+            pnlWorkflowBar.Controls.Add(lblWorkflowSearch);
+            pnlWorkflowBar.Controls.Add(btnMoveWorkflowDown);
+            pnlWorkflowBar.Controls.Add(btnMoveWorkflowUp);
             pnlWorkflowBar.Controls.Add(cmbWorkflows);
             pnlWorkflowBar.Controls.Add(lblWorkflowLabel);
             pnlWorkflowBar.Dock = System.Windows.Forms.DockStyle.Top;
             pnlWorkflowBar.Location = new System.Drawing.Point(0, 52);
             pnlWorkflowBar.Name = "pnlWorkflowBar";
-            pnlWorkflowBar.Size = new System.Drawing.Size(1180, 42);
+            pnlWorkflowBar.Size = new System.Drawing.Size(1240, 42);
             pnlWorkflowBar.TabIndex = 1;
             // 
             // btnDeleteWorkflow
@@ -262,10 +287,10 @@ namespace ProcessForge
             btnDeleteWorkflow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnDeleteWorkflow.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
             btnDeleteWorkflow.ForeColor = System.Drawing.Color.FromArgb(180, 40, 40);
-            btnDeleteWorkflow.Location = new System.Drawing.Point(1075, 8);
+            btnDeleteWorkflow.Location = new System.Drawing.Point(1135, 8);
             btnDeleteWorkflow.Name = "btnDeleteWorkflow";
-            btnDeleteWorkflow.Size = new System.Drawing.Size(90, 26);
-            btnDeleteWorkflow.TabIndex = 5;
+            btnDeleteWorkflow.Size = new System.Drawing.Size(95, 26);
+            btnDeleteWorkflow.TabIndex = 9;
             btnDeleteWorkflow.Text = "✕ Delete";
             btnDeleteWorkflow.UseVisualStyleBackColor = false;
             // 
@@ -277,10 +302,10 @@ namespace ProcessForge
             btnDuplicateWorkflow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnDuplicateWorkflow.Font = new System.Drawing.Font("Segoe UI", 8F);
             btnDuplicateWorkflow.ForeColor = System.Drawing.Color.Black;
-            btnDuplicateWorkflow.Location = new System.Drawing.Point(985, 8);
+            btnDuplicateWorkflow.Location = new System.Drawing.Point(1035, 8);
             btnDuplicateWorkflow.Name = "btnDuplicateWorkflow";
-            btnDuplicateWorkflow.Size = new System.Drawing.Size(85, 26);
-            btnDuplicateWorkflow.TabIndex = 4;
+            btnDuplicateWorkflow.Size = new System.Drawing.Size(95, 26);
+            btnDuplicateWorkflow.TabIndex = 8;
             btnDuplicateWorkflow.Text = "Duplicate";
             btnDuplicateWorkflow.UseVisualStyleBackColor = false;
             // 
@@ -292,10 +317,10 @@ namespace ProcessForge
             btnRenameWorkflow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnRenameWorkflow.Font = new System.Drawing.Font("Segoe UI", 8F);
             btnRenameWorkflow.ForeColor = System.Drawing.Color.Black;
-            btnRenameWorkflow.Location = new System.Drawing.Point(895, 8);
+            btnRenameWorkflow.Location = new System.Drawing.Point(945, 8);
             btnRenameWorkflow.Name = "btnRenameWorkflow";
             btnRenameWorkflow.Size = new System.Drawing.Size(85, 26);
-            btnRenameWorkflow.TabIndex = 3;
+            btnRenameWorkflow.TabIndex = 7;
             btnRenameWorkflow.Text = "Rename";
             btnRenameWorkflow.UseVisualStyleBackColor = false;
             // 
@@ -307,12 +332,61 @@ namespace ProcessForge
             btnNewWorkflow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnNewWorkflow.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
             btnNewWorkflow.ForeColor = System.Drawing.Color.White;
-            btnNewWorkflow.Location = new System.Drawing.Point(765, 8);
+            btnNewWorkflow.Location = new System.Drawing.Point(810, 8);
             btnNewWorkflow.Name = "btnNewWorkflow";
-            btnNewWorkflow.Size = new System.Drawing.Size(125, 26);
-            btnNewWorkflow.TabIndex = 2;
+            btnNewWorkflow.Size = new System.Drawing.Size(130, 26);
+            btnNewWorkflow.TabIndex = 6;
             btnNewWorkflow.Text = "+ New Workflow";
             btnNewWorkflow.UseVisualStyleBackColor = false;
+            // 
+            // txtWorkflowSearch
+            // 
+            txtWorkflowSearch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            txtWorkflowSearch.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            txtWorkflowSearch.Location = new System.Drawing.Point(475, 10);
+            txtWorkflowSearch.Name = "txtWorkflowSearch";
+            txtWorkflowSearch.PlaceholderText = "Search workflow...";
+            txtWorkflowSearch.Size = new System.Drawing.Size(185, 23);
+            txtWorkflowSearch.TabIndex = 5;
+            // 
+            // lblWorkflowSearch
+            // 
+            lblWorkflowSearch.AutoSize = true;
+            lblWorkflowSearch.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            lblWorkflowSearch.ForeColor = System.Drawing.Color.Black;
+            lblWorkflowSearch.Location = new System.Drawing.Point(422, 14);
+            lblWorkflowSearch.Name = "lblWorkflowSearch";
+            lblWorkflowSearch.Size = new System.Drawing.Size(47, 13);
+            lblWorkflowSearch.TabIndex = 4;
+            lblWorkflowSearch.Text = "Search:";
+            // 
+            // btnMoveWorkflowDown
+            // 
+            btnMoveWorkflowDown.BackColor = System.Drawing.Color.White;
+            btnMoveWorkflowDown.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnMoveWorkflowDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnMoveWorkflowDown.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            btnMoveWorkflowDown.ForeColor = System.Drawing.Color.Black;
+            btnMoveWorkflowDown.Location = new System.Drawing.Point(375, 8);
+            btnMoveWorkflowDown.Name = "btnMoveWorkflowDown";
+            btnMoveWorkflowDown.Size = new System.Drawing.Size(32, 26);
+            btnMoveWorkflowDown.TabIndex = 3;
+            btnMoveWorkflowDown.Text = "▼";
+            btnMoveWorkflowDown.UseVisualStyleBackColor = false;
+            // 
+            // btnMoveWorkflowUp
+            // 
+            btnMoveWorkflowUp.BackColor = System.Drawing.Color.White;
+            btnMoveWorkflowUp.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnMoveWorkflowUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnMoveWorkflowUp.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            btnMoveWorkflowUp.ForeColor = System.Drawing.Color.Black;
+            btnMoveWorkflowUp.Location = new System.Drawing.Point(338, 8);
+            btnMoveWorkflowUp.Name = "btnMoveWorkflowUp";
+            btnMoveWorkflowUp.Size = new System.Drawing.Size(32, 26);
+            btnMoveWorkflowUp.TabIndex = 2;
+            btnMoveWorkflowUp.Text = "▲";
+            btnMoveWorkflowUp.UseVisualStyleBackColor = false;
             // 
             // cmbWorkflows
             // 
@@ -320,9 +394,9 @@ namespace ProcessForge
             cmbWorkflows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             cmbWorkflows.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             cmbWorkflows.FormattingEnabled = true;
-            cmbWorkflows.Location = new System.Drawing.Point(145, 9);
+            cmbWorkflows.Location = new System.Drawing.Point(105, 9);
             cmbWorkflows.Name = "cmbWorkflows";
-            cmbWorkflows.Size = new System.Drawing.Size(320, 23);
+            cmbWorkflows.Size = new System.Drawing.Size(225, 23);
             cmbWorkflows.TabIndex = 1;
             // 
             // lblWorkflowLabel
@@ -332,9 +406,9 @@ namespace ProcessForge
             lblWorkflowLabel.ForeColor = System.Drawing.Color.Black;
             lblWorkflowLabel.Location = new System.Drawing.Point(15, 13);
             lblWorkflowLabel.Name = "lblWorkflowLabel";
-            lblWorkflowLabel.Size = new System.Drawing.Size(120, 15);
+            lblWorkflowLabel.Size = new System.Drawing.Size(81, 15);
             lblWorkflowLabel.TabIndex = 0;
-            lblWorkflowLabel.Text = "ACTIVE WORKFLOW:";
+            lblWorkflowLabel.Text = "WORKFLOW:";
             // 
             // pnlPagination
             // 
@@ -598,14 +672,15 @@ namespace ProcessForge
             // 
             // gbActionConfig
             // 
+            gbActionConfig.Controls.Add(lblSpecialActionsHeader);
+            gbActionConfig.Controls.Add(lblAutoLoginMode);
+            gbActionConfig.Controls.Add(cmbAutoLoginMode);
+            gbActionConfig.Controls.Add(btnAddAutoLoginAction);
+            gbActionConfig.Controls.Add(btnAddClearMemoryAction);
             gbActionConfig.Controls.Add(lblControlFlowHeader);
-
             gbActionConfig.Controls.Add(btnAddBreakAction);
-
             gbActionConfig.Controls.Add(lblGotoTarget);
-
             gbActionConfig.Controls.Add(cmbGotoStep);
-
             gbActionConfig.Controls.Add(btnAddGotoAction);
 
             gbActionConfig.Controls.Add(btnAddInputBoxAction);
@@ -711,6 +786,67 @@ namespace ProcessForge
             btnAddGotoAction.TabIndex = 34;
             btnAddGotoAction.Text = "↪ + ADD GOTO";
             btnAddGotoAction.UseVisualStyleBackColor = false;
+            // 
+            // lblSpecialActionsHeader
+            // 
+            lblSpecialActionsHeader.AutoSize = true;
+            lblSpecialActionsHeader.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            lblSpecialActionsHeader.ForeColor = System.Drawing.Color.Black;
+            lblSpecialActionsHeader.Location = new System.Drawing.Point(15, 465);
+            lblSpecialActionsHeader.Name = "lblSpecialActionsHeader";
+            lblSpecialActionsHeader.Size = new System.Drawing.Size(265, 13);
+            lblSpecialActionsHeader.TabIndex = 35;
+            lblSpecialActionsHeader.Text = "Special Actions (Auto-Login / Memory Management):";
+            // 
+            // lblAutoLoginMode
+            // 
+            lblAutoLoginMode.AutoSize = true;
+            lblAutoLoginMode.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+            lblAutoLoginMode.Location = new System.Drawing.Point(15, 492);
+            lblAutoLoginMode.Name = "lblAutoLoginMode";
+            lblAutoLoginMode.Size = new System.Drawing.Size(41, 13);
+            lblAutoLoginMode.TabIndex = 36;
+            lblAutoLoginMode.Text = "Mode:";
+            // 
+            // cmbAutoLoginMode
+            // 
+            cmbAutoLoginMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cmbAutoLoginMode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            cmbAutoLoginMode.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+            cmbAutoLoginMode.FormattingEnabled = true;
+            cmbAutoLoginMode.Items.AddRange(new object[] { "Standard Auto Login", "Auto Login + Create Character" });
+            cmbAutoLoginMode.Location = new System.Drawing.Point(60, 488);
+            cmbAutoLoginMode.Name = "cmbAutoLoginMode";
+            cmbAutoLoginMode.Size = new System.Drawing.Size(200, 23);
+            cmbAutoLoginMode.TabIndex = 37;
+            // 
+            // btnAddAutoLoginAction
+            // 
+            btnAddAutoLoginAction.BackColor = System.Drawing.Color.Black;
+            btnAddAutoLoginAction.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnAddAutoLoginAction.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnAddAutoLoginAction.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            btnAddAutoLoginAction.ForeColor = System.Drawing.Color.White;
+            btnAddAutoLoginAction.Location = new System.Drawing.Point(268, 485);
+            btnAddAutoLoginAction.Name = "btnAddAutoLoginAction";
+            btnAddAutoLoginAction.Size = new System.Drawing.Size(185, 30);
+            btnAddAutoLoginAction.TabIndex = 38;
+            btnAddAutoLoginAction.Text = "🔐 + ADD AUTO LOGIN";
+            btnAddAutoLoginAction.UseVisualStyleBackColor = false;
+            // 
+            // btnAddClearMemoryAction
+            // 
+            btnAddClearMemoryAction.BackColor = System.Drawing.Color.FromArgb(40, 70, 110);
+            btnAddClearMemoryAction.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnAddClearMemoryAction.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnAddClearMemoryAction.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            btnAddClearMemoryAction.ForeColor = System.Drawing.Color.White;
+            btnAddClearMemoryAction.Location = new System.Drawing.Point(465, 485);
+            btnAddClearMemoryAction.Name = "btnAddClearMemoryAction";
+            btnAddClearMemoryAction.Size = new System.Drawing.Size(210, 30);
+            btnAddClearMemoryAction.TabIndex = 39;
+            btnAddClearMemoryAction.Text = "🧹 + CLEAR MEMORY (CURRENT)";
+            btnAddClearMemoryAction.UseVisualStyleBackColor = false;
             // 
             // btnAddInputBoxAction
             //  
@@ -1186,7 +1322,7 @@ namespace ProcessForge
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             BackColor = System.Drawing.Color.White;
-            ClientSize = new System.Drawing.Size(1180, 720);
+            ClientSize = new System.Drawing.Size(1240, 780);
             Controls.Add(tlpMainLayout);
             Controls.Add(pnlFooter);
             Controls.Add(pnlPagination);

@@ -137,7 +137,7 @@ namespace ProcessForge.BulkMacroLogic
                     if (cancellationToken.IsCancellationRequested) break;
                     var step = mainSteps[stepPointer];
 
-                    var stepResult = ExecuteStep(step, allSteps, subSteps, windowSize, matchedAccount, cancellationToken);
+                    var stepResult = ExecuteStep(step, allSteps, subSteps, windowSize, matchedAccount, procData.ProcessId, cancellationToken);
                     if (stepResult.Status == StepActionResult.Break)
                     {
                         break; // Stop workflow on this window, advance to next window
@@ -171,7 +171,7 @@ namespace ProcessForge.BulkMacroLogic
 
                             if (subTarget != null)
                             {
-                                ExecuteLinearActions(subTarget, new OpenCvSharp.Point(0, 0), windowSize, matchedAccount, cancellationToken);
+                                ExecuteLinearActions(subTarget, new OpenCvSharp.Point(0, 0), windowSize, matchedAccount, procData.ProcessId, cancellationToken);
                             }
                             stepPointer++;
                         }
@@ -202,6 +202,7 @@ namespace ProcessForge.BulkMacroLogic
             List<TargetStepModel> subSteps,
             Rectangle windowSize,
             DataLoginFormat? account,
+            int processId,
             CancellationToken token)
         {
             if (token.IsCancellationRequested) return StepExecutionResult.Break();
@@ -211,21 +212,21 @@ namespace ProcessForge.BulkMacroLogic
             {
                 OpenCvSharp.Point matchLoc;
                 double matchScore;
-                var detectResult = DetectImageWithSubSteps(windowSize, step, subSteps, account, out matchLoc, out matchScore, token);
+                var detectResult = DetectImageWithSubSteps(windowSize, step, subSteps, account, processId, out matchLoc, out matchScore, token);
                 if (detectResult.Status != StepActionResult.Continue) return detectResult;
 
                 if (token.IsCancellationRequested) return StepExecutionResult.Break();
 
                 if (matchScore >= 0.85)
                 {
-                    var actionRes = ExecuteLinearActions(step, matchLoc, windowSize, account, token);
+                    var actionRes = ExecuteLinearActions(step, matchLoc, windowSize, account, processId, token);
                     if (actionRes.Status != StepActionResult.Continue) return actionRes;
                 }
             }
             // Case B: Step has no image template (action-only macro step)
             else
             {
-                var actionRes = ExecuteLinearActions(step, new OpenCvSharp.Point(0, 0), windowSize, account, token);
+                var actionRes = ExecuteLinearActions(step, new OpenCvSharp.Point(0, 0), windowSize, account, processId, token);
                 if (actionRes.Status != StepActionResult.Continue) return actionRes;
             }
 
@@ -238,6 +239,7 @@ namespace ProcessForge.BulkMacroLogic
             TargetStepModel step,
             List<TargetStepModel> subSteps,
             DataLoginFormat? account,
+            int processId,
             out OpenCvSharp.Point matchLocation,
             out double matchScore,
             CancellationToken token)
@@ -296,7 +298,7 @@ namespace ProcessForge.BulkMacroLogic
                                     Cv2.MinMaxLoc(subResult, out _, out double subMax, out _, out OpenCvSharp.Point subLoc);
                                     if (subMax >= 0.85)
                                     {
-                                        var subRes = ExecuteLinearActions(sub, subLoc, windowSize, account, token);
+                                        var subRes = ExecuteLinearActions(sub, subLoc, windowSize, account, processId, token);
                                         if (subRes.Status != StepActionResult.Continue)
                                         {
                                             return subRes;
@@ -321,6 +323,7 @@ namespace ProcessForge.BulkMacroLogic
             OpenCvSharp.Point matchLoc,
             Rectangle windowSize,
             DataLoginFormat? account,
+            int processId,
             CancellationToken token)
         {
             if (step.Actions == null || step.Actions.Count == 0) return StepExecutionResult.Continue();
@@ -367,6 +370,19 @@ namespace ProcessForge.BulkMacroLogic
                     int delay = action.DelayMs ?? 500;
                     if (SleepOrCancel(delay, token)) return StepExecutionResult.Break();
                     continue;
+                }
+                else if (action.ActionType == "AutoLogin")
+                {
+                    string mode = !string.IsNullOrWhiteSpace(action.AutoLoginMode) ? action.AutoLoginMode : (!string.IsNullOrWhiteSpace(action.Word) ? action.Word : "Standard Auto Login");
+                    var loginResult = AutoLoginLogic.ExecuteAutoLoginForSingleWindow(processId, windowSize, account, mode, token);
+                    if (loginResult.Status != StepActionResult.Continue)
+                    {
+                        return loginResult;
+                    }
+                }
+                else if (action.ActionType == "ClearMemory")
+                {
+                    ClearUnusedMemoryLogic.ClearMemoryForProcess(processId);
                 }
                 else if (action.ActionType == "InputBox")
                 {

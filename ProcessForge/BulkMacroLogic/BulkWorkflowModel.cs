@@ -29,6 +29,13 @@ namespace ProcessForge.BulkMacroLogic
     {
         public string SelectedWorkflowId { get; set; } = string.Empty;
         public List<BulkWorkflowModel> Workflows { get; set; } = new List<BulkWorkflowModel>();
+
+        // Looper configuration
+        public bool EnableLoop { get; set; } = false;
+        public int LoopCount { get; set; } = 1;
+        public bool LoopInfinite { get; set; } = false;
+        public int LoopDelayValue { get; set; } = 10;
+        public string LoopDelayUnit { get; set; } = "Seconds"; // "Seconds", "Minutes", "Hours"
     }
 
     public static class BulkWorkflowManager

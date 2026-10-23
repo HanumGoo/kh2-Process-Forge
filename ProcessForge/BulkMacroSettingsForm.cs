@@ -51,6 +51,9 @@ namespace ProcessForge
         {
             // Workflow management
             cmbWorkflows.SelectedIndexChanged += CmbWorkflows_SelectedIndexChanged;
+            btnMoveWorkflowUp.Click += BtnMoveWorkflowUp_Click;
+            btnMoveWorkflowDown.Click += BtnMoveWorkflowDown_Click;
+            txtWorkflowSearch.TextChanged += TxtWorkflowSearch_TextChanged;
             btnNewWorkflow.Click += BtnNewWorkflow_Click;
             btnRenameWorkflow.Click += BtnRenameWorkflow_Click;
             btnDuplicateWorkflow.Click += BtnDuplicateWorkflow_Click;
@@ -76,6 +79,8 @@ namespace ProcessForge
             btnAddInputBoxAction.Click += BtnAddInputBoxAction_Click;
             btnAddBreakAction.Click += BtnAddBreakAction_Click;
             btnAddGotoAction.Click += BtnAddGotoAction_Click;
+            btnAddAutoLoginAction.Click += BtnAddAutoLoginAction_Click;
+            btnAddClearMemoryAction.Click += BtnAddClearMemoryAction_Click;
             btnMoveUp.Click += BtnMoveUp_Click;
             btnMoveDown.Click += BtnMoveDown_Click;
             btnRemoveAction.Click += BtnRemoveAction_Click;
@@ -109,6 +114,13 @@ namespace ProcessForge
             };
         }
 
+        private List<BulkWorkflowModel> GetFilteredWorkflows()
+        {
+            string query = txtWorkflowSearch?.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(query)) return _config.Workflows;
+            return _config.Workflows.Where(w => w.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+        }
+
         private void PopulateWorkflows(string? selectedId = null)
         {
             _isUpdatingUi = true;
@@ -121,7 +133,13 @@ namespace ProcessForge
                 _config.SelectedWorkflowId = def.Id;
             }
 
-            foreach (var wf in _config.Workflows)
+            var visibleList = GetFilteredWorkflows();
+            if (visibleList.Count == 0)
+            {
+                visibleList = _config.Workflows;
+            }
+
+            foreach (var wf in visibleList)
             {
                 cmbWorkflows.Items.Add(wf.Name);
             }
@@ -130,17 +148,74 @@ namespace ProcessForge
             string targetId = !string.IsNullOrEmpty(selectedId) ? selectedId : _config.SelectedWorkflowId;
             if (!string.IsNullOrEmpty(targetId))
             {
-                int found = _config.Workflows.FindIndex(w => w.Id == targetId);
+                int found = visibleList.FindIndex(w => w.Id == targetId);
                 if (found >= 0) selectIndex = found;
             }
 
-            cmbWorkflows.SelectedIndex = selectIndex;
-            _currentWorkflow = _config.Workflows[selectIndex];
+            if (cmbWorkflows.Items.Count > 0)
+            {
+                cmbWorkflows.SelectedIndex = selectIndex;
+                _currentWorkflow = visibleList[selectIndex];
+                _config.SelectedWorkflowId = _currentWorkflow.Id;
+            }
+
+            UpdateWorkflowReorderButtonsState();
             _isUpdatingUi = false;
 
             _currentStepIndex = 0;
             BuildPaginationUI();
             LoadStepToForm(0);
+        }
+
+        private void UpdateWorkflowReorderButtonsState()
+        {
+            if (_currentWorkflow == null)
+            {
+                btnMoveWorkflowUp.Enabled = false;
+                btnMoveWorkflowDown.Enabled = false;
+                return;
+            }
+
+            int idx = _config.Workflows.FindIndex(w => w.Id == _currentWorkflow.Id);
+            btnMoveWorkflowUp.Enabled = idx > 0;
+            btnMoveWorkflowDown.Enabled = idx >= 0 && idx < _config.Workflows.Count - 1;
+        }
+
+        private void TxtWorkflowSearch_TextChanged(object? sender, EventArgs e)
+        {
+            if (_isUpdatingUi) return;
+            string? currentId = _currentWorkflow?.Id;
+            PopulateWorkflows(currentId);
+        }
+
+        private void BtnMoveWorkflowUp_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null) return;
+            int idx = _config.Workflows.FindIndex(w => w.Id == _currentWorkflow.Id);
+            if (idx > 0)
+            {
+                SaveCurrentFormToModel();
+                var item = _config.Workflows[idx];
+                _config.Workflows.RemoveAt(idx);
+                _config.Workflows.Insert(idx - 1, item);
+                BulkWorkflowManager.SaveConfig(_config);
+                PopulateWorkflows(item.Id);
+            }
+        }
+
+        private void BtnMoveWorkflowDown_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null) return;
+            int idx = _config.Workflows.FindIndex(w => w.Id == _currentWorkflow.Id);
+            if (idx >= 0 && idx < _config.Workflows.Count - 1)
+            {
+                SaveCurrentFormToModel();
+                var item = _config.Workflows[idx];
+                _config.Workflows.RemoveAt(idx);
+                _config.Workflows.Insert(idx + 1, item);
+                BulkWorkflowManager.SaveConfig(_config);
+                PopulateWorkflows(item.Id);
+            }
         }
 
         private void CmbWorkflows_SelectedIndexChanged(object? sender, EventArgs e)
@@ -149,11 +224,13 @@ namespace ProcessForge
 
             SaveCurrentFormToModel();
 
+            var visibleList = GetFilteredWorkflows();
             int idx = cmbWorkflows.SelectedIndex;
-            if (idx >= 0 && idx < _config.Workflows.Count)
+            if (idx >= 0 && idx < visibleList.Count)
             {
-                _currentWorkflow = _config.Workflows[idx];
+                _currentWorkflow = visibleList[idx];
                 _config.SelectedWorkflowId = _currentWorkflow.Id;
+                UpdateWorkflowReorderButtonsState();
                 _currentStepIndex = 0;
                 BuildPaginationUI();
                 LoadStepToForm(0);
@@ -568,6 +645,12 @@ namespace ProcessForge
                 {
                     txtInputBoxPrompt.Text = act.PromptMessage ?? "Enter value:";
                 }
+                else if (act.ActionType == "AutoLogin")
+                {
+                    string mode = !string.IsNullOrWhiteSpace(act.AutoLoginMode) ? act.AutoLoginMode : (!string.IsNullOrWhiteSpace(act.Word) ? act.Word : "Standard Auto Login");
+                    int modeIdx = cmbAutoLoginMode.FindStringExact(mode);
+                    if (modeIdx >= 0) cmbAutoLoginMode.SelectedIndex = modeIdx;
+                }
                 else if (act.ActionType == "Goto")
                 {
                     if (!string.IsNullOrEmpty(act.GotoStepTarget))
@@ -587,6 +670,37 @@ namespace ProcessForge
             }
 
             picPreview.Invalidate();
+        }
+
+        private void BtnAddAutoLoginAction_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null) return;
+            var step = _currentWorkflow.Steps[_currentStepIndex];
+
+            string mode = cmbAutoLoginMode.SelectedItem?.ToString() ?? "Standard Auto Login";
+            var action = new StepInputAction
+            {
+                ActionType = "AutoLogin",
+                AutoLoginMode = mode,
+                Word = mode
+            };
+
+            step.Actions.Add(action);
+            RefreshActionsList(step.Actions.Count - 1);
+        }
+
+        private void BtnAddClearMemoryAction_Click(object? sender, EventArgs e)
+        {
+            if (_currentWorkflow == null) return;
+            var step = _currentWorkflow.Steps[_currentStepIndex];
+
+            var action = new StepInputAction
+            {
+                ActionType = "ClearMemory"
+            };
+
+            step.Actions.Add(action);
+            RefreshActionsList(step.Actions.Count - 1);
         }
 
         private void BtnAddMouseAction_Click(object? sender, EventArgs e)
@@ -692,6 +806,12 @@ namespace ProcessForge
             else if (existing.ActionType == "InputBox")
             {
                 existing.PromptMessage = string.IsNullOrWhiteSpace(txtInputBoxPrompt.Text) ? "Enter required value:" : txtInputBoxPrompt.Text.Trim();
+            }
+            else if (existing.ActionType == "AutoLogin")
+            {
+                string mode = cmbAutoLoginMode.SelectedItem?.ToString() ?? "Standard Auto Login";
+                existing.AutoLoginMode = mode;
+                existing.Word = mode;
             }
             else if (existing.ActionType == "Goto")
             {
@@ -1323,6 +1443,17 @@ namespace ProcessForge
                         executedCount++;
                         MessageBox.Show(this, $"↪ [Goto Action]\nWorkflow would jump to target: \"{action.GotoStepTarget}\".", "Goto Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         break;
+                    }
+                    else if (action.ActionType == "AutoLogin")
+                    {
+                        executedCount++;
+                        string mode = !string.IsNullOrWhiteSpace(action.AutoLoginMode) ? action.AutoLoginMode : (!string.IsNullOrWhiteSpace(action.Word) ? action.Word : "Standard Auto Login");
+                        MessageBox.Show(this, $"🔐 [Auto-Login Action]\nWorkflow would trigger {mode} for the current window using its matched account credentials.", "Auto-Login Action Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else if (action.ActionType == "ClearMemory")
+                    {
+                        executedCount++;
+                        MessageBox.Show(this, "🧹 [Clear Memory Action]\nWorkflow would silently clear working set memory for the current process.", "Clear Memory Action Reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
 

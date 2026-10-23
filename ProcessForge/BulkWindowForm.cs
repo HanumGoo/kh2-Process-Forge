@@ -23,6 +23,7 @@ namespace ProcessForge
         private BulkWindowConfig BulkConfig = new BulkWindowConfig();
         private int SelectedGroupIndex = 0; // 0 = All Detected, 1 = Ungrouped, 2+ = Custom Groups
         private BulkWorkflowConfig _bulkWorkflowConfig = new BulkWorkflowConfig();
+        private CancellationTokenSource? _groupMacroLoopCts;
 
         // Legacy / Import state
         private bool isUsingImport = false;
@@ -88,6 +89,13 @@ namespace ProcessForge
             btnConfigureMacro.Click += BtnConfigureMacro_Click;
             btnRunGroupMacro.Click += BtnRunGroupMacro_Click;
             btnStopGroupMacro.Click += BtnStopGroupMacro_Click;
+
+            // Wire Looper Events
+            chkEnableLoop.CheckedChanged += (s, e) => { UpdateLooperControlsEnabled(); SaveLooperConfig(); };
+            chkLoopInfinite.CheckedChanged += (s, e) => { UpdateLooperControlsEnabled(); SaveLooperConfig(); };
+            numLoopCount.ValueChanged += (s, e) => SaveLooperConfig();
+            numLoopDelay.ValueChanged += (s, e) => SaveLooperConfig();
+            cmbLoopDelayUnit.SelectedIndexChanged += (s, e) => SaveLooperConfig();
 
             flowGroupProcesses.Resize += (s, e) => ResizeProcessCards();
 
@@ -1286,11 +1294,55 @@ namespace ProcessForge
                 {
                     cmbGroupWorkflow.SelectedIndex = Math.Min(selectIdx, cmbGroupWorkflow.Items.Count - 1);
                 }
+
+                // Load Looper configuration
+                chkEnableLoop.Checked = _bulkWorkflowConfig.EnableLoop;
+                numLoopCount.Value = Math.Max(1, Math.Min(9999, _bulkWorkflowConfig.LoopCount));
+                chkLoopInfinite.Checked = _bulkWorkflowConfig.LoopInfinite;
+                numLoopDelay.Value = Math.Max(1, Math.Min(99999, _bulkWorkflowConfig.LoopDelayValue));
+                int unitIdx = _bulkWorkflowConfig.LoopDelayUnit switch
+                {
+                    "Minutes" => 1,
+                    "Hours" => 2,
+                    _ => 0
+                };
+                if (cmbLoopDelayUnit.Items.Count > 0)
+                {
+                    cmbLoopDelayUnit.SelectedIndex = (unitIdx >= 0 && unitIdx < cmbLoopDelayUnit.Items.Count) ? unitIdx : 0;
+                }
+                UpdateLooperControlsEnabled();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading workflows in BulkWindowForm: {ex.Message}");
             }
+        }
+
+        private void UpdateLooperControlsEnabled()
+        {
+            bool loopEnabled = chkEnableLoop.Checked;
+            chkLoopInfinite.Enabled = loopEnabled;
+            numLoopCount.Enabled = loopEnabled && !chkLoopInfinite.Checked;
+            lblLoopCount.Enabled = loopEnabled && !chkLoopInfinite.Checked;
+            numLoopDelay.Enabled = loopEnabled;
+            lblLoopDelay.Enabled = loopEnabled;
+            cmbLoopDelayUnit.Enabled = loopEnabled;
+        }
+
+        private void SaveLooperConfig()
+        {
+            if (_bulkWorkflowConfig == null) return;
+            _bulkWorkflowConfig.EnableLoop = chkEnableLoop.Checked;
+            _bulkWorkflowConfig.LoopCount = (int)numLoopCount.Value;
+            _bulkWorkflowConfig.LoopInfinite = chkLoopInfinite.Checked;
+            _bulkWorkflowConfig.LoopDelayValue = (int)numLoopDelay.Value;
+            _bulkWorkflowConfig.LoopDelayUnit = cmbLoopDelayUnit.SelectedIndex switch
+            {
+                1 => "Minutes",
+                2 => "Hours",
+                _ => "Seconds"
+            };
+            BulkWorkflowManager.SaveConfig(_bulkWorkflowConfig);
         }
 
         private BulkWorkflowModel? GetSelectedWorkflow()
@@ -1349,8 +1401,18 @@ namespace ProcessForge
                 _ => (SelectedGroupIndex - 2 < BulkConfig.Groups.Count) ? BulkConfig.Groups[SelectedGroupIndex - 2].GroupName : "Selected Group"
             };
 
+            bool isLoop = chkEnableLoop.Checked;
+            bool isInf = chkLoopInfinite.Checked;
+            int totalLoops = isLoop ? (isInf ? int.MaxValue : (int)numLoopCount.Value) : 1;
+            int multiplier = cmbLoopDelayUnit.SelectedIndex switch { 1 => 60, 2 => 3600, _ => 1 };
+            int delaySeconds = (int)numLoopDelay.Value * multiplier;
+
+            string loopInfo = isLoop 
+                ? (isInf ? $" [Loop: Infinite, Interval: {numLoopDelay.Value} {cmbLoopDelayUnit.SelectedItem}]" : $" [Loop: {totalLoops}x, Interval: {numLoopDelay.Value} {cmbLoopDelayUnit.SelectedItem}]")
+                : string.Empty;
+
             var confirm = MessageBox.Show(
-                $"Run macro '{workflow.Name}' ({workflow.Steps.Count} steps) across {activeProcesses.Count} window(s) in group '{groupName}'?\n\nEach window will be restored, processed sequentially, and minimized upon completion.",
+                $"Run macro '{workflow.Name}' ({workflow.Steps.Count} steps) across {activeProcesses.Count} window(s) in group '{groupName}'?{loopInfo}\n\nEach window will be restored, processed sequentially, and minimized upon completion.",
                 "Confirm Macro Execution",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
@@ -1360,39 +1422,112 @@ namespace ProcessForge
 
             btnRunGroupMacro.Enabled = false;
             btnStopGroupMacro.Enabled = true;
-            lblMacroStatus.Text = $"Starting macro '{workflow.Name}' on {activeProcesses.Count} windows...";
+
+            _groupMacroLoopCts = new CancellationTokenSource();
+            var token = _groupMacroLoopCts.Token;
+
+            int currentLoop = 0;
 
             try
             {
-                await BulkMacroRunner.RunGroupMacro(
-                    activeProcesses,
-                    workflow,
-                    accountDataFilePath: string.Empty, // auto-detect from config
-                    onProgress: (cur, tot, status) =>
+                while (!token.IsCancellationRequested && (isInf || currentLoop < totalLoops))
+                {
+                    currentLoop++;
+                    string loopPrefix = isLoop 
+                        ? (isInf ? $"[Loop #{currentLoop} (∞)]" : $"[Loop {currentLoop}/{totalLoops}]") 
+                        : string.Empty;
+
+                    allInGroup = GetCurrentViewProcesses();
+                    activeProcesses = allInGroup.Where(p => p.ProcessId > 0).ToList();
+                    if (activeProcesses.Count == 0)
                     {
-                        if (this.IsDisposed) return;
-                        this.BeginInvoke(new Action(() =>
-                        {
-                            lblMacroStatus.Text = $"[{cur}/{tot}] {status}";
-                        }));
-                    },
-                    onCompleted: () =>
-                    {
-                        if (this.IsDisposed) return;
-                        this.BeginInvoke(new Action(() =>
-                        {
-                            lblMacroStatus.Text = $"Status: Macro completed ({activeProcesses.Count} windows).";
-                        }));
+                        lblMacroStatus.Text = $"{loopPrefix} No online windows remaining in group.";
+                        break;
                     }
-                );
+
+                    lblMacroStatus.Text = $"{loopPrefix} Running '{workflow.Name}' on {activeProcesses.Count} windows...";
+
+                    await BulkMacroRunner.RunGroupMacro(
+                        activeProcesses,
+                        workflow,
+                        accountDataFilePath: string.Empty,
+                        onProgress: (cur, tot, status) =>
+                        {
+                            if (this.IsDisposed) return;
+                            this.BeginInvoke(new Action(() =>
+                            {
+                                lblMacroStatus.Text = $"{loopPrefix} [{cur}/{tot}] {status}";
+                            }));
+                        },
+                        onCompleted: null,
+                        externalToken: token
+                    );
+
+                    if (token.IsCancellationRequested) break;
+
+                    // If more loops remaining, perform countdown delay
+                    if (isLoop && (isInf || currentLoop < totalLoops))
+                    {
+                        int remaining = delaySeconds;
+                        while (remaining > 0 && !token.IsCancellationRequested)
+                        {
+                            string countdownStr = remaining >= 3600
+                                ? $"{remaining / 3600}h {(remaining % 3600) / 60}m {remaining % 60}s"
+                                : (remaining >= 60 ? $"{remaining / 60}m {remaining % 60}s" : $"{remaining}s");
+
+                            if (!this.IsDisposed)
+                            {
+                                this.BeginInvoke(new Action(() =>
+                                {
+                                    lblMacroStatus.Text = $"{loopPrefix} Done ({activeProcesses.Count} win).\r\nNext in {countdownStr}... Click Stop to exit.";
+                                }));
+                            }
+
+                            int slice = Math.Min(remaining * 1000, 1000);
+                            try
+                            {
+                                await Task.Delay(slice, token);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                break;
+                            }
+                            remaining--;
+                        }
+                    }
+                }
+
+                if (!this.IsDisposed)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        lblMacroStatus.Text = "Status: Stopped by user.";
+                    }
+                    else
+                    {
+                        lblMacroStatus.Text = isLoop
+                            ? $"Status: All {currentLoop} loop(s) completed successfully."
+                            : $"Status: Macro completed ({activeProcesses.Count} windows).";
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (!this.IsDisposed) lblMacroStatus.Text = "Status: Stopped by user.";
             }
             catch (Exception ex)
             {
-                lblMacroStatus.Text = $"Status: Error - {ex.Message}";
-                MessageBox.Show($"Macro execution error: {ex.Message}", "Macro Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!this.IsDisposed)
+                {
+                    lblMacroStatus.Text = $"Status: Error - {ex.Message}";
+                    MessageBox.Show($"Macro execution error: {ex.Message}", "Macro Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             finally
             {
+                _groupMacroLoopCts?.Dispose();
+                _groupMacroLoopCts = null;
+
                 if (!this.IsDisposed)
                 {
                     btnRunGroupMacro.Enabled = true;
@@ -1403,6 +1538,7 @@ namespace ProcessForge
 
         private void BtnStopGroupMacro_Click(object? sender, EventArgs e)
         {
+            _groupMacroLoopCts?.Cancel();
             BulkMacroRunner.Stop();
             lblMacroStatus.Text = "Status: Stopping macro execution...";
             btnStopGroupMacro.Enabled = false;

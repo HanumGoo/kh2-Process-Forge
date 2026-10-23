@@ -1727,6 +1727,9 @@ namespace ProcessForge
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? GotoStepTarget { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? AutoLoginMode { get; set; }
+
         public override string ToString()
         {
             if (ActionType == "Break")
@@ -1744,6 +1747,15 @@ namespace ProcessForge
             else if (ActionType == "Delay")
             {
                 return $"⏳ [Delay] Wait {DelayMs ?? 500} ms";
+            }
+            else if (ActionType == "AutoLogin")
+            {
+                string mode = !string.IsNullOrWhiteSpace(AutoLoginMode) ? AutoLoginMode : (!string.IsNullOrWhiteSpace(Word) ? Word : "Standard Auto Login");
+                return $"🔐 [Auto-Login] Run Auto-Login ({mode}) for current window";
+            }
+            else if (ActionType == "ClearMemory")
+            {
+                return "🧹 [Clear Memory] Free unused working set memory for current window";
             }
             else if (ActionType == "InputBox")
             {

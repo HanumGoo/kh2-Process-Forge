@@ -74,6 +74,110 @@ namespace ProcessForge.ApplicationLogic
             await RunAutoLogin(processName, accountDataFilePath, "Standard Auto Login", onProcessCompleted, externalToken);
         }
 
+        public static StepExecutionResult ExecuteAutoLoginForSingleWindow(
+            int processId,
+            Rectangle windowSize,
+            DataLoginFormat? account,
+            string autoLoginMode = "Standard Auto Login",
+            CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
+
+            string storageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "screenshots");
+            string configFilePath = Path.Combine(storageDirectory, "steps_config.json");
+
+            List<TargetStepModel> loaded = AutoLoginSettingsForm.LoadSteps();
+            bool isCreateCharacterMode = string.Equals(autoLoginMode, "Auto Login + Create Character", StringComparison.OrdinalIgnoreCase);
+
+            var targetAccount = account ?? new DataLoginFormat { ProcessId = processId };
+            if (targetAccount.ProcessId <= 0) targetAccount.ProcessId = processId;
+
+            Case AllCase = new Case(storageDirectory, configFilePath, targetAccount, cancellationToken);
+
+            // 1. Shared Main Steps: 1, 2, 3
+            var mainSteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "Main").ToList();
+            if (mainSteps.Count == 0)
+            {
+                mainSteps = loaded.Where(s => !s.IsSubStep && s.StepIndex < 3).ToList();
+            }
+
+            // 2. Branch Flow: Character Creation (CharSteps 4-9) vs Ordinary Auto Login (Steps 4-5)
+            List<TargetStepModel> activeSteps;
+            if (isCreateCharacterMode)
+            {
+                var charSteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "CreateCharacter").ToList();
+                if (charSteps.Count == 0)
+                {
+                    charSteps = loaded.Where(s => s.StepTitle.StartsWith("CharStep")).ToList();
+                }
+                activeSteps = mainSteps.Concat(charSteps).ToList();
+            }
+            else
+            {
+                var ordinarySteps = loaded.Where(s => !s.IsSubStep && s.BranchType == "Ordinary").ToList();
+                if (ordinarySteps.Count == 0)
+                {
+                    ordinarySteps = loaded.Where(s => !s.IsSubStep && (s.StepIndex == 3 || s.StepIndex == 4)).ToList();
+                }
+                activeSteps = mainSteps.Concat(ordinarySteps).ToList();
+            }
+
+            int stepPointer = 0;
+            int maxJumpCount = 500;
+            int jumpCount = 0;
+
+            while (stepPointer >= 0 && stepPointer < activeSteps.Count)
+            {
+                if (cancellationToken.IsCancellationRequested) return StepExecutionResult.Break();
+                var currentStep = activeSteps[stepPointer];
+                var stepResult = AllCase.ExecuteCase(windowSize, currentStep, loaded);
+
+                if (stepResult.Status == StepActionResult.Break)
+                {
+                    return StepExecutionResult.Break();
+                }
+                else if (stepResult.Status == StepActionResult.Goto && !string.IsNullOrWhiteSpace(stepResult.GotoTarget))
+                {
+                    jumpCount++;
+                    if (jumpCount > maxJumpCount)
+                    {
+                        break;
+                    }
+
+                    // Try finding target in activeSteps first
+                    int targetIdx = activeSteps.FindIndex(s =>
+                        string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals($"Step_{s.StepIndex + 1}", stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                    if (targetIdx != -1)
+                    {
+                        stepPointer = targetIdx;
+                        continue;
+                    }
+                    else
+                    {
+                        // If target is in all loaded steps (e.g. sub-step or other step)
+                        var targetInLoaded = loaded.FirstOrDefault(s =>
+                            string.Equals(s.StepTitle, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s.TemplateName, stepResult.GotoTarget, StringComparison.OrdinalIgnoreCase));
+
+                        if (targetInLoaded != null && targetInLoaded.IsSubStep)
+                        {
+                            AllCase.ExecuteCase(windowSize, targetInLoaded, loaded);
+                        }
+                        stepPointer++;
+                    }
+                }
+                else
+                {
+                    stepPointer++;
+                }
+            }
+
+            return StepExecutionResult.Continue();
+        }
+
         private static void ExecuteAutoLogin(string processName, string accountDataFilePath, string autoLoginMode, Action? onProcessCompleted, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested) return;

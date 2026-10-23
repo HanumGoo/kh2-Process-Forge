@@ -51,6 +51,13 @@ namespace ProcessForge
             btnRunGroupMacro = new Button();
             btnStopGroupMacro = new Button();
             lblMacroStatus = new Label();
+            chkEnableLoop = new CheckBox();
+            chkLoopInfinite = new CheckBox();
+            lblLoopCount = new Label();
+            numLoopCount = new NumericUpDown();
+            lblLoopDelay = new Label();
+            numLoopDelay = new NumericUpDown();
+            cmbLoopDelayUnit = new ComboBox();
             pnlLeftHeader = new Panel();
             lblGroupsHeader = new Label();
             btnAddGroup = new Button();
@@ -85,6 +92,8 @@ namespace ProcessForge
             pnlRightToolbar.SuspendLayout();
             pnlGroupLeft.SuspendLayout();
             pnlGroupActions.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numLoopCount).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numLoopDelay).BeginInit();
             pnlLeftHeader.SuspendLayout();
             tabLegacy.SuspendLayout();
             pnlContent.SuspendLayout();
@@ -339,10 +348,17 @@ namespace ProcessForge
             pnlGroupActions.Controls.Add(btnRunGroupMacro);
             pnlGroupActions.Controls.Add(btnStopGroupMacro);
             pnlGroupActions.Controls.Add(lblMacroStatus);
+            pnlGroupActions.Controls.Add(chkEnableLoop);
+            pnlGroupActions.Controls.Add(chkLoopInfinite);
+            pnlGroupActions.Controls.Add(lblLoopCount);
+            pnlGroupActions.Controls.Add(numLoopCount);
+            pnlGroupActions.Controls.Add(lblLoopDelay);
+            pnlGroupActions.Controls.Add(numLoopDelay);
+            pnlGroupActions.Controls.Add(cmbLoopDelayUnit);
             pnlGroupActions.Dock = DockStyle.Bottom;
             pnlGroupActions.Location = new Point(0, 395);
             pnlGroupActions.Name = "pnlGroupActions";
-            pnlGroupActions.Size = new Size(278, 344);
+            pnlGroupActions.Size = new Size(278, 420);
             pnlGroupActions.TabIndex = 2;
             // 
             // lblGroupActionsTitle
@@ -487,6 +503,81 @@ namespace ProcessForge
             btnConfigureMacro.Text = "⚙";
             btnConfigureMacro.UseVisualStyleBackColor = false;
             // 
+            // chkEnableLoop
+            // 
+            chkEnableLoop.AutoSize = true;
+            chkEnableLoop.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
+            chkEnableLoop.Location = new Point(8, 244);
+            chkEnableLoop.Name = "chkEnableLoop";
+            chkEnableLoop.Size = new Size(160, 17);
+            chkEnableLoop.TabIndex = 11;
+            chkEnableLoop.Text = "🔁 Enable Macro Looping";
+            chkEnableLoop.UseVisualStyleBackColor = true;
+            // 
+            // lblLoopCount
+            // 
+            lblLoopCount.AutoSize = true;
+            lblLoopCount.Font = new Font("Segoe UI", 8F);
+            lblLoopCount.Location = new Point(8, 273);
+            lblLoopCount.Name = "lblLoopCount";
+            lblLoopCount.Size = new Size(46, 13);
+            lblLoopCount.TabIndex = 12;
+            lblLoopCount.Text = "Repeat:";
+            // 
+            // numLoopCount
+            // 
+            numLoopCount.Font = new Font("Segoe UI", 8F);
+            numLoopCount.Location = new Point(56, 270);
+            numLoopCount.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
+            numLoopCount.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numLoopCount.Name = "numLoopCount";
+            numLoopCount.Size = new Size(52, 22);
+            numLoopCount.TabIndex = 13;
+            numLoopCount.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            // 
+            // chkLoopInfinite
+            // 
+            chkLoopInfinite.AutoSize = true;
+            chkLoopInfinite.Font = new Font("Segoe UI", 8F);
+            chkLoopInfinite.Location = new Point(122, 272);
+            chkLoopInfinite.Name = "chkLoopInfinite";
+            chkLoopInfinite.Size = new Size(105, 17);
+            chkLoopInfinite.TabIndex = 14;
+            chkLoopInfinite.Text = "∞ Infinite Loop";
+            chkLoopInfinite.UseVisualStyleBackColor = true;
+            // 
+            // lblLoopDelay
+            // 
+            lblLoopDelay.AutoSize = true;
+            lblLoopDelay.Font = new Font("Segoe UI", 8F);
+            lblLoopDelay.Location = new Point(8, 301);
+            lblLoopDelay.Name = "lblLoopDelay";
+            lblLoopDelay.Size = new Size(38, 13);
+            lblLoopDelay.TabIndex = 15;
+            lblLoopDelay.Text = "Delay:";
+            // 
+            // numLoopDelay
+            // 
+            numLoopDelay.Font = new Font("Segoe UI", 8F);
+            numLoopDelay.Location = new Point(56, 298);
+            numLoopDelay.Maximum = new decimal(new int[] { 99999, 0, 0, 0 });
+            numLoopDelay.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numLoopDelay.Name = "numLoopDelay";
+            numLoopDelay.Size = new Size(60, 22);
+            numLoopDelay.TabIndex = 16;
+            numLoopDelay.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
+            // cmbLoopDelayUnit
+            // 
+            cmbLoopDelayUnit.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbLoopDelayUnit.Font = new Font("Segoe UI", 8F);
+            cmbLoopDelayUnit.FormattingEnabled = true;
+            cmbLoopDelayUnit.Items.AddRange(new object[] { "Seconds", "Minutes", "Hours" });
+            cmbLoopDelayUnit.Location = new Point(122, 298);
+            cmbLoopDelayUnit.Name = "cmbLoopDelayUnit";
+            cmbLoopDelayUnit.Size = new Size(146, 21);
+            cmbLoopDelayUnit.TabIndex = 17;
+            // 
             // btnRunGroupMacro
             // 
             btnRunGroupMacro.BackColor = Color.Black;
@@ -494,10 +585,10 @@ namespace ProcessForge
             btnRunGroupMacro.FlatStyle = FlatStyle.Flat;
             btnRunGroupMacro.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             btnRunGroupMacro.ForeColor = Color.White;
-            btnRunGroupMacro.Location = new Point(8, 244);
+            btnRunGroupMacro.Location = new Point(8, 330);
             btnRunGroupMacro.Name = "btnRunGroupMacro";
-            btnRunGroupMacro.Size = new Size(188, 28);
-            btnRunGroupMacro.TabIndex = 11;
+            btnRunGroupMacro.Size = new Size(185, 28);
+            btnRunGroupMacro.TabIndex = 18;
             btnRunGroupMacro.Text = "▶ Run Macro on Group";
             btnRunGroupMacro.UseVisualStyleBackColor = false;
             // 
@@ -509,10 +600,10 @@ namespace ProcessForge
             btnStopGroupMacro.FlatStyle = FlatStyle.Flat;
             btnStopGroupMacro.Font = new Font("Segoe UI", 8.25F, FontStyle.Bold);
             btnStopGroupMacro.ForeColor = Color.DarkRed;
-            btnStopGroupMacro.Location = new Point(200, 244);
+            btnStopGroupMacro.Location = new Point(200, 330);
             btnStopGroupMacro.Name = "btnStopGroupMacro";
             btnStopGroupMacro.Size = new Size(68, 28);
-            btnStopGroupMacro.TabIndex = 12;
+            btnStopGroupMacro.TabIndex = 19;
             btnStopGroupMacro.Text = "■ Stop";
             btnStopGroupMacro.UseVisualStyleBackColor = false;
             // 
@@ -520,10 +611,10 @@ namespace ProcessForge
             // 
             lblMacroStatus.Font = new Font("Segoe UI", 8F);
             lblMacroStatus.ForeColor = Color.DimGray;
-            lblMacroStatus.Location = new Point(8, 277);
+            lblMacroStatus.Location = new Point(8, 365);
             lblMacroStatus.Name = "lblMacroStatus";
-            lblMacroStatus.Size = new Size(260, 58);
-            lblMacroStatus.TabIndex = 13;
+            lblMacroStatus.Size = new Size(260, 80);
+            lblMacroStatus.TabIndex = 20;
             lblMacroStatus.Text = "Macro Status: Idle\r\nSelect workflow and group to run.";
             // 
             // pnlLeftHeader
@@ -857,7 +948,7 @@ namespace ProcessForge
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(1000, 720);
+            ClientSize = new Size(1020, 780);
             Controls.Add(tabControlMain);
             Controls.Add(pnlHeader);
             Font = new Font("Segoe UI", 9F);
@@ -875,6 +966,8 @@ namespace ProcessForge
             pnlRightToolbar.ResumeLayout(false);
             pnlRightToolbar.PerformLayout();
             pnlGroupLeft.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)numLoopCount).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numLoopDelay).EndInit();
             pnlGroupActions.ResumeLayout(false);
             pnlGroupActions.PerformLayout();
             pnlLeftHeader.ResumeLayout(false);
@@ -923,6 +1016,13 @@ namespace ProcessForge
         private Button btnRunGroupMacro;
         private Button btnStopGroupMacro;
         private Label lblMacroStatus;
+        private CheckBox chkEnableLoop;
+        private CheckBox chkLoopInfinite;
+        private Label lblLoopCount;
+        private NumericUpDown numLoopCount;
+        private Label lblLoopDelay;
+        private NumericUpDown numLoopDelay;
+        private ComboBox cmbLoopDelayUnit;
         private Panel pnlLeftHeader;
         private Label lblGroupsHeader;
         private Button btnAddGroup;
